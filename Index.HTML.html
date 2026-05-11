@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Semaine Famille</title>
+
+<!-- PWA / Écran d'accueil -->
+<meta name="application-name" content="Semaine Famille">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Famille">
+<meta name="theme-color" content="#9C27B0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="description" content="Organisation de la famille - présences, menus, courses, tâches">
+
+<!-- Icône pour iPhone/iPad -->
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%239C27B0'/><text y='72' x='50' text-anchor='middle' font-size='60'>⭐</text></svg>">
+
+<!-- Manifest PWA -->
+<link rel="manifest" href="data:application/json,{
+  %22name%22:%22Semaine Famille%22,
+  %22short_name%22:%22Famille%22,
+  %22description%22:%22Organisation de la famille%22,
+  %22start_url%22:%22.%22,
+  %22display%22:%22standalone%22,
+  %22background_color%22:%22%23f3e5f5%22,
+  %22theme_color%22:%22%239C27B0%22,
+  %22orientation%22:%22portrait%22,
+  %22icons%22:[{
+    %22src%22:%22data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%239C27B0'/><text y='72' x='50' text-anchor='middle' font-size='60'>⭐</text></svg>%22,
+    %22sizes%22:%22any%22,
+    %22type%22:%22image/svg+xml%22
+  }]
+}">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --violet:#9C27B0; --rose:#F50870; --rose-dark:#C2185B;
+  --cyan:#00BCD4; --orange:#FF5722; --yellow:#FEEA3B;
+  --bg:#f3e5f5; --card:#ffffff; --text:#2d1b33; --text-light:#7b5e8a;
+  --shadow:0 4px 20px rgba(156,39,176,0.15); --radius:16px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* LOGIN */
+.login-screen{position:fixed;inset:0;background:linear-gradient(135deg,var(--violet),var(--rose));z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;}
+.login-screen.hidden{display:none;}
+.login-logo{font-size:4rem;margin-bottom:12px;}
+.login-title{font-size:2rem;font-weight:900;color:white;margin-bottom:6px;}
+.login-sub{color:rgba(255,255,255,0.8);font-weight:600;margin-bottom:32px;font-size:1rem;}
+.login-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;width:100%;max-width:340px;}
+.login-btn{padding:18px;border-radius:16px;border:none;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 12px rgba(0,0,0,0.2);}
+.login-btn:hover{transform:translateY(-2px);}
+.login-btn:active{transform:scale(0.97);}
+.login-btn .avatar{font-size:2rem;display:block;margin-bottom:4px;}
+.login-btn.parent{background:linear-gradient(135deg,#FF5722,#FF9800);color:white;grid-column:span 2;}
+
+/* ADMIN MODAL */
+.admin-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:300;align-items:center;justify-content:center;padding:16px;}
+.admin-modal.show{display:flex;}
+.admin-modal-box{background:white;border-radius:20px;padding:28px;width:100%;max-width:320px;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,0.3);}
+.admin-modal-box h3{font-size:1.2rem;font-weight:800;color:var(--violet);margin-bottom:8px;}
+.admin-modal-box p{color:var(--text-light);font-weight:600;margin-bottom:20px;font-size:0.9rem;}
+.pin-display{display:flex;gap:8px;justify-content:center;margin-bottom:20px;}
+.pin-dot{width:16px;height:16px;border-radius:50%;background:#e0d0e8;transition:background 0.2s;}
+.pin-dot.filled{background:var(--violet);}
+.pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+.pin-btn{padding:14px;border-radius:12px;border:2px solid #e0d0e8;background:white;font-family:'Nunito',sans-serif;font-weight:800;font-size:1.2rem;cursor:pointer;transition:all 0.2s;color:var(--text);}
+.pin-btn:hover{background:var(--bg);border-color:var(--violet);}
+.pin-btn:active{transform:scale(0.95);}
+.pin-error{color:var(--rose);font-weight:700;font-size:0.9rem;margin-bottom:8px;min-height:20px;}
+.pin-cancel{color:var(--text-light);font-weight:700;cursor:pointer;font-size:0.9rem;text-decoration:underline;}
+
+/* NAV */
+.nav{background:var(--violet);position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,0.2);}
+.nav-title{background:var(--rose);color:white;padding:8px 16px;font-size:1rem;font-weight:800;display:flex;align-items:center;justify-content:space-between;}
+.nav-user{display:flex;align-items:center;gap:8px;}
+.nav-user-name{font-size:0.9rem;}
+.nav-logout{background:rgba(255,255,255,0.2);border:none;color:white;padding:4px 10px;border-radius:20px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.8rem;cursor:pointer;}
+.nav-tabs{display:flex;overflow-x:auto;scrollbar-width:none;}
+.nav-tabs::-webkit-scrollbar{display:none;}
+.nav-tab{flex:1;min-width:68px;padding:11px 3px;color:rgba(255,255,255,0.7);text-align:center;font-weight:700;font-size:0.7rem;cursor:pointer;border:none;background:none;transition:all 0.2s;border-bottom:3px solid transparent;white-space:nowrap;font-family:'Nunito',sans-serif;}
+.nav-tab:hover{color:white;}
+.nav-tab.active{color:var(--yellow);border-bottom-color:var(--yellow);}
+
+.page{display:none;padding:16px;max-width:600px;margin:0 auto;padding-bottom:40px;}
+.page.active{display:block;}
+.card{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:16px;box-shadow:var(--shadow);}
+.card-title{font-size:0.95rem;font-weight:800;color:var(--violet);margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--bg);text-transform:uppercase;letter-spacing:1px;}
+.jour-header{background:linear-gradient(135deg,var(--rose),var(--violet));color:white;padding:10px 16px;border-radius:12px;font-weight:800;font-size:1rem;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;text-align:center;}
+.repas-label{font-weight:700;color:var(--text-light);font-size:0.85rem;text-transform:uppercase;letter-spacing:1px;margin:8px 0 4px;display:flex;align-items:center;gap:8px;}
+.checkboxes-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px;}
+.checkbox-item{display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 8px;border-radius:8px;transition:background 0.2s;}
+.checkbox-item:hover{background:var(--bg);}
+.checkbox-item input[type="checkbox"]{width:18px;height:18px;accent-color:var(--violet);cursor:pointer;flex-shrink:0;}
+.checkbox-item label{font-size:0.9rem;font-weight:600;cursor:pointer;}
+.total-badge{background:var(--violet);color:white;padding:2px 10px;border-radius:20px;font-size:0.8rem;font-weight:700;display:inline-block;}
+.divider{height:2px;background:var(--bg);margin:10px 0;border-radius:2px;}
+.btn{padding:12px 24px;border:none;border-radius:12px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.95rem;cursor:pointer;transition:all 0.2s;text-transform:uppercase;letter-spacing:1px;}
+.btn:active{transform:scale(0.97);}
+.btn-primary{background:var(--rose);color:white;width:100%;margin-top:8px;}
+.btn-primary:hover{background:var(--rose-dark);}
+.btn-secondary{background:var(--cyan);color:white;width:100%;margin-top:8px;}
+.btn-danger{background:var(--orange);color:white;}
+.btn-small{padding:6px 14px;font-size:0.8rem;}
+.input-row{display:flex;gap:8px;margin-bottom:8px;}
+input[type="text"],select{font-family:'Nunito',sans-serif;padding:10px 12px;border:2px solid #e0d0e8;border-radius:10px;font-size:0.95rem;font-weight:600;color:var(--text);background:white;transition:border-color 0.2s;width:100%;}
+input[type="text"]:focus,select:focus{outline:none;border-color:var(--violet);}
+.course-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:8px;background:var(--bg);margin-bottom:4px;}
+.course-item span{font-weight:600;font-size:0.95rem;}
+.btn-delete{background:var(--rose);color:white;border:none;border-radius:6px;padding:5px 12px;cursor:pointer;font-size:0.85rem;font-weight:700;}
+.inner-tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+.inner-tab{padding:6px 14px;border-radius:20px;border:2px solid var(--violet);background:white;color:var(--violet);font-weight:700;font-size:0.85rem;cursor:pointer;transition:all 0.2s;font-family:'Nunito',sans-serif;}
+.inner-tab.active{background:var(--violet);color:white;}
+
+/* TÂCHES */
+.tache-item{display:flex;align-items:center;justify-content:space-between;padding:14px;border-radius:12px;background:var(--bg);margin-bottom:8px;gap:8px;transition:all 0.3s;}
+.tache-item.done{opacity:0;transform:translateX(60px);pointer-events:none;max-height:0;padding:0;margin:0;overflow:hidden;}
+.tache-info{display:flex;align-items:center;gap:10px;}
+.tache-icon{font-size:1.6rem;}
+.tache-name{font-weight:700;font-size:0.95rem;}
+.tache-toggle{padding:8px 14px;border-radius:20px;border:none;font-weight:800;font-size:0.85rem;cursor:pointer;transition:all 0.2s;font-family:'Nunito',sans-serif;white-space:nowrap;}
+.tache-toggle.fait{background:#4CAF50;color:white;}
+.tache-toggle.non-fait{background:#ddd;color:#666;}
+.all-done{text-align:center;padding:30px;color:var(--violet);}
+.all-done .big-icon{font-size:3rem;display:block;margin-bottom:8px;}
+.all-done p{font-weight:800;font-size:1.1rem;}
+
+/* ADMIN */
+.admin-tache-block{background:var(--bg);border-radius:12px;padding:14px;margin-bottom:12px;}
+.admin-tache-header{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-weight:800;font-size:1rem;}
+.admin-days-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.day-check{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.day-check label{font-size:0.68rem;font-weight:700;color:var(--text-light);text-transform:uppercase;}
+.day-check input[type="checkbox"]{width:20px;height:20px;accent-color:var(--violet);cursor:pointer;}
+.enfant-section{margin-bottom:12px;}
+.enfant-title{font-weight:800;font-size:0.95rem;color:var(--violet);margin-bottom:8px;padding:6px 12px;background:var(--bg);border-radius:8px;}
+
+/* JOB */
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.cal-month{font-size:1.1rem;font-weight:800;color:var(--violet);}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.cal-day-name{text-align:center;font-size:0.65rem;font-weight:700;color:var(--text-light);padding:4px 0;text-transform:uppercase;}
+.cal-day{border-radius:8px;background:var(--bg);display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:all 0.2s;border:2px solid transparent;min-height:56px;padding:4px 2px;}
+.cal-day:hover{border-color:var(--violet);background:#e8d5f0;}
+.cal-day.empty{background:transparent;cursor:default;pointer-events:none;}
+.cal-day.has-data{background:#e8d5f0;}
+.cal-day.today{border-color:var(--rose);}
+.day-num{font-size:0.75rem;font-weight:800;color:var(--text);line-height:1;margin-bottom:2px;}
+.day-num.today-num{color:var(--rose);}
+.day-icons{font-size:0.6rem;line-height:1.5;text-align:center;width:100%;}
+.legende{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;}
+.legende-item{font-size:0.75rem;font-weight:600;background:var(--bg);padding:4px 8px;border-radius:20px;}
+
+/* MENU */
+.menu-jour-card{background:white;border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:var(--shadow);}
+.menu-repas-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.menu-repas-label{font-weight:700;font-size:0.8rem;color:var(--text-light);text-transform:uppercase;min-width:38px;}
+.menu-repas-input{flex:1;padding:8px 10px;font-size:0.9rem;}
+.menu-presences{font-size:0.78rem;font-weight:700;color:var(--violet);background:var(--bg);padding:4px 8px;border-radius:20px;white-space:nowrap;}
+
+/* ACCUEIL */
+.screen1-hero{text-align:center;padding:24px 16px 16px;}
+.screen1-hero h1{font-size:2rem;font-weight:900;color:var(--violet);margin-bottom:6px;}
+.screen1-hero p{color:var(--text-light);font-weight:600;margin-bottom:20px;}
+.quick-nav{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+.quick-btn{background:linear-gradient(135deg,var(--violet),var(--rose));color:white;padding:20px;border-radius:16px;font-weight:800;font-size:1rem;text-align:center;cursor:pointer;border:none;font-family:'Nunito',sans-serif;transition:all 0.2s;box-shadow:0 4px 12px rgba(156,39,176,0.3);}
+.quick-btn:hover{transform:translateY(-2px);}
+.quick-btn .icon{font-size:1.8rem;display:block;margin-bottom:4px;}
+
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--violet);color:white;padding:12px 24px;border-radius:24px;font-weight:700;font-size:0.9rem;z-index:1000;transition:transform 0.3s;box-shadow:0 4px 20px rgba(0,0,0,0.2);}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;padding:16px;}
+.modal-overlay.show{display:flex;}
+.modal{background:white;border-radius:20px;padding:24px;width:100%;max-width:340px;box-shadow:0 8px 40px rgba(0,0,0,0.3);max-height:90vh;overflow-y:auto;}
+.modal h3{font-size:1.1rem;font-weight:800;color:var(--violet);margin-bottom:4px;text-align:center;}
+.modal-sub{text-align:center;color:var(--text-light);font-size:0.85rem;font-weight:600;margin-bottom:16px;}
+.modal-btns{display:flex;flex-direction:column;gap:8px;}
+.modal-section{font-size:0.78rem;font-weight:800;color:var(--text-light);text-transform:uppercase;letter-spacing:1px;margin:8px 0 4px;}
+.modal-btn{padding:11px 14px;border-radius:12px;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;transition:opacity 0.2s;text-align:left;}
+.modal-btn:hover{opacity:0.85;}
+.loading{text-align:center;color:var(--text-light);padding:20px;font-weight:600;}
+.spinner{width:32px;height:32px;border:3px solid var(--bg);border-top-color:var(--violet);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 8px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+
+<!-- ÉCRAN DE LOGIN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-logo">⭐</div>
+  <div class="login-title">Semaine Famille</div>
+  <div class="login-sub">Qui es-tu ?</div>
+  <div class="login-grid">
+    <button class="login-btn" style="background:linear-gradient(135deg,#E91E63,#9C27B0);color:white" onclick="login('Alessia')">
+      <span class="avatar">👧</span>Alessia
+    </button>
+    <button class="login-btn" style="background:linear-gradient(135deg,#2196F3,#00BCD4);color:white" onclick="login('Antonin')">
+      <span class="avatar">👦</span>Antonin
+    </button>
+    <button class="login-btn" style="background:linear-gradient(135deg,#4CAF50,#8BC34A);color:white" onclick="login('Clément')">
+      <span class="avatar">👦</span>Clément
+    </button>
+    <button class="login-btn" style="background:linear-gradient(135deg,#FF9800,#FF5722);color:white" onclick="login('Diego')">
+      <span class="avatar">👦</span>Diego
+    </button>
+    <button class="login-btn" style="background:linear-gradient(135deg,#9C27B0,#673AB7);color:white" onclick="login('Jérémie')">
+      <span class="avatar">👦</span>Jérémie
+    </button>
+    <button class="login-btn parent" onclick="login('parent')">
+      <span class="avatar">👨‍👩‍👧‍👦</span>Mélanie & Yann (parents)
+    </button>
+  </div>
+</div>
+
+<!-- MODAL CODE ADMIN -->
+<div class="admin-modal" id="adminModal">
+  <div class="admin-modal-box">
+    <h3>🔐 Zone Admin</h3>
+    <p>Entrez le code pour accéder à la configuration</p>
+    <div class="pin-display">
+      <div class="pin-dot" id="dot0"></div>
+      <div class="pin-dot" id="dot1"></div>
+      <div class="pin-dot" id="dot2"></div>
+      <div class="pin-dot" id="dot3"></div>
+    </div>
+    <div class="pin-error" id="pinError"></div>
+    <div class="pin-grid">
+      <button class="pin-btn" onclick="pinPress('1')">1</button>
+      <button class="pin-btn" onclick="pinPress('2')">2</button>
+      <button class="pin-btn" onclick="pinPress('3')">3</button>
+      <button class="pin-btn" onclick="pinPress('4')">4</button>
+      <button class="pin-btn" onclick="pinPress('5')">5</button>
+      <button class="pin-btn" onclick="pinPress('6')">6</button>
+      <button class="pin-btn" onclick="pinPress('7')">7</button>
+      <button class="pin-btn" onclick="pinPress('8')">8</button>
+      <button class="pin-btn" onclick="pinPress('9')">9</button>
+      <button class="pin-btn" onclick="pinClear()" style="font-size:0.9rem">Effacer</button>
+      <button class="pin-btn" onclick="pinPress('0')">0</button>
+      <button class="pin-btn" onclick="pinDelete()" style="font-size:1.2rem">⌫</button>
+    </div>
+    <div class="pin-cancel" onclick="closeAdminModal()">Annuler</div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- MODAL JOB -->
+<div class="modal-overlay" id="jobModal">
+  <div class="modal">
+    <h3 id="modalTitle"></h3>
+    <div class="modal-sub" id="modalSub"></div>
+    <div class="modal-btns" id="modalBtns"></div>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav" id="mainNav" style="display:none">
+  <div class="nav-title">
+    <span>⭐ Semaine Famille</span>
+    <div class="nav-user">
+      <button id="installBtn" onclick="installApp()" style="display:none;background:rgba(255,255,255,0.2);border:none;color:white;padding:4px 10px;border-radius:20px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.75rem;cursor:pointer;margin-right:6px">📲 Installer</button>
+      <span class="nav-user-name" id="navUserName"></span>
+      <button class="nav-logout" onclick="logout()">Changer</button>
+    </div>
+  </div>
+  <div class="nav-tabs" id="navTabs">
+    <button class="nav-tab active" onclick="showPage('accueil')">🏠 Accueil</button>
+    <button class="nav-tab" onclick="showPage('present')">👥 Présences</button>
+    <button class="nav-tab" onclick="showPage('menu')">🍽️ Menu</button>
+    <button class="nav-tab" onclick="showPage('courses')">🛒 Courses</button>
+    <button class="nav-tab" onclick="showPage('taches')">✅ Tâches</button>
+    <button class="nav-tab" id="jobTab" onclick="showPage('job')">📅 Job</button>
+    <button class="nav-tab" id="adminTab" onclick="requestAdmin()">⚙️ Admin</button>
+  </div>
+</div>
+
+<!-- ACCUEIL -->
+<div class="page active" id="page-accueil">
+  <div class="screen1-hero">
+    <h1 id="accueil-title">⭐ Bonjour !</h1>
+    <p id="accueil-sub">Organisation de la famille</p>
+  </div>
+  <div class="quick-nav" id="quick-nav-grid">
+    <button class="quick-btn" onclick="showPage('present')"><span class="icon">👥</span>Présences</button>
+    <button class="quick-btn" onclick="showPage('menu')"><span class="icon">🍽️</span>Menu</button>
+    <button class="quick-btn" onclick="showPage('courses')"><span class="icon">🛒</span>Courses</button>
+    <button class="quick-btn" onclick="showPage('taches')"><span class="icon">✅</span>Tâches</button>
+  </div>
+</div>
+
+<!-- PRÉSENCES -->
+<div class="page" id="page-present">
+  <button class="btn btn-primary" onclick="savePresences()">💾 Enregistrer</button>
+  <button class="btn btn-secondary" onclick="clearPresences()" style="margin-bottom:12px">🗑️ Tout effacer</button>
+  <div id="present-loading" class="loading"><div class="spinner"></div>Chargement...</div>
+  <div id="present-content" style="display:none"></div>
+  <button class="btn btn-primary" onclick="savePresences()">💾 Enregistrer</button>
+  <button class="btn btn-secondary" onclick="clearPresences()">🗑️ Tout effacer</button>
+</div>
+
+<!-- MENU -->
+<div class="page" id="page-menu">
+  <button class="btn btn-primary" onclick="saveMenu()">💾 Enregistrer le menu</button>
+  <button class="btn btn-secondary" onclick="clearMenu()" style="margin-bottom:12px">🗑️ Effacer le menu</button>
+  <div id="menu-loading" class="loading"><div class="spinner"></div>Chargement...</div>
+  <div id="menu-content" style="display:none"></div>
+  <button class="btn btn-primary" onclick="saveMenu()">💾 Enregistrer le menu</button>
+  <button class="btn btn-secondary" onclick="clearMenu()">🗑️ Effacer le menu</button>
+</div>
+
+<!-- COURSES -->
+<div class="page" id="page-courses">
+  <div class="inner-tabs">
+    <button class="inner-tab active" onclick="showListe('generale',this)">🛒 Générale</button>
+    <button class="inner-tab" onclick="showListe('landi',this)">🏪 Landi</button>
+    <button class="inner-tab" onclick="showListe('france',this)">🇫🇷 France</button>
+  </div>
+  <div class="card">
+    <div class="input-row">
+      <input type="text" id="input-course" placeholder="Ajouter un produit..." onkeypress="if(event.key==='Enter')addCourse()">
+      <button class="btn btn-primary btn-small" onclick="addCourse()" style="width:auto;margin:0;white-space:nowrap">+ Ajouter</button>
+    </div>
+    <div id="courses-list"><div class="loading">Chargement...</div></div>
+    <button class="btn btn-danger btn-small" onclick="clearListe()" style="margin-top:8px;width:100%">🗑️ Vider cette liste</button>
+  </div>
+</div>
+
+<!-- TÂCHES -->
+<div class="page" id="page-taches">
+  <div id="taches-content"><div class="loading"><div class="spinner"></div>Chargement...</div></div>
+</div>
+
+<!-- JOB -->
+<div class="page" id="page-job">
+  <div class="card">
+    <div class="legende">
+      <div class="legende-item">🟢 Jérémie</div>
+      <div class="legende-item">🌸 Mélanie jour</div>
+      <div class="legende-item">🌸🌙 Mélanie nuit</div>
+      <div class="legende-item">🟡 Yann jour</div>
+      <div class="legende-item">🟡🌙 Yann nuit</div>
+    </div>
+    <div class="cal-header">
+      <button class="btn btn-small" onclick="changeMonth(-1)" style="background:var(--violet);color:white;width:auto">◀</button>
+      <div class="cal-month" id="cal-month-title"></div>
+      <button class="btn btn-small" onclick="changeMonth(1)" style="background:var(--violet);color:white;width:auto">▶</button>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div class="page" id="page-admin">
+  <div class="card">
+    <div class="card-title">⚙️ Tâches par enfant</div>
+    <div class="inner-tabs" id="admin-tabs">
+      <button class="inner-tab active" onclick="showAdminEnfant('Alessia',this)">Alessia</button>
+      <button class="inner-tab" onclick="showAdminEnfant('Antonin',this)">Antonin</button>
+      <button class="inner-tab" onclick="showAdminEnfant('Clément',this)">Clément</button>
+      <button class="inner-tab" onclick="showAdminEnfant('Diego',this)">Diego</button>
+      <button class="inner-tab" onclick="showAdminEnfant('Jérémie',this)">Jérémie</button>
+    </div>
+    <div id="admin-taches-form"></div>
+    <button class="btn btn-primary" onclick="saveAdminConfig()">💾 Enregistrer</button>
+  </div>
+  <div class="card">
+    <div class="card-title">Récapitulatif</div>
+    <div id="admin-list"><div class="loading">Chargement...</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">👁️ Vue enfant — Aujourd'hui</div>
+    <div class="inner-tabs" id="preview-tabs">
+      <button class="inner-tab active" onclick="showPreviewEnfant('Alessia',this)">Alessia</button>
+      <button class="inner-tab" onclick="showPreviewEnfant('Antonin',this)">Antonin</button>
+      <button class="inner-tab" onclick="showPreviewEnfant('Clément',this)">Clément</button>
+      <button class="inner-tab" onclick="showPreviewEnfant('Diego',this)">Diego</button>
+      <button class="inner-tab" onclick="showPreviewEnfant('Jérémie',this)">Jérémie</button>
+    </div>
+    <div id="preview-content"><div class="loading">Chargement...</div></div>
+  </div>
+</div>
+
+<script>
+const SCRIPT_URL='https://script.google.com/macros/s/AKfycbxOJEus1Fev5I4YZsSbjpIXXlgGJBY7QmFkkqZtkXYD6eEPwqmgCl8r2hfrO1X9eyqxSA/exec';
+const ADMIN_CODE='2019';
+
+const JOURS=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
+const JOURS_LABEL=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+const JOURS_COURTS=['Lu','Ma','Me','Je','Ve','Sa','Di'];
+const MEMBRES=['alessia','antonin','clement','jeremie','melanie','yann'];
+const MEMBRES_LABEL=['Alessia','Antonin','Clément','Jérémie','Mélanie','Yann'];
+const MOIS_NOMS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+
+const TACHES_FIXES=[
+  {id:'lit',        label:'Défaire ton lit',         icon:'🛏️'},
+  {id:'lessive',    label:'Monter ta lessive',       icon:'👕'},
+  {id:'vaisselle',  label:'Vider le lave-vaisselle', icon:'🍽️'},
+  {id:'aspirateur', label:"Passer l'aspirateur",     icon:'🧹'}
+];
+
+let currentUser=null, isParent=false;
+let presencesData={},menuData={},coursesData={},tachesData=[],tachesConfig=[],jobData={};
+let currentListe='generale',currentAdminEnfant='Alessia';
+let calYear,calMonth,selectedDay=null;
+let pinValue='';
+
+// ===================== LOGIN =====================
+function login(user){
+  currentUser=user;
+  isParent=(user==='parent');
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('mainNav').style.display='block';
+
+  // Adapter l'interface selon l'utilisateur
+  const userName=isParent?'👨‍👩‍👧‍👦 Parents':user;
+  document.getElementById('navUserName').textContent=userName;
+  document.getElementById('accueil-title').textContent=`⭐ Bonjour ${isParent?'!':user+' !'} `;
+
+  // Onglet Admin visible seulement pour les parents, Job visible par tous
+  document.getElementById('jobTab').style.display='';
+  document.getElementById('adminTab').style.display=isParent?'':'none';
+
+  // Accueil adapté
+  const qnav=document.getElementById('quick-nav-grid');
+  if(isParent){
+    qnav.innerHTML=`
+      <button class="quick-btn" onclick="showPage('present')"><span class="icon">👥</span>Présences</button>
+      <button class="quick-btn" onclick="showPage('menu')"><span class="icon">🍽️</span>Menu</button>
+      <button class="quick-btn" onclick="showPage('courses')"><span class="icon">🛒</span>Courses</button>
+      <button class="quick-btn" onclick="showPage('taches')"><span class="icon">✅</span>Tâches</button>
+      <button class="quick-btn" onclick="showPage('job')"><span class="icon">📅</span>Job</button>
+      <button class="quick-btn" onclick="requestAdmin()" style="background:linear-gradient(135deg,#FF5722,#FF9800)"><span class="icon">⚙️</span>Admin</button>`;
+  } else {
+    qnav.innerHTML=`
+      <button class="quick-btn" onclick="showPage('taches')"><span class="icon">✅</span>Mes tâches</button>
+      <button class="quick-btn" onclick="showPage('present')"><span class="icon">👥</span>Présences</button>
+      <button class="quick-btn" onclick="showPage('menu')"><span class="icon">🍽️</span>Menu</button>
+      <button class="quick-btn" onclick="showPage('courses')"><span class="icon">🛒</span>Courses</button>
+      <button class="quick-btn" onclick="showPage('job')"><span class="icon">📅</span>Job parents</button>`;
+  }
+
+  function installApp(){
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(()=>{deferredPrompt=null;});
+  }
+}
+
+showPage('accueil');
+
+// PWA — Installation
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt',(e)=>{
+  e.preventDefault();
+  deferredPrompt=e;
+  // Afficher bouton d'installation si disponible
+  const btn=document.getElementById('installBtn');
+  if(btn) btn.style.display='block';
+});
+
+window.addEventListener('appinstalled',()=>{
+  showToast('✅ App installée sur votre écran d\'accueil !');
+  deferredPrompt=null;
+});
+
+// Ajuster padding pour iPhone (encoche)
+if(CSS.supports('padding-top: env(safe-area-inset-top)')){
+  document.querySelector('.nav').style.paddingTop='env(safe-area-inset-top)';
+}
+  // Pré-charger les tâches si enfant
+  if(!isParent) loadTaches();
+}
+
+function logout(){
+  currentUser=null;
+  isParent=false;
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('mainNav').style.display='none';
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-accueil').classList.add('active');
+}
+
+// ===================== CODE ADMIN =====================
+function requestAdmin(){
+  if(document.getElementById('page-admin').classList.contains('unlocked')){
+    showPage('admin');
+    return;
+  }
+  pinValue='';
+  updatePinDisplay();
+  document.getElementById('pinError').textContent='';
+  document.getElementById('adminModal').classList.add('show');
+}
+
+function pinPress(digit){
+  if(pinValue.length>=4) return;
+  pinValue+=digit;
+  updatePinDisplay();
+  if(pinValue.length===4) checkPin();
+}
+
+function pinDelete(){
+  pinValue=pinValue.slice(0,-1);
+  updatePinDisplay();
+}
+
+function pinClear(){
+  pinValue='';
+  updatePinDisplay();
+}
+
+function updatePinDisplay(){
+  for(let i=0;i<4;i++){
+    document.getElementById(`dot${i}`).classList.toggle('filled',i<pinValue.length);
+  }
+}
+
+function checkPin(){
+  if(pinValue===ADMIN_CODE){
+    document.getElementById('adminModal').classList.remove('show');
+    document.getElementById('page-admin').classList.add('unlocked');
+    showPage('admin');
+  } else {
+    document.getElementById('pinError').textContent='Code incorrect, réessayez';
+    pinValue='';
+    updatePinDisplay();
+    setTimeout(()=>{document.getElementById('pinError').textContent='';},2000);
+  }
+}
+
+function closeAdminModal(){
+  document.getElementById('adminModal').classList.remove('show');
+  pinValue='';
+  updatePinDisplay();
+}
+
+// ===================== UTILS =====================
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+async function apiCall(params){
+  try{
+    const r=await fetch(SCRIPT_URL+'?'+new URLSearchParams(params).toString());
+    return await r.text();
+  }catch(e){console.error(e);return '';}
+}
+
+function parseLines(text){
+  if(!text||text.trim()==='ok'||text.trim()==='') return [];
+  return text.split('~~~~').map(l=>l.trim()).filter(l=>l.length>0);
+}
+
+function getTodayJour(){
+  const d=new Date().getDay();
+  return JOURS[d===0?6:d-1];
+}
+
+// ===================== NAVIGATION =====================
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  const order=['accueil','present','menu','courses','taches','job','admin'];
+  const idx=order.indexOf(name);
+  if(idx>=0) document.querySelectorAll('.nav-tab')[idx].classList.add('active');
+  if(name==='present') loadPresences();
+  if(name==='menu') loadMenu();
+  if(name==='courses') loadCourses(currentListe);
+  if(name==='taches') loadTaches();
+  if(name==='job') initCal();
+  if(name==='admin') loadAdminConfig();
+}
+
+// ===================== PRÉSENCES =====================
+function buildPresencesUI(){
+  let html='';
+  JOURS.forEach((jour,ji)=>{
+    html+=`<div class="jour-header">${JOURS_LABEL[ji]}</div>`;
+    ['midi','soir'].forEach(repas=>{
+      const key=`${jour}_${repas}`;
+      const data=presencesData[key]||{};
+      const count=MEMBRES.filter(m=>data[m]==='TRUE').length;
+      html+=`<div class="repas-label">${repas.toUpperCase()} <span class="total-badge" id="total_${key}">${count} présent${count>1?'s':''}</span></div>
+      <div class="checkboxes-grid">`;
+      MEMBRES.forEach((m,mi)=>{
+        html+=`<label class="checkbox-item">
+          <input type="checkbox" id="cb_${key}_${m}" ${data[m]==='TRUE'?'checked':''} onchange="updateTotal('${key}')">
+          <label for="cb_${key}_${m}">${MEMBRES_LABEL[mi]}</label>
+        </label>`;
+      });
+      html+=`</div><div class="divider"></div>`;
+    });
+  });
+  document.getElementById('present-content').innerHTML=html;
+}
+
+function updateTotal(key){
+  const count=MEMBRES.filter(m=>document.getElementById(`cb_${key}_${m}`)?.checked).length;
+  const el=document.getElementById(`total_${key}`);
+  if(el) el.textContent=`${count} présent${count>1?'s':''}`;
+}
+
+async function loadPresences(){
+  document.getElementById('present-loading').style.display='block';
+  document.getElementById('present-content').style.display='none';
+  const text=await apiCall({action:'lire',sheet:'PRESENCES'});
+  presencesData={};
+  parseLines(text).forEach(line=>{
+    const c=line.split('|');
+    if(c.length>=8) presencesData[`${c[0]}_${c[1]}`]={alessia:c[2],antonin:c[3],clement:c[4],jeremie:c[5],melanie:c[6],yann:c[7].trim()};
+  });
+  document.getElementById('present-loading').style.display='none';
+  document.getElementById('present-content').style.display='block';
+  buildPresencesUI();
+}
+
+async function savePresences(){
+  showToast('Enregistrement...');
+  for(const jour of JOURS){
+    for(const repas of ['midi','soir']){
+      const key=`${jour}_${repas}`;
+      const p={action:'enregistrer',sheet:'PRESENCES',jour,repas};
+      MEMBRES.forEach(m=>{p[m]=document.getElementById(`cb_${key}_${m}`)?.checked?'TRUE':'FALSE';});
+      await apiCall(p);
+    }
+  }
+  showToast('✅ Présences enregistrées !');
+}
+
+async function clearPresences(){
+  if(!confirm('Effacer toutes les présences ?')) return;
+  await apiCall({action:'effacer',sheet:'PRESENCES'});
+  presencesData={};
+  buildPresencesUI();
+  showToast('🗑️ Présences effacées');
+}
+
+// ===================== MENU =====================
+async function loadMenu(){
+  document.getElementById('menu-loading').style.display='block';
+  document.getElementById('menu-content').style.display='none';
+  const [pText,mText]=await Promise.all([
+    apiCall({action:'lire',sheet:'PRESENCES'}),
+    apiCall({action:'lire',sheet:'MENU'})
+  ]);
+  presencesData={};
+  parseLines(pText).forEach(line=>{
+    const c=line.split('|');
+    if(c.length>=8) presencesData[`${c[0]}_${c[1]}`]={alessia:c[2],antonin:c[3],clement:c[4],jeremie:c[5],melanie:c[6],yann:c[7].trim()};
+  });
+  menuData={};
+  parseLines(mText).forEach(line=>{
+    const c=line.split('|');
+    if(c.length>=3) menuData[`${c[0]}_${c[1]}`]=c.slice(2).join('|').trim();
+  });
+  let html='';
+  JOURS.forEach((jour,ji)=>{
+    html+=`<div class="menu-jour-card"><div class="jour-header" style="margin-bottom:12px">${JOURS_LABEL[ji]}</div>`;
+    ['midi','soir'].forEach(repas=>{
+      const key=`${jour}_${repas}`;
+      const count=MEMBRES.filter(m=>presencesData[key]?.[m]==='TRUE').length;
+      const val=(menuData[key]||'').replace(/"/g,'&quot;').replace(/^-$/,'').trim();
+      html+=`<div class="menu-repas-row">
+        <span class="menu-repas-label">${repas}</span>
+        <input type="text" class="menu-repas-input" id="menu_${key}" placeholder="Repas du ${repas}..." value="${val}">
+        <span class="menu-presences">👥 ${count}</span>
+      </div>`;
+    });
+    html+=`</div>`;
+  });
+  document.getElementById('menu-content').innerHTML=html;
+  document.getElementById('menu-loading').style.display='none';
+  document.getElementById('menu-content').style.display='block';
+}
+
+async function saveMenu(){
+  showToast('Enregistrement...');
+  for(const jour of JOURS){
+    for(const repas of ['midi','soir']){
+      const plat=document.getElementById(`menu_${jour}_${repas}`)?.value?.trim()||'';
+      await apiCall({action:'enregistrer',sheet:'MENU',jour,repas,plat:plat||'-'});
+    }
+  }
+  showToast('✅ Menu enregistré !');
+}
+
+async function clearMenu(){
+  if(!confirm('Effacer tout le menu ?')) return;
+  await apiCall({action:'effacer',sheet:'MENU'});
+  loadMenu();
+  showToast('🗑️ Menu effacé');
+}
+
+// ===================== COURSES =====================
+function showListe(liste,btn){
+  currentListe=liste;
+  document.querySelectorAll('#page-courses .inner-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  loadCourses(liste);
+}
+
+async function loadCourses(liste){
+  document.getElementById('courses-list').innerHTML='<div class="loading">Chargement...</div>';
+  const text=await apiCall({action:'lire',sheet:'COURSES',liste});
+  coursesData[liste]=[];
+  parseLines(text).forEach(line=>{
+    const pipe=line.indexOf('|');
+    const ingredient=pipe>=0?line.substring(0,pipe).trim():line.trim();
+    if(ingredient) coursesData[liste].push(ingredient);
+  });
+  renderCourses(liste);
+}
+
+function renderCourses(liste){
+  const container=document.getElementById('courses-list');
+  if(!coursesData[liste]?.length){container.innerHTML='<div class="loading">Liste vide</div>';return;}
+  container.innerHTML=coursesData[liste].map((item,i)=>
+    `<div class="course-item" id="ci_${i}">
+      <span>${item}</span>
+      <button class="btn-delete" onclick="deleteCourse(${i},'${item.replace(/'/g,"\\'").replace(/\\/g,'\\\\')}')">✕</button>
+    </div>`
+  ).join('');
+}
+
+async function addCourse(){
+  const input=document.getElementById('input-course');
+  const ingredient=input.value.trim();
+  if(!ingredient) return;
+  await apiCall({action:'ajouter',sheet:'COURSES',ingredient,liste:currentListe});
+  input.value='';
+  showToast('✅ Ajouté !');
+  loadCourses(currentListe);
+}
+
+async function deleteCourse(idx,ingredient){
+  await apiCall({action:'supprimer',sheet:'COURSES',ingredient,liste:currentListe});
+  coursesData[currentListe].splice(idx,1);
+  renderCourses(currentListe);
+  showToast('🗑️ Supprimé');
+}
+
+async function clearListe(){
+  if(!confirm('Vider toute cette liste ?')) return;
+  await apiCall({action:'effacer_liste',sheet:'COURSES',liste:currentListe});
+  coursesData[currentListe]=[];
+  renderCourses(currentListe);
+  showToast('🗑️ Liste vidée');
+}
+
+// ===================== TÂCHES =====================
+async function loadTaches(){
+  document.getElementById('taches-content').innerHTML='<div class="loading"><div class="spinner"></div>Chargement...</div>';
+  const [cText,tText]=await Promise.all([
+    apiCall({action:'lire',sheet:'TACHES_CONFIG'}),
+    apiCall({action:'lire',sheet:'TACHES'})
+  ]);
+  tachesConfig=[];
+  parseLines(cText).forEach(line=>{
+    const c=line.split('|');
+    if(c.length>=9) tachesConfig.push({tache:c[0],enfant:c[1],lundi:c[2],mardi:c[3],mercredi:c[4],jeudi:c[5],vendredi:c[6],samedi:c[7],dimanche:c[8],active:c[9]?.trim()});
+  });
+  tachesData=[];
+  parseLines(tText).forEach(line=>{
+    const c=line.split('|');
+    if(c.length>=4) tachesData.push({tache:c[0],enfant:c[1],jour:c[2],etat:c[3]?.trim()});
+  });
+  renderTaches();
+}
+
+function getTacheIcon(label){return TACHES_FIXES.find(t=>t.label===label)?.icon||'📋';}
+
+function renderTaches(){
+  const jour=getTodayJour();
+  const ji=JOURS.indexOf(jour);
+  // Si parent, montrer onglets enfants
+  if(isParent){
+    renderTachesParent(jour,ji);
+    return;
+  }
+  // Enfant : seulement ses tâches non faites
+  const enfant=currentUser;
+  const actives=tachesConfig.filter(t=>t.enfant===enfant&&t[jour]==='TRUE');
+  if(!actives.length){
+    document.getElementById('taches-content').innerHTML=
+      `<div class="card"><div class="all-done"><span class="big-icon">🎉</span><p>Aucune tâche pour aujourd'hui !</p></div></div>`;
+    return;
+  }
+  const nonFaites=actives.filter(t=>{
+    const etat=tachesData.find(td=>td.tache===t.tache&&td.enfant===enfant&&td.jour===jour);
+    return !etat||etat.etat?.trim()!=='Fait';
+  });
+  if(!nonFaites.length){
+    document.getElementById('taches-content').innerHTML=
+      `<div class="card"><div class="all-done"><span class="big-icon">🌟</span><p>Bravo ${enfant} ! Toutes tes tâches sont faites !</p></div></div>`;
+    return;
+  }
+  let html=`<div class="card"><div class="card-title">✅ Mes tâches — ${JOURS_LABEL[ji]}</div>
+    <p style="font-size:0.85rem;color:var(--text-light);font-weight:600;margin-bottom:12px">${nonFaites.length} tâche${nonFaites.length>1?'s':''} à faire</p>`;
+  nonFaites.forEach(t=>{
+    html+=`<div class="tache-item" id="tache_${t.tache.replace(/[^a-z]/gi,'_')}">
+      <div class="tache-info">
+        <span class="tache-icon">${getTacheIcon(t.tache)}</span>
+        <span class="tache-name">${t.tache}</span>
+      </div>
+      <button class="tache-toggle non-fait" onclick="toggleTache('${t.tache.replace(/'/g,"\\'")}','${jour}',false,'${enfant}')">
+        ⬜ À faire
+      </button>
+    </div>`;
+  });
+  html+='</div>';
+  document.getElementById('taches-content').innerHTML=html;
+}
+
+function renderTachesParent(jour,ji){
+  // Vue parent : tous les enfants avec leurs tâches
+  const enfants=['Alessia','Antonin','Clément','Diego','Jérémie'];
+  let html='';
+  enfants.forEach(enfant=>{
+    const actives=tachesConfig.filter(t=>t.enfant===enfant&&t[jour]==='TRUE');
+    if(!actives.length) return;
+    const faites=actives.filter(t=>{
+      const etat=tachesData.find(td=>td.tache===t.tache&&td.enfant===enfant&&td.jour===jour);
+      return etat&&etat.etat?.trim()==='Fait';
+    });
+    html+=`<div class="card">
+      <div class="card-title">${enfant} — ${faites.length}/${actives.length} faites</div>`;
+    actives.forEach(t=>{
+      const etat=tachesData.find(td=>td.tache===t.tache&&td.enfant===enfant&&td.jour===jour);
+      const fait=etat?.etat?.trim()==='Fait';
+      html+=`<div class="tache-item">
+        <div class="tache-info">
+          <span class="tache-icon">${getTacheIcon(t.tache)}</span>
+          <span class="tache-name">${t.tache}</span>
+        </div>
+        <span class="tache-toggle ${fait?'fait':'non-fait'}" style="cursor:default">${fait?'✅ Fait':'⬜ À faire'}</span>
+      </div>`;
+    });
+    html+='</div>';
+  });
+  if(!html) html='<div class="card"><div class="loading">Aucune tâche configurée</div></div>';
+  document.getElementById('taches-content').innerHTML=html;
+}
+
+async function toggleTache(tache,jour,estFait,enfant){
+  // Animer la disparition
+  const id='tache_'+tache.replace(/[^a-z]/gi,'_');
+  const el=document.getElementById(id);
+  if(el) el.classList.add('done');
+
+  await apiCall({action:'enregistrer',sheet:'TACHES',tache,enfant,jour,etat:'Fait'});
+  showToast('✅ Bien joué !');
+
+  // Recharger après animation
+  setTimeout(()=>loadTaches(),400);
+}
+
+// ===================== JOB =====================
+function initCal(){
+  const now=new Date();
+  calYear=now.getFullYear();
+  calMonth=now.getMonth();
+  loadJob();
+}
+
+async function loadJob(){
+  const text=await apiCall({action:'lire',sheet:'JOB',mois:MOIS_NOMS[calMonth],annee:String(calYear)});
+  jobData={};
+  parseLines(text).forEach(line=>{
+    const c=line.split('|');
+    if(c.length>=5){
+      const jour=c[2].trim(),personne=c[3].trim(),type=c[4].trim();
+      if(type&&type!=='vide'){
+        if(!jobData[jour]) jobData[jour]={};
+        jobData[jour][personne]=type;
+      }
+    }
+  });
+  renderCal();
+}
+
+function renderCal(){
+  document.getElementById('cal-month-title').textContent=`${MOIS_NOMS[calMonth]} ${calYear}`;
+  const grid=document.getElementById('cal-grid');
+  let html=JOURS_COURTS.map(j=>`<div class="cal-day-name">${j}</div>`).join('');
+  let dow=new Date(calYear,calMonth,1).getDay();
+  dow=dow===0?6:dow-1;
+  for(let i=0;i<dow;i++) html+=`<div class="cal-day empty"></div>`;
+  const days=new Date(calYear,calMonth+1,0).getDate();
+  const today=new Date();
+  const isNow=today.getFullYear()===calYear&&today.getMonth()===calMonth;
+  for(let d=1;d<=days;d++){
+    const dd=jobData[String(d)]||{};
+    const icons=[];
+    if(dd['Jeremie']) icons.push(dd['Jeremie']);
+    if(dd['Melanie']) icons.push(dd['Melanie']);
+    if(dd['Yann']) icons.push(dd['Yann']);
+    const isToday=isNow&&d===today.getDate();
+    html+=`<div class="cal-day ${icons.length?'has-data':''} ${isToday?'today':''}" onclick="openJobModal(${d})">
+      <span class="day-num ${isToday?'today-num':''}">${d}</span>
+      <span class="day-icons">${icons.join('<br>')}</span>
+    </div>`;
+  }
+  grid.innerHTML=html;
+}
+
+function changeMonth(dir){
+  calMonth+=dir;
+  if(calMonth<0){calMonth=11;calYear--;}
+  if(calMonth>11){calMonth=0;calYear++;}
+  loadJob();
+}
+
+function openJobModal(day){
+  selectedDay=day;
+  const dd=jobData[String(day)]||{};
+  document.getElementById('modalTitle').textContent=`${day} ${MOIS_NOMS[calMonth]} ${calYear}`;
+  document.getElementById('modalSub').textContent='Qui travaille ce jour ?';
+  const isA=(p,t)=>dd[p]===t;
+  document.getElementById('modalBtns').innerHTML=`
+    <div class="modal-section">🟢 Jérémie</div>
+    <button class="modal-btn" style="background:#4CAF50;color:white" onclick="saveJob('Jeremie','🟢J')">🟢 Jérémie travaille ${isA('Jeremie','🟢J')?'✓':''}</button>
+    <div class="modal-section">🌸 Mélanie</div>
+    <button class="modal-btn" style="background:#E91E93;color:white" onclick="saveJob('Melanie','🌸M')">🌸 Mélanie — Jour ${isA('Melanie','🌸M')?'✓':''}</button>
+    <button class="modal-btn" style="background:#9C27B0;color:white" onclick="saveJob('Melanie','🌸M🌙')">🌸🌙 Mélanie — Nuit ${isA('Melanie','🌸M🌙')?'✓':''}</button>
+    <div class="modal-section">🟡 Yann</div>
+    <button class="modal-btn" style="background:#F9A825;color:#333" onclick="saveJob('Yann','🟡Y')">🟡 Yann — Jour ${isA('Yann','🟡Y')?'✓':''}</button>
+    <button class="modal-btn" style="background:#FF8F00;color:white" onclick="saveJob('Yann','🟡Y🌙')">🟡🌙 Yann — Nuit ${isA('Yann','🟡Y🌙')?'✓':''}</button>
+    <div class="modal-section"></div>
+    <button class="modal-btn" style="background:#f44336;color:white" onclick="clearJobDay()">❌ Effacer ce jour</button>
+    <button class="modal-btn" style="background:#eee;color:#333" onclick="closeModal()">Annuler</button>`;
+  document.getElementById('jobModal').classList.add('show');
+}
+
+async function saveJob(personne,type){
+  closeModal();
+  await apiCall({action:'enregistrer',sheet:'JOB',mois:MOIS_NOMS[calMonth],annee:String(calYear),jour:String(selectedDay),personne,type});
+  if(!jobData[String(selectedDay)]) jobData[String(selectedDay)]={};
+  jobData[String(selectedDay)][personne]=type;
+  renderCal();
+  showToast('✅ Enregistré !');
+}
+
+async function clearJobDay(){
+  closeModal();
+  for(const p of ['Jeremie','Melanie','Yann']){
+    await apiCall({action:'enregistrer',sheet:'JOB',mois:MOIS_NOMS[calMonth],annee:String(calYear),jour:String(selectedDay),personne:p,type:'vide'});
+  }
+  delete jobData[String(selectedDay)];
+  renderCal();
+  showToast('🗑️ Jour effacé');
+}
+
+function closeModal(){document.getElementById('jobModal').classList.remove('show');}
+
+// ===================== ADMIN =====================
+function showAdminEnfant(enfant,btn){
+  currentAdminEnfant=enfant;
+  document.querySelectorAll('#admin-tabs .inner-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  renderAdminForm();
+}
+
+function renderAdminForm(){
+  let html='';
+  TACHES_FIXES.forEach(tache=>{
+    const ex=tachesConfig.find(t=>t.tache===tache.label&&t.enfant===currentAdminEnfant);
+    html+=`<div class="admin-tache-block">
+      <div class="admin-tache-header"><span>${tache.icon}</span>${tache.label}</div>
+      <div class="admin-days-grid">`;
+    JOURS.forEach((jour,ji)=>{
+      const checked=ex&&ex[jour]==='TRUE'?'checked':'';
+      html+=`<div class="day-check">
+        <label for="a_${tache.id}_${jour}">${JOURS_COURTS[ji]}</label>
+        <input type="checkbox" id="a_${tache.id}_${jour}" ${checked}>
+      </div>`;
+    });
+    html+=`</div></div>`;
+  });
+  document.getElementById('admin-taches-form').innerHTML=html;
+}
+
+async function loadAdminConfig(){
+  const text=await apiCall({action:'lire',sheet:'TACHES_CONFIG'});
+  tachesConfig=[];
+  parseLines(text).forEach(line=>{
+    const c=line.split('|');
+    if(c.length>=9) tachesConfig.push({tache:c[0],enfant:c[1],lundi:c[2],mardi:c[3],mercredi:c[4],jeudi:c[5],vendredi:c[6],samedi:c[7],dimanche:c[8],active:c[9]?.trim()});
+  });
+  renderAdminForm();
+  renderAdminSummary();
+  renderPreview(currentPreviewEnfant);
+}
+
+function renderAdminSummary(){
+  if(!tachesConfig.length){
+    document.getElementById('admin-list').innerHTML='<div class="loading">Aucune configuration</div>';
+    return;
+  }
+  const byEnfant={};
+  tachesConfig.forEach(t=>{if(!byEnfant[t.enfant])byEnfant[t.enfant]=[];byEnfant[t.enfant].push(t);});
+  let html='';
+  Object.entries(byEnfant).forEach(([enfant,taches])=>{
+    html+=`<div class="enfant-section"><div class="enfant-title">👤 ${enfant}</div>`;
+    taches.forEach(t=>{
+      const icon=TACHES_FIXES.find(tf=>tf.label===t.tache)?.icon||'📋';
+      const jours=JOURS.filter(j=>t[j]==='TRUE').map(j=>JOURS_COURTS[JOURS.indexOf(j)]).join(' ');
+      html+=`<div class="tache-item" style="margin-bottom:4px">
+        <div class="tache-info"><span class="tache-icon">${icon}</span><span class="tache-name">${t.tache}</span></div>
+        <span style="font-size:0.8rem;color:var(--text-light);font-weight:700">${jours||'—'}</span>
+      </div>`;
+    });
+    html+='</div>';
+  });
+  document.getElementById('admin-list').innerHTML=html;
+}
+
+async function saveAdminConfig(){
+  showToast('Enregistrement...');
+  for(const tache of TACHES_FIXES){
+    const p={action:'enregistrer',sheet:'TACHES_CONFIG',tache:tache.label,enfant:currentAdminEnfant,active:'TRUE'};
+    JOURS.forEach(jour=>{p[jour]=document.getElementById(`a_${tache.id}_${jour}`)?.checked?'TRUE':'FALSE';});
+    await apiCall(p);
+  }
+  showToast('✅ Configuration enregistrée !');
+  loadAdminConfig();
+}
+
+let currentPreviewEnfant='Alessia';
+
+function showPreviewEnfant(enfant,btn){
+  currentPreviewEnfant=enfant;
+  document.querySelectorAll('#preview-tabs .inner-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  renderPreview(enfant);
+}
+
+function renderPreview(enfant){
+  const jour=getTodayJour();
+  const ji=JOURS.indexOf(jour);
+  const actives=tachesConfig.filter(t=>t.enfant===enfant&&t[jour]==='TRUE');
+
+  if(!actives.length){
+    document.getElementById('preview-content').innerHTML=
+      `<div class="all-done"><span class="big-icon">😴</span><p>Aucune tâche pour ${enfant} aujourd'hui</p></div>`;
+    return;
+  }
+
+  const nonFaites=actives.filter(t=>{
+    const etat=tachesData.find(td=>td.tache===t.tache&&td.enfant===enfant&&td.jour===jour);
+    return !etat||etat.etat?.trim()!=='Fait';
+  });
+
+  const faites=actives.filter(t=>{
+    const etat=tachesData.find(td=>td.tache===t.tache&&td.enfant===enfant&&td.jour===jour);
+    return etat&&etat.etat?.trim()==='Fait';
+  });
+
+  let html=`<p style="font-size:0.85rem;color:var(--text-light);font-weight:600;margin-bottom:12px">
+    ${JOURS_LABEL[ji]} — ${faites.length}/${actives.length} tâche${actives.length>1?'s':''} faite${faites.length>1?'s':''}</p>`;
+
+  if(!nonFaites.length){
+    html+=`<div class="all-done"><span class="big-icon">🌟</span><p>Tout est fait !</p></div>`;
+  } else {
+    html+=`<p style="font-size:0.8rem;font-weight:700;color:var(--rose);margin-bottom:8px">⬜ À faire :</p>`;
+    nonFaites.forEach(t=>{
+      html+=`<div class="tache-item">
+        <div class="tache-info">
+          <span class="tache-icon">${getTacheIcon(t.tache)}</span>
+          <span class="tache-name">${t.tache}</span>
+        </div>
+        <span class="tache-toggle non-fait" style="cursor:default">⬜ À faire</span>
+      </div>`;
+    });
+  }
+
+  if(faites.length){
+    html+=`<p style="font-size:0.8rem;font-weight:700;color:#4CAF50;margin:12px 0 8px">✅ Déjà fait :</p>`;
+    faites.forEach(t=>{
+      html+=`<div class="tache-item" style="opacity:0.6">
+        <div class="tache-info">
+          <span class="tache-icon">${getTacheIcon(t.tache)}</span>
+          <span class="tache-name" style="text-decoration:line-through">${t.tache}</span>
+        </div>
+        <span class="tache-toggle fait" style="cursor:default">✅ Fait</span>
+      </div>`;
+    });
+  }
+
+  document.getElementById('preview-content').innerHTML=html;
+}
+</script>
+</body>
+</html>
