@@ -379,6 +379,28 @@ input[type="text"]:focus,select:focus{outline:none;border-color:var(--violet);}
     <button class="btn btn-primary" onclick="saveAdminConfig()">💾 Enregistrer</button>
   </div>
   <div class="card">
+    <div class="card-title">📌 Tâche ponctuelle</div>
+    <div class="input-row">
+      <select id="ponct-enfant">
+        <option>Alessia</option>
+        <option>Antonin</option>
+        <option>Clément</option>
+        <option>Diego</option>
+        <option>Jérémie</option>
+        <option>Yann</option>
+        <option>Mélanie</option>
+      </select>
+    </div>
+    <div class="input-row">
+      <input type="text" id="ponct-tache" placeholder="Nom de la tâche ponctuelle...">
+    </div>
+    <div class="input-row">
+      <input type="date" id="ponct-date" style="font-family:'Nunito',sans-serif;padding:10px 12px;border:2px solid #e0d0e8;border-radius:10px;font-size:0.95rem;font-weight:600;width:100%">
+    </div>
+    <button class="btn btn-primary" onclick="saveTachePonctuelle()">📌 Ajouter cette tâche</button>
+    <div id="ponct-list" style="margin-top:12px"></div>
+  </div>
+  <div class="card">
     <div class="card-title">Récapitulatif</div>
     <div id="admin-list"><div class="loading">Chargement...</div></div>
   </div>
@@ -390,6 +412,8 @@ input[type="text"]:focus,select:focus{outline:none;border-color:var(--violet);}
       <button class="inner-tab" onclick="showPreviewEnfant('Clément',this)">Clément</button>
       <button class="inner-tab" onclick="showPreviewEnfant('Diego',this)">Diego</button>
       <button class="inner-tab" onclick="showPreviewEnfant('Jérémie',this)">Jérémie</button>
+      <button class="inner-tab" onclick="showPreviewEnfant('Yann',this)">Yann</button>
+      <button class="inner-tab" onclick="showPreviewEnfant('Mélanie',this)">Mélanie</button>
     </div>
     <div id="preview-content"><div class="loading">Chargement...</div></div>
   </div>
@@ -412,6 +436,46 @@ const TACHES_FIXES=[
   {id:'vaisselle',  label:'Vider le lave-vaisselle', icon:'🍽️'},
   {id:'aspirateur', label:"Passer l'aspirateur",     icon:'🧹'}
 ];
+
+// Tâches récurrentes du lit — visible jeudi ET vendredi
+// dateDebut = date du premier vendredi concerné
+// frequence = toutes les X semaines
+const TACHES_RECURRENTES = [
+  { personne:'Alessia', tache:'Défaire ton lit', icon:'🛏️', dateDebut:'2026-05-15', frequence:3 },
+  { personne:'Diego',   tache:'Défaire ton lit', icon:'🛏️', dateDebut:'2026-05-15', frequence:3 },
+  { personne:'Clément', tache:'Défaire ton lit', icon:'🛏️', dateDebut:'2026-05-29', frequence:3 },
+  { personne:'Antonin', tache:'Défaire ton lit', icon:'🛏️', dateDebut:'2026-05-29', frequence:3 },
+  { personne:'Jérémie', tache:'Défaire ton lit', icon:'🛏️', dateDebut:'2026-05-15', frequence:2 },
+  { personne:'Yann',    tache:'Défaire ton lit', icon:'🛏️', dateDebut:'2026-05-15', frequence:2 },
+  { personne:'Mélanie', tache:'Défaire ton lit', icon:'🛏️', dateDebut:'2026-05-15', frequence:2 },
+];
+
+// Vérifie si une tâche récurrente est active aujourd'hui (jeudi ou vendredi de la bonne semaine)
+function isTacheRecurrenteActive(tache, dateStr) {
+  const today = new Date(dateStr || new Date().toISOString().split('T')[0]);
+  const dow = today.getDay(); // 0=dim, 4=jeu, 5=ven
+  
+  // Visible jeudi (4) et vendredi (5) uniquement
+  if(dow !== 4 && dow !== 5) return false;
+  
+  // Trouver le vendredi de cette semaine
+  const vendredi = new Date(today);
+  if(dow === 4) vendredi.setDate(today.getDate() + 1); // jeudi → vendredi suivant
+  // si dow === 5, vendredi = today
+  
+  const debut = new Date(tache.dateDebut);
+  
+  // Vendredi doit être >= dateDebut
+  if(vendredi < debut) return false;
+  
+  // Calculer nombre de semaines écoulées depuis dateDebut
+  const msParSemaine = 7 * 24 * 60 * 60 * 1000;
+  const semaines = Math.round((vendredi - debut) / msParSemaine);
+  
+  return semaines % tache.frequence === 0;
+}
+
+let tachesPonctuelles = []; // chargées depuis Google Sheets
 
 let currentUser=null, isParent=false;
 let presencesData={},menuData={},coursesData={},tachesData=[],tachesConfig=[],jobData={};
@@ -866,9 +930,10 @@ async function clearListe(){
 // ===================== TÂCHES =====================
 async function loadTaches(){
   document.getElementById('taches-content').innerHTML='<div class="loading"><div class="spinner"></div>Chargement...</div>';
-  const [cText,tText]=await Promise.all([
+  const [cText,tText,pText]=await Promise.all([
     apiCall({action:'lire',sheet:'TACHES_CONFIG'}),
-    apiCall({action:'lire',sheet:'TACHES'})
+    apiCall({action:'lire',sheet:'TACHES'}),
+    apiCall({action:'lire',sheet:'TACHES_PONCTUELLES'})
   ]);
   tachesConfig=[];
   parseLines(cText).forEach(line=>{
@@ -880,45 +945,93 @@ async function loadTaches(){
     const c=line.split('|');
     if(c.length>=4) tachesData.push({tache:c[0],enfant:c[1],jour:c[2],etat:c[3]?.trim()});
   });
+  tachesPonctuelles=[];
+  parseLines(pText).forEach(line=>{
+    const c=line.split('|');
+    if(c.length>=3) tachesPonctuelles.push({tache:c[0],enfant:c[1],date:c[2].trim(),icon:'📌'});
+  });
   renderTaches();
 }
 
 function getTacheIcon(label){return TACHES_FIXES.find(t=>t.label===label)?.icon||'📋';}
 
+function getToutesLesTachesEnfant(enfant, jour) {
+  const today = new Date();
+  const dow = today.getDay();
+  const dateStr = today.toISOString().split('T')[0];
+  const taches = [];
+
+  // 1 — Tâches fixes configurées dans Admin
+  tachesConfig.filter(t=>t.enfant===enfant&&t[jour]==='TRUE').forEach(t=>{
+    taches.push({tache:t.tache, icon:getTacheIcon(t.tache), source:'fixe', jourReel:jour});
+  });
+
+  // 2 — Tâches récurrentes (visible jeudi ET vendredi)
+  if(dow===4||dow===5){
+    TACHES_RECURRENTES.filter(t=>t.personne===enfant).forEach(t=>{
+      if(isTacheRecurrenteActive(t, dateStr)){
+        if(!taches.find(x=>x.tache===t.tache)){
+          taches.push({
+            tache:t.tache, icon:t.icon, source:'recurrente',
+            jourReel:'vendredi',
+            badge: dow===4 ? '⏰ Demain' : ''
+          });
+        }
+      }
+    });
+  }
+
+  // 3 — Tâches ponctuelles du jour
+  tachesPonctuelles.filter(t=>t.enfant===enfant&&t.date===dateStr).forEach(t=>{
+    taches.push({tache:t.tache, icon:'📌', source:'ponctuelle', jourReel:jour});
+  });
+
+  return taches;
+}
+
 function renderTaches(){
-  const jour=getTodayJour();
-  const ji=JOURS.indexOf(jour);
-  // Si parent, montrer onglets enfants
+  const today = new Date();
+  const dow = today.getDay();
+  const jourIdx = dow===0?6:dow-1;
+  const jour = JOURS[jourIdx];
+
   if(isParent){
-    renderTachesParent(jour,ji);
+    renderTachesParent(jour, jourIdx);
     return;
   }
-  // Enfant : seulement ses tâches non faites
-  const enfant=currentUser;
-  const actives=tachesConfig.filter(t=>t.enfant===enfant&&t[jour]==='TRUE');
-  if(!actives.length){
+
+  const enfant = currentUser;
+  const toutesLesTaches = getToutesLesTachesEnfant(enfant, jour);
+
+  if(!toutesLesTaches.length){
     document.getElementById('taches-content').innerHTML=
       `<div class="card"><div class="all-done"><span class="big-icon">🎉</span><p>Aucune tâche pour aujourd'hui !</p></div></div>`;
     return;
   }
-  const nonFaites=actives.filter(t=>{
-    const etat=tachesData.find(td=>td.tache===t.tache&&td.enfant===enfant&&td.jour===jour);
+
+  const nonFaites = toutesLesTaches.filter(t=>{
+    const etat=tachesData.find(td=>td.tache===t.tache&&td.enfant===enfant&&td.jour===t.jourReel);
     return !etat||etat.etat?.trim()!=='Fait';
   });
+
   if(!nonFaites.length){
     document.getElementById('taches-content').innerHTML=
-      `<div class="card"><div class="all-done"><span class="big-icon">🌟</span><p>Bravo ${enfant} ! Toutes tes tâches sont faites !</p></div></div>`;
+      `<div class="card"><div class="all-done"><span class="big-icon">🌟</span><p>Bravo ${enfant} !<br>Toutes tes tâches sont faites !</p></div></div>`;
     return;
   }
-  let html=`<div class="card"><div class="card-title">✅ Mes tâches — ${JOURS_LABEL[ji]}</div>
+
+  let html=`<div class="card"><div class="card-title">✅ Mes tâches — ${JOURS_LABEL[jourIdx]}</div>
     <p style="font-size:0.85rem;color:var(--text-light);font-weight:600;margin-bottom:12px">${nonFaites.length} tâche${nonFaites.length>1?'s':''} à faire</p>`;
+
   nonFaites.forEach(t=>{
-    html+=`<div class="tache-item" id="tache_${t.tache.replace(/[^a-z]/gi,'_')}">
+    const idSafe=t.tache.replace(/[^a-z]/gi,'_');
+    const badge=t.badge?`<span style="font-size:0.7rem;background:var(--orange);color:white;padding:2px 7px;border-radius:20px;margin-left:6px">${t.badge}</span>`:'';
+    html+=`<div class="tache-item" id="tache_${idSafe}">
       <div class="tache-info">
-        <span class="tache-icon">${getTacheIcon(t.tache)}</span>
-        <span class="tache-name">${t.tache}</span>
+        <span class="tache-icon">${t.icon}</span>
+        <div><span class="tache-name">${t.tache}</span>${badge}</div>
       </div>
-      <button class="tache-toggle non-fait" onclick="toggleTache('${t.tache.replace(/'/g,"\\'")}','${jour}',false,'${enfant}')">
+      <button class="tache-toggle non-fait" onclick="toggleTache('${t.tache.replace(/'/g,"\\'")}','${t.jourReel}',false,'${enfant}')">
         ⬜ À faire
       </button>
     </div>`;
@@ -1105,6 +1218,10 @@ async function loadAdminConfig(){
   renderAdminForm();
   renderAdminSummary();
   renderPreview(currentPreviewEnfant);
+  loadPonctuelles();
+  // Initialiser la date du champ ponctuel à aujourd'hui
+  const today=new Date().toISOString().split('T')[0];
+  if(document.getElementById('ponct-date')) document.getElementById('ponct-date').value=today;
 }
 
 function renderAdminSummary(){
@@ -1130,6 +1247,49 @@ function renderAdminSummary(){
   document.getElementById('admin-list').innerHTML=html;
 }
 
+async function saveTachePonctuelle(){
+  const tache=document.getElementById('ponct-tache').value.trim();
+  const enfant=document.getElementById('ponct-enfant').value;
+  const date=document.getElementById('ponct-date').value;
+  if(!tache||!date){showToast('⚠️ Remplis tous les champs');return;}
+  await apiCall({action:'enregistrer',sheet:'TACHES_PONCTUELLES',tache,enfant,date});
+  document.getElementById('ponct-tache').value='';
+  document.getElementById('ponct-date').value='';
+  showToast('📌 Tâche ponctuelle ajoutée !');
+  loadPonctuelles();
+}
+
+async function loadPonctuelles(){
+  const text=await apiCall({action:'lire',sheet:'TACHES_PONCTUELLES'});
+  const items=[];
+  parseLines(text).forEach(line=>{
+    const c=line.split('|');
+    if(c.length>=3) items.push({tache:c[0],enfant:c[1],date:c[2].trim()});
+  });
+  // Afficher seulement les futures et aujourd'hui
+  const today=new Date().toISOString().split('T')[0];
+  const futures=items.filter(i=>i.date>=today).sort((a,b)=>a.date.localeCompare(b.date));
+  const container=document.getElementById('ponct-list');
+  if(!futures.length){container.innerHTML='<div class="loading" style="padding:8px">Aucune tâche ponctuelle à venir</div>';return;}
+  container.innerHTML=futures.map(i=>`
+    <div class="tache-item" style="margin-bottom:4px">
+      <div class="tache-info">
+        <span class="tache-icon">📌</span>
+        <div>
+          <span class="tache-name">${i.tache}</span>
+          <span style="display:block;font-size:0.78rem;color:var(--text-light)">${i.enfant} — ${i.date}</span>
+        </div>
+      </div>
+      <button class="btn-delete" onclick="deletePonctuelle('${i.tache.replace(/'/g,"\\'")}','${i.enfant}','${i.date}')">✕</button>
+    </div>`).join('');
+}
+
+async function deletePonctuelle(tache,enfant,date){
+  await apiCall({action:'supprimer',sheet:'TACHES_PONCTUELLES',tache,enfant,date});
+  showToast('🗑️ Tâche supprimée');
+  loadPonctuelles();
+}
+
 async function saveAdminConfig(){
   showToast('Enregistrement...');
   for(const tache of TACHES_FIXES){
@@ -1151,38 +1311,42 @@ function showPreviewEnfant(enfant,btn){
 }
 
 function renderPreview(enfant){
-  const jour=getTodayJour();
-  const ji=JOURS.indexOf(jour);
-  const actives=tachesConfig.filter(t=>t.enfant===enfant&&t[jour]==='TRUE');
+  const today = new Date();
+  const dow = today.getDay();
+  const jourIdx = dow===0?6:dow-1;
+  const jour = JOURS[jourIdx];
+  const dateStr = today.toISOString().split('T')[0];
 
-  if(!actives.length){
+  const toutesLesTaches = getToutesLesTachesEnfant(enfant, jour);
+
+  if(!toutesLesTaches.length){
     document.getElementById('preview-content').innerHTML=
       `<div class="all-done"><span class="big-icon">😴</span><p>Aucune tâche pour ${enfant} aujourd'hui</p></div>`;
     return;
   }
 
-  const nonFaites=actives.filter(t=>{
-    const etat=tachesData.find(td=>td.tache===t.tache&&td.enfant===enfant&&td.jour===jour);
+  const faites=toutesLesTaches.filter(t=>{
+    const etat=tachesData.find(td=>td.tache===t.tache&&td.enfant===enfant&&td.jour===t.jourReel);
+    return etat&&etat.etat?.trim()==='Fait';
+  });
+  const nonFaites=toutesLesTaches.filter(t=>{
+    const etat=tachesData.find(td=>td.tache===t.tache&&td.enfant===enfant&&td.jour===t.jourReel);
     return !etat||etat.etat?.trim()!=='Fait';
   });
 
-  const faites=actives.filter(t=>{
-    const etat=tachesData.find(td=>td.tache===t.tache&&td.enfant===enfant&&td.jour===jour);
-    return etat&&etat.etat?.trim()==='Fait';
-  });
-
   let html=`<p style="font-size:0.85rem;color:var(--text-light);font-weight:600;margin-bottom:12px">
-    ${JOURS_LABEL[ji]} — ${faites.length}/${actives.length} tâche${actives.length>1?'s':''} faite${faites.length>1?'s':''}</p>`;
+    ${JOURS_LABEL[jourIdx]} — ${faites.length}/${toutesLesTaches.length} faite${faites.length>1?'s':''}</p>`;
 
   if(!nonFaites.length){
     html+=`<div class="all-done"><span class="big-icon">🌟</span><p>Tout est fait !</p></div>`;
   } else {
     html+=`<p style="font-size:0.8rem;font-weight:700;color:var(--rose);margin-bottom:8px">⬜ À faire :</p>`;
     nonFaites.forEach(t=>{
+      const badge=t.badge?`<span style="font-size:0.7rem;background:var(--orange);color:white;padding:2px 7px;border-radius:20px;margin-left:6px">${t.badge}</span>`:'';
       html+=`<div class="tache-item">
         <div class="tache-info">
-          <span class="tache-icon">${getTacheIcon(t.tache)}</span>
-          <span class="tache-name">${t.tache}</span>
+          <span class="tache-icon">${t.icon}</span>
+          <div><span class="tache-name">${t.tache}</span>${badge}</div>
         </div>
         <span class="tache-toggle non-fait" style="cursor:default">⬜ À faire</span>
       </div>`;
@@ -1194,7 +1358,7 @@ function renderPreview(enfant){
     faites.forEach(t=>{
       html+=`<div class="tache-item" style="opacity:0.6">
         <div class="tache-info">
-          <span class="tache-icon">${getTacheIcon(t.tache)}</span>
+          <span class="tache-icon">${t.icon}</span>
           <span class="tache-name" style="text-decoration:line-through">${t.tache}</span>
         </div>
         <span class="tache-toggle fait" style="cursor:default">✅ Fait</span>
