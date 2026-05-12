@@ -44,7 +44,15 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
-/* LOGIN */
+/* CELEBRATIONS */
+#confetti-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:999;display:none;}
+.celebration{border-radius:20px;padding:20px;margin-bottom:20px;text-align:center;animation:popIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275);}
+@keyframes popIn{0%{transform:scale(0.5);opacity:0;}100%{transform:scale(1);opacity:1;}}
+.celebration.anniv{background:linear-gradient(135deg,#9C27B0,#F50870);color:white;box-shadow:0 8px 32px rgba(245,8,112,0.4);}
+.celebration.noel{background:linear-gradient(135deg,#c0392b,#27ae60);color:white;box-shadow:0 8px 32px rgba(192,57,43,0.4);}
+.celebration-icons{font-size:1.8rem;letter-spacing:4px;margin:8px 0;}
+.celebration-title{font-size:1.6rem;font-weight:900;margin:10px 0;text-shadow:0 2px 8px rgba(0,0,0,0.2);}
+.celebration-msg{font-size:0.95rem;font-weight:600;opacity:0.95;line-height:1.5;}
 .login-screen{position:fixed;inset:0;background:linear-gradient(135deg,var(--violet),var(--rose));z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;}
 .login-screen.hidden{display:none;}
 .login-logo{font-size:4rem;margin-bottom:12px;}
@@ -245,6 +253,8 @@ input[type="text"]:focus,select:focus{outline:none;border-color:var(--violet);}
   </div>
 </div>
 
+<canvas id="confetti-canvas"></canvas>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
@@ -280,6 +290,7 @@ input[type="text"]:focus,select:focus{outline:none;border-color:var(--violet);}
 
 <!-- ACCUEIL -->
 <div class="page active" id="page-accueil">
+  <div id="celebration-banner"></div>
   <div class="screen1-hero">
     <h1 id="accueil-title">⭐ Bonjour !</h1>
     <p id="accueil-sub">Organisation de la famille</p>
@@ -408,7 +419,103 @@ let currentListe='generale',currentAdminEnfant='Alessia';
 let calYear,calMonth,selectedDay=null;
 let pinValue='';
 
-// ===================== LOGIN =====================
+// ===================== ANNIVERSAIRES & FÊTES =====================
+const ANNIVERSAIRES = [
+  { nom: 'Alessia',  jour: 1,  mois: 1  },
+  { nom: 'Antonin',  jour: 15, mois: 5  },
+  { nom: 'Clément',  jour: 22, mois: 2  },
+  { nom: 'Jérémie',  jour: 24, mois: 4  },
+  { nom: 'Diego',    jour: 9,  mois: 10 },
+  { nom: 'Yann',     jour: 10, mois: 3  },
+  { nom: 'Mélanie',  jour: 28, mois: 3  },
+];
+
+function checkCelebrations() {
+  const now = new Date();
+  const jour = now.getDate();
+  const mois = now.getMonth() + 1;
+  const container = document.getElementById('celebration-banner');
+  if (!container) return;
+
+  // Noël
+  if (jour === 25 && mois === 12) {
+    container.innerHTML = `
+      <div class="celebration noel">
+        <div class="celebration-icons">🎄⛄🎁✨🦌🔔</div>
+        <div class="celebration-title">Joyeux Noël !</div>
+        <div class="celebration-msg">Toute la famille vous souhaite un merveilleux Noël plein de joie et de cadeaux ! 🎅</div>
+        <div class="celebration-icons">❄️🌟🎶🕯️🍪☃️</div>
+      </div>`;
+    launchConfetti('noel');
+    return;
+  }
+
+  // Anniversaires
+  const anniv = ANNIVERSAIRES.filter(a => a.jour === jour && a.mois === mois);
+  if (anniv.length > 0) {
+    const noms = anniv.map(a => a.nom);
+    const nomStr = noms.length === 1 ? noms[0] : noms.slice(0,-1).join(', ') + ' et ' + noms[noms.length-1];
+    const multiple = noms.length > 1;
+    container.innerHTML = `
+      <div class="celebration anniv">
+        <div class="celebration-icons">🎂🎉🎈🥳🎁🎊</div>
+        <div class="celebration-title">Joyeux anniversaire ${nomStr} !</div>
+        <div class="celebration-msg">Toute la famille te souhaite${multiple?'nt':''} un magnifique anniversaire plein de bonheur ! 🌟</div>
+        <div class="celebration-icons">🎂🍰🥂🎶💝✨</div>
+      </div>`;
+    launchConfetti('anniv');
+  }
+}
+
+function launchConfetti(type) {
+  const colors = type === 'noel'
+    ? ['#c0392b','#27ae60','#f1c40f','#ffffff','#2980b9']
+    : ['#9C27B0','#F50870','#FEEA3B','#00BCD4','#FF5722'];
+
+  const canvas = document.getElementById('confetti-canvas');
+  if (!canvas) return;
+  canvas.style.display = 'block';
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const particles = Array.from({length: 120}, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height - canvas.height,
+    r: Math.random() * 8 + 4,
+    d: Math.random() * 120 + 10,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    tilt: Math.random() * 10 - 10,
+    tiltAngle: 0,
+    tiltAngleIncrement: Math.random() * 0.07 + 0.05
+  }));
+
+  let angle = 0;
+  let count = 0;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    angle += 0.01;
+    particles.forEach(p => {
+      p.tiltAngle += p.tiltAngleIncrement;
+      p.y += (Math.cos(angle + p.d) + 2) * 1.5;
+      p.tilt = Math.sin(p.tiltAngle) * 12;
+      ctx.beginPath();
+      ctx.lineWidth = p.r / 2;
+      ctx.strokeStyle = p.color;
+      ctx.moveTo(p.x + p.tilt + p.r / 4, p.y);
+      ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 4);
+      ctx.stroke();
+      if (p.y > canvas.height) {
+        p.y = -10;
+        p.x = Math.random() * canvas.width;
+      }
+    });
+    count++;
+    if (count < 300) requestAnimationFrame(draw);
+    else canvas.style.display = 'none';
+  }
+  draw();
+}
 function login(user){
   currentUser=user;
   isParent=(user==='parent');
@@ -450,6 +557,8 @@ function login(user){
   }
 }
 
+// Vérifier anniversaires et fêtes au chargement
+checkCelebrations();
 showPage('accueil');
 
 // PWA — Installation
