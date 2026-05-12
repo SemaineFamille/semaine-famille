@@ -155,6 +155,33 @@ input[type="text"]:focus,select:focus{outline:none;border-color:var(--violet);}
 .day-icons{font-size:0.6rem;line-height:1.5;text-align:center;width:100%;}
 .legende{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;}
 .legende-item{font-size:0.75rem;font-weight:600;background:var(--bg);padding:4px 8px;border-radius:20px;}
+.horaires-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.horaire-box {
+  background: #ffffffaa;
+  padding: 15px;
+  border-radius: 12px;
+  text-align: center;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.horaire-box h3 {
+  margin-bottom: 10px;
+  font-size: 20px;
+  color: #333;
+}
+
+.horaire-img {
+  width: 100%;
+  border-radius: 10px;
+}
+
 
 /* MENU */
 .menu-jour-card{background:white;border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:var(--shadow);}
@@ -400,6 +427,29 @@ input[type="text"]:focus,select:focus{outline:none;border-color:var(--violet);}
       <button class="btn btn-small" onclick="changeMonth(1)" style="background:var(--violet);color:white;width:auto">▶</button>
     </div>
     <div class="cal-grid" id="cal-grid"></div>
+    <div class="horaires-container">
+
+  <div class="horaire-box">
+    <h3>Alessia</h3>
+    <img src="horaires/alessia.png" class="horaire-img">
+  </div>
+
+  <div class="horaire-box">
+    <h3>Diego</h3>
+    <img src="horaires/diego.png" class="horaire-img">
+  </div>
+
+  <div class="horaire-box">
+    <h3>Clément</h3>
+    <img src="horaires/clement.png" class="horaire-img">
+  </div>
+
+  <div class="horaire-box">
+    <h3>Antonin</h3>
+    <img src="horaires/antonin.png" class="horaire-img">
+  </div>
+
+</div>
   </div>
 </div>
 
