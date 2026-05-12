@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Semaine Famille</title>
 
-
+  <!-- Manifest PWA  -->
+  <link rel="manifest" href="/semaine-famille/manifest.json">
   <!-- Couleur Android -->
   <meta name="theme-color" content="#9C27B0">
 
@@ -30,12 +31,12 @@
 }
 </head>
 *{margin:0;padding:0;box-sizing:border-box;}
+  
 <script>
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("/semaine-famille/sw.js");
 }
 </script>
-
 body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
 /* CELEBRATIONS */
