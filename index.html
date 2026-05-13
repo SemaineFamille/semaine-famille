@@ -1092,15 +1092,20 @@ async function loadTaches(){
     const c=line.split('|');
     if(c.length>=4) tachesData.push({tache:c[0],enfant:c[1],jour:c[2],etat:c[3]?.trim()});
   });
-  tachesPonctuelles=[];
+ tachesPonctuelles=[];
 parseLines(pText).forEach(line=>{
   const c=line.split('|');
   if(c.length>=3){
     const rawDate = c[2].trim();
+    // Extraire yyyy-mm-dd depuis n'importe quel format
+    let date = rawDate;
     const parsed = new Date(rawDate);
-    const date = isNaN(parsed.getTime())
-      ? rawDate
-      : formatDateYYYYMMDD(parsed);
+    if(!isNaN(parsed.getTime())){
+      const y = parsed.getFullYear();
+      const m = String(parsed.getMonth()+1).padStart(2,'0');
+      const d = String(parsed.getDate()).padStart(2,'0');
+      date = `${y}-${m}-${d}`;
+    }
     tachesPonctuelles.push({tache:c[0], enfant:c[1], date:date, icon:'📌'});
   }
 });
