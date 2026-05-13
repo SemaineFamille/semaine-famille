@@ -513,12 +513,12 @@ input[type="text"]:focus,select:focus{outline:none;border-color:var(--violet);}
 const SCRIPT_URL='https://script.google.com/macros/s/AKfycbxOJEus1Fev5I4YZsSbjpIXXlgGJBY7QmFkkqZtkXYD6eEPwqmgCl8r2hfrO1X9eyqxSA/exec';
 const ADMIN_CODE='2019';
   
-function formatDateYYYYMMDD(date = new Date)() 
+function formatDateYYYYMMDD(date = new Date()) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
-  return ${year}-${month}-${day};
-
+  return '${year}-${month}-${day}';
+}
 
 const JOURS=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
 const JOURS_LABEL=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
