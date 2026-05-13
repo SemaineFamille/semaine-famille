@@ -1093,10 +1093,17 @@ async function loadTaches(){
     if(c.length>=4) tachesData.push({tache:c[0],enfant:c[1],jour:c[2],etat:c[3]?.trim()});
   });
   tachesPonctuelles=[];
-  parseLines(pText).forEach(line=>{
-    const c=line.split('|');
-    if(c.length>=3) tachesPonctuelles.push({tache:c[0],enfant:c[1],date:c[2].trim(),icon:'📌'});
-  });
+parseLines(pText).forEach(line=>{
+  const c=line.split('|');
+  if(c.length>=3){
+    const rawDate = c[2].trim();
+    const parsed = new Date(rawDate);
+    const date = isNaN(parsed.getTime())
+      ? rawDate
+      : formatDateYYYYMMDD(parsed);
+    tachesPonctuelles.push({tache:c[0], enfant:c[1], date:date, icon:'📌'});
+  }
+});
  console.log('Ponctuelles:', JSON.stringify(tachesPonctuelles));
 console.log('Date jour:', formatDateYYYYMMDD(new Date()));
   renderTaches();
