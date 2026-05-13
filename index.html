@@ -1109,9 +1109,7 @@ parseLines(pText).forEach(line=>{
     tachesPonctuelles.push({tache:c[0], enfant:c[1], date:date, icon:'📌'});
   }
 });
- console.log('Date convertie:', tachesPonctuelles[0]?.date);
- console.log('Ponctuelles:', JSON.stringify(tachesPonctuelles));
-console.log('Date jour:', formatDateYYYYMMDD(new Date()));
+
   renderTaches();
 }
 
@@ -1211,12 +1209,10 @@ function renderTaches(){
 function renderTachesParentSelf(jour, jourIdx){
   const dateStr = formatDateYYYYMMDD(new Date());
   const tachesActives = TACHES_PARENTS.filter(t => isTacheParentActive(t));
-  console.log('renderTachesParentSelf appelée, dateStr:', dateStr);
-  console.log('tachesPonctuelles dans renderTachesParentSelf:', JSON.stringify(tachesPonctuelles));
   const ponctParents = tachesPonctuelles.filter(t =>
     (t.enfant === 'Mél & Yann' || ['Mélanie','Yann'].includes(t.enfant)) && t.date === dateStr
   );
-  console.log('ponctParents trouvées:', JSON.stringify(ponctParents));
+  
 
   if(!tachesActives.length && !ponctParents.length){
     document.getElementById('taches-content').innerHTML =
@@ -1726,23 +1722,6 @@ function renderPreview(enfant){
 
   document.getElementById('preview-content').innerHTML=html;
 }
-</script>
-
-<div id="debug-box" style="position:fixed;bottom:0;left:0;right:0;background:#000;color:#0f0;
-font-size:11px;padding:8px;max-height:200px;overflow-y:auto;z-index:9999;font-family:monospace;
-display:none"></div>
-
-<script>
-const _origLog = console.log;
-console.log = function(...args){
-  _origLog(...args);
-  const box = document.getElementById('debug-box');
-  if(box){
-    box.style.display='block';
-    box.innerHTML += args.map(a => typeof a==='object'?JSON.stringify(a):a).join(' ') + '<br>';
-    box.scrollTop = box.scrollHeight;
-  }
-};
 </script>
 
 </body>
