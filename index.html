@@ -1304,8 +1304,9 @@ function openJobModal(day){
     <div class="modal-section">🟢 Jérémie</div>
     <button class="modal-btn" style="background:#4CAF50;color:white" onclick="saveJob('Jeremie','🟢')">🟢 Jérémie travaille ${isA('Jeremie','🟢')?'✓':''}</button>
     <div class="modal-section">🌸 Mélanie</div>
-    <button class="modal-btn" style="background:#E91E93;color:white" onclick="saveJob('Melanie','🌸')">🌸 Mélanie — Jour ${isA('Melanie','🌸')?'✓':''}</button>
-    <button class="modal-btn" style="background:#9C27B0;color:white" onclick="saveJob('Melanie','🌸⭐')">🌸⭐ Mélanie — Nuit ${isA('Melanie','🌸⭐')?'✓':''}</button>
+   <button class="modal-btn" style="background:#E91E93;color:white" onclick="saveJob('Melanie','jour')">
+      <img src="image/Mélanie_Jour_coeur.png" class="modal-icon"> Mélanie — Jour ${isA('Melanie','jour')?'✓':''}
+    </button>
     <div class="modal-section">👨🏼‍🚒 Yann</div>
     <button class="modal-btn" style="background:#F9A825;color:#333" onclick="saveJob('Yann','👨🏼‍🚒')">👨🏼‍🚒 Yann — Jour ${isA('Yann','👨🏼‍🚒Y')?'✓':''}</button>
     <button class="modal-btn" style="background:#FF8F00;color:white" onclick="saveJob('Yann','👨🏼‍🚒💫')">👨🏼‍🚒💫 Yann — Nuit ${isA('Yann','👨🏼‍🚒💫')?'✓':''}</button>
