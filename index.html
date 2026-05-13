@@ -1097,6 +1097,8 @@ async function loadTaches(){
     const c=line.split('|');
     if(c.length>=3) tachesPonctuelles.push({tache:c[0],enfant:c[1],date:c[2].trim(),icon:'📌'});
   });
+ console.log('Ponctuelles:', JSON.stringify(tachesPonctuelles));
+console.log('Date jour:', formatDateYYYYMMDD(new Date()));
   renderTaches();
 }
 
@@ -1704,6 +1706,22 @@ function renderPreview(enfant){
 }
 </script>
 
-  
+<div id="debug-box" style="position:fixed;bottom:0;left:0;right:0;background:#000;color:#0f0;
+font-size:11px;padding:8px;max-height:200px;overflow-y:auto;z-index:9999;font-family:monospace;
+display:none"></div>
+
+<script>
+const _origLog = console.log;
+console.log = function(...args){
+  _origLog(...args);
+  const box = document.getElementById('debug-box');
+  if(box){
+    box.style.display='block';
+    box.innerHTML += args.map(a => typeof a==='object'?JSON.stringify(a):a).join(' ') + '<br>';
+    box.scrollTop = box.scrollHeight;
+  }
+};
+</script>
+
 </body>
 </html>
