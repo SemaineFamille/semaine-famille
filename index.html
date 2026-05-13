@@ -1355,6 +1355,12 @@ async function loadAdminConfig(){
   renderAdminForm();
   renderAdminSummary();
   renderPreview(currentPreviewEnfant);
+  function formatDateJS(dateObj) {
+    const y = dateObj.getFullYear();
+    const m = String(dateObj.getMonth() + 1).padStart(2, "0");
+    const d = String(dateObj.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+}
   loadPonctuelles();
   // Initialiser la date du champ ponctuel à aujourd'hui
   const today = formatDateYYYYMMDD();
@@ -1389,7 +1395,8 @@ function renderAdminSummary(){
 async function saveTachePonctuelle(){
   const tache=document.getElementById('ponct-tache').value.trim();
   const enfant=document.getElementById('ponct-enfant').value;
-  const date=document.getElementById('ponct-date').value;
+  const dateObj = new Date(document.getElementById('ponct-date').value);
+const date = formatDateJS(dateObj);
   if(!tache||!date){showToast('⚠️ Remplis tous les champs');return;}
   await apiCall({action:'enregistrer',sheet:'TACHES_PONCTUELLES',tache,enfant,date});
   document.getElementById('ponct-tache').value='';
