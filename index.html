@@ -1276,8 +1276,13 @@ function renderCal(){
     const dd=jobData[String(d)]||{};
     const icons=[];
     if(dd['Jeremie']) icons.push(dd['Jeremie']);
-    if(dd['Melanie']) icons.push(dd['Melanie']);
-    if(dd['Yann']) icons.push(dd['Yann']);
+    if(dd['Melanie']==='jour') icons.push('<img src="image/Mélanie_Jour_coeur.png" class="cal-icon">');
+if(dd['Melanie']==='nuit') icons.push('<img src="image/Mélanie_Nuit_Coeur.png" class="cal-icon">');
+
+    if(dd['Yann']==='jour')
+    icons.push('<img src="image/Yann_Jour.png" class="cal-icon">');
+if(dd['Yann']==='nuit')
+    icons.push('<img src="image/Yann_Nuit.png" class="cal-icon">');
     const isToday=isNow&&d===today.getDate();
     html+=`<div class="cal-day ${icons.length?'has-data':''} ${isToday?'today':''}" onclick="openJobModal(${d})">
       <span class="day-num ${isToday?'today-num':''}">${d}</span>
@@ -1304,16 +1309,28 @@ function openJobModal(day){
     <div class="modal-section">🟢 Jérémie</div>
     <button class="modal-btn" style="background:#4CAF50;color:white" onclick="saveJob('Jeremie','🟢')">🟢 Jérémie travaille ${isA('Jeremie','🟢')?'✓':''}</button>
     <div class="modal-section">🌸 Mélanie</div>
-   <button class="modal-btn" style="background:#E91E93;color:white" onclick="saveJob('Melanie','jour')">
+    <button class="modal-btn" style="background:#E91E93;color:white" onclick="saveJob('Melanie','jour')">
       <img src="image/Mélanie_Jour_coeur.png" class="modal-icon"> Mélanie — Jour ${isA('Melanie','jour')?'✓':''}
     </button>
+
+    <button class="modal-btn" style="background:#9C27B0;color:white" onclick="saveJob('Melanie','nuit')">
+      <img src="image/Mélanie_Nuit_Coeur.png" class="modal-icon"> Mélanie — Nuit ${isA('Melanie','nuit')?'✓':''}
+    </button>
+
     <div class="modal-section">👨🏼‍🚒 Yann</div>
-    <button class="modal-btn" style="background:#F9A825;color:#333" onclick="saveJob('Yann','👨🏼‍🚒')">👨🏼‍🚒 Yann — Jour ${isA('Yann','👨🏼‍🚒Y')?'✓':''}</button>
-    <button class="modal-btn" style="background:#FF8F00;color:white" onclick="saveJob('Yann','👨🏼‍🚒💫')">👨🏼‍🚒💫 Yann — Nuit ${isA('Yann','👨🏼‍🚒💫')?'✓':''}</button>
+    <button class="modal-btn" style="background:#F9A825;color:#333" onclick="saveJob('Yann','jour')">
+      <img src="image/Yann_Jour.png" class="modal-icon"> Yann — Jour ${isA('Yann','jour')?'✓':''}
+    </button>
+
+    <button class="modal-btn" style="background:#FF8F00;color:white" onclick="saveJob('Yann','nuit')">
+      <img src="image/Yann_Nuit.png" class="modal-icon"> Yann — Nuit ${isA('Yann','nuit')?'✓':''}
+    </button>
+
     <div class="modal-section"></div>
     <button class="modal-btn" style="background:#f44336;color:white" onclick="clearJobDay()">❌ Effacer ce jour</button>
-    <button class="modal-btn" style="background:#eee;color:#333" onclick="closeModal()">Annuler</button>`;
-  document.getElementById('jobModal').classList.add('show');
+    <button class="modal-btn" style="background:#eee;color:#333" onclick="closeModal()">Annuler</button>
+`;
+document.getElementById('jobModal').classList.add('show');
 }
 
 async function saveJob(personne,type){
