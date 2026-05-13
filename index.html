@@ -1144,7 +1144,7 @@ function renderTaches(){
   const jour = JOURS[jourIdx];
 
   if(isParent){
-    renderTachesParent(jour, jourIdx);
+    renderTachesParentSelf(jour, jourIdx);
     return;
   }
 
@@ -1189,6 +1189,63 @@ function renderTaches(){
   document.getElementById('taches-content').innerHTML=html;
 }
 
+ function renderTachesParentSelf(jour, jourIdx){
+  const dateStr = formatDateYYYYMMDD(new Date());
+  const tachesActives = TACHES_PARENTS.filter(t => isTacheParentActive(t));
+  const ponctParents = tachesPonctuelles.filter(t =>
+    ['Mélanie','Yann'].includes(t.enfant) && t.date === dateStr
+  );
+
+  if(!tachesActives.length && !ponctParents.length){
+    document.getElementById('taches-content').innerHTML =
+      `<div class="card"><div class="all-done"><span class="big-icon">🎉</span><p>Aucune tâche pour vous aujourd'hui !</p></div></div>`;
+    return;
+  }
+
+  const toutesLesTaches = [
+    ...tachesActives.map(t => ({ tache: t.label, icon: t.icon, jourReel: jour, source: 'fixe' })),
+    ...ponctParents.map(t => ({ tache: t.tache, icon: '📌', jourReel: jour, source: 'ponctuelle', enfantReel: t.enfant }))
+  ];
+
+  const nonFaites = toutesLesTaches.filter(t => {
+    const etat = tachesData.find(td =>
+      td.tache === t.tache && td.enfant === 'Mél & Yann' && td.jour === t.jourReel
+    );
+    return !etat || etat.etat?.trim() !== 'Fait';
+  });
+
+  if(!nonFaites.length){
+    document.getElementById('taches-content').innerHTML =
+      `<div class="card"><div class="all-done"><span class="big-icon">🌟</span><p>Bravo !<br>Toutes vos tâches sont faites !</p></div></div>`;
+    return;
+  }
+
+  let html = `<div class="card">
+    <div class="card-title">✅ Nos tâches — ${JOURS_LABEL[jourIdx]}</div>
+    <p style="font-size:0.85rem;color:var(--text-light);font-weight:600;margin-bottom:12px">
+      ${nonFaites.length} tâche${nonFaites.length > 1 ? 's' : ''} à faire
+    </p>`;
+
+  nonFaites.forEach(t => {
+    const idSafe = t.tache.replace(/[^a-z]/gi, '_');
+    const sous = t.enfantReel
+      ? `<span style="display:block;font-size:0.78rem;color:var(--text-light)">${t.enfantReel}</span>`
+      : '';
+    html += `<div class="tache-item" id="tache_${idSafe}">
+      <div class="tache-info">
+        <span class="tache-icon">${t.icon}</span>
+        <div><span class="tache-name">${t.tache}</span>${sous}</div>
+      </div>
+      <button class="tache-toggle non-fait"
+        onclick="toggleTache('${t.tache.replace(/'/g,"\\'")}','${t.jourReel}',false,'Mél & Yann')">
+        ⬜ À faire
+      </button>
+    </div>`;
+  });
+
+  html += '</div>';
+  document.getElementById('taches-content').innerHTML = html;
+}
 function renderTachesParent(jour,ji){
   let html='';
 
