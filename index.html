@@ -1578,34 +1578,76 @@ function showPreviewEnfant(enfant,btn){
 }
 
 function renderPreviewParents(){
-  const today=new Date();
-  const dow=today.getDay();
-  const jourIdx=dow===0?6:dow-1;
-  const dateStr= formatDateYYYYMMDD(today);
+  const today = new Date();
+  const dow = today.getDay();
+  const jourIdx = dow===0?6:dow-1;
+  const jour = JOURS[jourIdx];
+  const dateStr = formatDateYYYYMMDD(today);
 
-  const tachesActives=TACHES_PARENTS.filter(t=>isTacheParentActive(t));
-  const ponctParents=tachesPonctuelles.filter(t=>['Mélanie','Yann'].includes(t.enfant)&&t.date===dateStr);
+  const tachesActives = TACHES_PARENTS.filter(t => isTacheParentActive(t));
+  const ponctParents = tachesPonctuelles.filter(t =>
+    ['Mélanie','Yann'].includes(t.enfant) && t.date === dateStr
+  );
 
-  if(!tachesActives.length&&!ponctParents.length){
+  if(!tachesActives.length && !ponctParents.length){
     document.getElementById('preview-content').innerHTML=
       `<div class="all-done"><span class="big-icon">😊</span><p>Aucune tâche pour Mélanie & Yann aujourd'hui !</p></div>`;
     return;
   }
 
-  let html=`<p style="font-size:0.85rem;color:var(--text-light);font-weight:600;margin-bottom:12px">${JOURS_LABEL[jourIdx]}</p>`;
-  tachesActives.forEach(t=>{
-    html+=`<div class="tache-item">
-      <div class="tache-info"><span class="tache-icon">${t.icon}</span><span class="tache-name">${t.label}</span></div>
-      <span class="tache-toggle non-fait" style="cursor:default">⬜ À faire</span>
-    </div>`;
+  const toutesLesTaches = [
+    ...tachesActives.map(t => ({ tache: t.label, icon: t.icon, jourReel: jour })),
+    ...ponctParents.map(t => ({ tache: t.tache, icon: '📌', jourReel: jour, sous: t.enfant }))
+  ];
+
+  const faites = toutesLesTaches.filter(t => {
+    const etat = tachesData.find(td =>
+      td.tache === t.tache && td.enfant === 'Mél & Yann' && td.jour === t.jourReel
+    );
+    return etat && etat.etat?.trim() === 'Fait';
   });
-  ponctParents.forEach(t=>{
-    html+=`<div class="tache-item">
-      <div class="tache-info"><span class="tache-icon">📌</span><span class="tache-name">${t.tache} <span style="font-size:0.75rem;color:var(--text-light)">(${t.enfant})</span></span></div>
-      <span class="tache-toggle non-fait" style="cursor:default">⬜ À faire</span>
-    </div>`;
+
+  const nonFaites = toutesLesTaches.filter(t => {
+    const etat = tachesData.find(td =>
+      td.tache === t.tache && td.enfant === 'Mél & Yann' && td.jour === t.jourReel
+    );
+    return !etat || etat.etat?.trim() !== 'Fait';
   });
-  document.getElementById('preview-content').innerHTML=html;
+
+  let html = `<p style="font-size:0.85rem;color:var(--text-light);font-weight:600;margin-bottom:12px">
+    ${JOURS_LABEL[jourIdx]} — ${faites.length}/${toutesLesTaches.length} faite${faites.length > 1 ? 's' : ''}</p>`;
+
+  if(!nonFaites.length){
+    html += `<div class="all-done"><span class="big-icon">🌟</span><p>Tout est fait !</p></div>`;
+  } else {
+    html += `<p style="font-size:0.8rem;font-weight:700;color:var(--rose);margin-bottom:8px">⬜ À faire :</p>`;
+    nonFaites.forEach(t => {
+      const sous = t.sous ? `<span style="font-size:0.75rem;color:var(--text-light)">(${t.sous})</span>` : '';
+      html += `<div class="tache-item">
+        <div class="tache-info">
+          <span class="tache-icon">${t.icon}</span>
+          <span class="tache-name">${t.tache} ${sous}</span>
+        </div>
+        <span class="tache-toggle non-fait" style="cursor:default">⬜ À faire</span>
+      </div>`;
+    });
+  }
+
+  if(faites.length){
+    html += `<p style="font-size:0.8rem;font-weight:700;color:#4CAF50;margin:12px 0 8px">✅ Déjà fait :</p>`;
+    faites.forEach(t => {
+      const sous = t.sous ? `<span style="font-size:0.75rem;color:var(--text-light)">(${t.sous})</span>` : '';
+      html += `<div class="tache-item" style="opacity:0.6">
+        <div class="tache-info">
+          <span class="tache-icon">${t.icon}</span>
+          <span class="tache-name" style="text-decoration:line-through">${t.tache} ${sous}</span>
+        </div>
+        <span class="tache-toggle fait" style="cursor:default">✅ Fait</span>
+      </div>`;
+    });
+  }
+
+  document.getElementById('preview-content').innerHTML = html;
 }
 
 function renderPreview(enfant){
