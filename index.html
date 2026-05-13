@@ -1486,7 +1486,7 @@ function renderPreview(enfant){
   const dow = today.getDay();
   const jourIdx = dow===0?6:dow-1;
   const jour = JOURS[jourIdx];
-  const dateStr = today.toISOString().split('T')[0];
+  const dateStr = formatDateYYYYMMDD(today);
 
   const toutesLesTaches = getToutesLesTachesEnfant(enfant, jour);
 
