@@ -479,8 +479,8 @@ input[type="text"]:focus,select:focus{outline:none;border-color:var(--violet);}
         <option>Clément</option>
         <option>Diego</option>
         <option>Jérémie</option>
-        <option>Yann</option>
-        <option>Mélanie</option>
+        <option>Mél & Yann</option>
+      
       </select>
     </div>
     <div class="input-row">
@@ -513,12 +513,12 @@ input[type="text"]:focus,select:focus{outline:none;border-color:var(--violet);}
 <script>
 const SCRIPT_URL='https://script.google.com/macros/s/AKfycbxOJEus1Fev5I4YZsSbjpIXXlgGJBY7QmFkkqZtkXYD6eEPwqmgCl8r2hfrO1X9eyqxSA/exec';
 const ADMIN_CODE='2019';
-
-function formatDateJS(dateObj) {
-    const y = dateObj.getFullYear();
-    const m = String(dateObj.getMonth() + 1).padStart(2, "0");
-    const d = String(dateObj.getDate()).padStart(2, "0");
-    return `${y}-${m}-${d}`;
+  
+function formatDateYYYYMMDD(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return ${year}-${month}-${day};
 }
 
 const JOURS=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
