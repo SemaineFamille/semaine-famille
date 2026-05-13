@@ -20,7 +20,7 @@
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%239C27B0'/><text y='72' x='50' text-anchor='middle' font-size='60'>⭐</text></svg>">
 
 <!-- Manifest PWA -->
-
+</head>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -29,7 +29,7 @@
   --bg:#f3e5f5; --card:#ffffff; --text:#2d1b33; --text-light:#7b5e8a;
   --shadow:0 4px 20px rgba(156,39,176,0.15); --radius:16px;
 }
-</head>
+
 *{margin:0;padding:0;box-sizing:border-box;}
   .legend-icon {
   width: 22px;
@@ -45,8 +45,10 @@
   display: block;
   margin: 2px auto; /* centre l’image dans la case */
     
-    
 }
+ </style>
+</head>
+    
 <script>
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("/semaine-famille/sw.js");
