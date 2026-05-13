@@ -1211,9 +1211,9 @@ function renderTaches(){
  function renderTachesParentSelf(jour, jourIdx){
   const dateStr = formatDateYYYYMMDD(new Date());
   const tachesActives = TACHES_PARENTS.filter(t => isTacheParentActive(t));
-  const ponctParents = tachesPonctuelles.filter(t =>
-    ['Mélanie','Yann'].includes(t.enfant) && t.date === dateStr
-  );
+ const ponctParents = tachesPonctuelles.filter(t =>
+  (t.enfant === 'Mél & Yann' || ['Mélanie','Yann'].includes(t.enfant)) && t.date === dateStr
+);
 
   if(!tachesActives.length && !ponctParents.length){
     document.getElementById('taches-content').innerHTML =
@@ -1272,7 +1272,9 @@ function renderTachesParent(jour,ji){
   const tachesParentsActives=TACHES_PARENTS.filter(t=>isTacheParentActive(t));
   // + tâches ponctuelles parents
   const dateStr=new Date().toISOString().split('T')[0];
-  const ponctParents=tachesPonctuelles.filter(t=>['Mélanie','Yann'].includes(t.enfant)&&t.date===dateStr);
+  const ponctParents = tachesPonctuelles.filter(t =>
+  (t.enfant === 'Mél & Yann' || ['Mélanie','Yann'].includes(t.enfant)) && t.date === dateStr
+);
 
   if(tachesParentsActives.length||ponctParents.length){
     html+=`<div class="card"><div class="card-title">🏠 Mélanie & Yann — ${JOURS_LABEL[ji]}</div>`;
