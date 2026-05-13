@@ -1109,6 +1109,7 @@ parseLines(pText).forEach(line=>{
     tachesPonctuelles.push({tache:c[0], enfant:c[1], date:date, icon:'📌'});
   }
 });
+ console.log('Date convertie:', tachesPonctuelles[0]?.date);
  console.log('Ponctuelles:', JSON.stringify(tachesPonctuelles));
 console.log('Date jour:', formatDateYYYYMMDD(new Date()));
   renderTaches();
