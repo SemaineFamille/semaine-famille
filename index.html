@@ -68,14 +68,6 @@
 }
 
 
-<script>
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/semaine-famille/sw.js");
-}
-  
-</script>
-
-
 /* CELEBRATIONS */
 #confetti-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:999;display:none;}
 .celebration{border-radius:20px;padding:20px;margin-bottom:20px;text-align:center;animation:popIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275);}
@@ -288,6 +280,11 @@ input[type="text"]:focus,select:focus{outline:none;border-color:var(--violet);}
   width: 100%; /* important pour que tous aient la même taille */
 }
 </style>
+ <script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/semaine-famille/sw.js");
+}
+</script>
 </head>
 <body>
 
@@ -297,7 +294,7 @@ input[type="text"]:focus,select:focus{outline:none;border-color:var(--violet);}
   <div class="login-title">Semaine Famille</div>
   <div class="login-sub">Qui es-tu ?</div>
   <div class="login-grid">
-    <div id="accueil-buttons">
+   
   <button class="login-btn" style="background:linear-gradient(135deg,#E91E63,#9C27B0);color:white" onclick="login('Alessia')">
     <span class="avatar">👧🦄</span>Alessia
   </button>
