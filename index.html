@@ -20,7 +20,7 @@
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%239C27B0'/><text y='72' x='50' text-anchor='middle' font-size='60'>⭐</text></svg>">
 
 <!-- Manifest PWA -->
-</head>
+
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -37,7 +37,7 @@
   object-fit: contain;
   margin-right: 6px;
   vertical-align: middle;
-
+}
 .cal-icon {
   width: 12px;      /* tu peux mettre 14px, 16px, 20px selon ce que tu veux */
   height: 12px;
@@ -52,9 +52,9 @@
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("/semaine-famille/sw.js");
 }
+  
 </script>
-</body>
-  {font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
 
 /* CELEBRATIONS */
 #confetti-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:999;display:none;}
