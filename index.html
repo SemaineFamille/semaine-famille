@@ -1208,12 +1208,15 @@ function renderTaches(){
   document.getElementById('taches-content').innerHTML=html;
 }
 
- function renderTachesParentSelf(jour, jourIdx){
+function renderTachesParentSelf(jour, jourIdx){
   const dateStr = formatDateYYYYMMDD(new Date());
   const tachesActives = TACHES_PARENTS.filter(t => isTacheParentActive(t));
- const ponctParents = tachesPonctuelles.filter(t =>
-  (t.enfant === 'Mél & Yann' || ['Mélanie','Yann'].includes(t.enfant)) && t.date === dateStr
-);
+  console.log('renderTachesParentSelf appelée, dateStr:', dateStr);
+  console.log('tachesPonctuelles dans renderTachesParentSelf:', JSON.stringify(tachesPonctuelles));
+  const ponctParents = tachesPonctuelles.filter(t =>
+    (t.enfant === 'Mél & Yann' || ['Mélanie','Yann'].includes(t.enfant)) && t.date === dateStr
+  );
+  console.log('ponctParents trouvées:', JSON.stringify(ponctParents));
 
   if(!tachesActives.length && !ponctParents.length){
     document.getElementById('taches-content').innerHTML =
