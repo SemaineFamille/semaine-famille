@@ -1145,9 +1145,13 @@ function getToutesLesTachesEnfant(enfant, jour) {
 
   // 3 — Tâches ponctuelles du jour (fonctionne pour tous y compris parents)
   const enfantsPonct = enfant === 'Mél & Yann' ? ['Mélanie','Yann'] : [enfant];
-  tachesPonctuelles.filter(t=>enfantsPonct.includes(t.enfant)&&t.date===dateStr).forEach(t=>{
-    taches.push({tache:t.tache, icon:'📌', source:'ponctuelle', jourReel:jour, enfantReel:t.enfant});
-  });
+console.log('Recherche ponct pour:', enfant, '→ liste:', JSON.stringify(enfantsPonct));
+console.log('Toutes ponctuelles:', JSON.stringify(tachesPonctuelles));
+console.log('dateStr:', dateStr);
+tachesPonctuelles.filter(t=>enfantsPonct.includes(t.enfant)&&t.date===dateStr).forEach(t=>{
+  console.log('Tâche ponctuelle trouvée:', t.tache);
+  taches.push({tache:t.tache, icon:'📌', source:'ponctuelle', jourReel:jour, enfantReel:t.enfant});
+});
 
   return taches;
 }
