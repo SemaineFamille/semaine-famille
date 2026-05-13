@@ -514,6 +514,13 @@ input[type="text"]:focus,select:focus{outline:none;border-color:var(--violet);}
 const SCRIPT_URL='https://script.google.com/macros/s/AKfycbxOJEus1Fev5I4YZsSbjpIXXlgGJBY7QmFkkqZtkXYD6eEPwqmgCl8r2hfrO1X9eyqxSA/exec';
 const ADMIN_CODE='2019';
 
+function formatDateJS(dateObj) {
+    const y = dateObj.getFullYear();
+    const m = String(dateObj.getMonth() + 1).padStart(2, "0");
+    const d = String(dateObj.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+}
+
 const JOURS=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
 const JOURS_LABEL=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
 const JOURS_COURTS=['Lu','Ma','Me','Je','Ve','Sa','Di'];
@@ -717,7 +724,7 @@ function login(user){
       <button class="quick-btn" onclick="showPage('present')"><span class="icon">👥</span>Présences</button>
       <button class="quick-btn" onclick="showPage('menu')"><span class="icon">🍽️</span>Menu</button>
       <button class="quick-btn" onclick="showPage('courses')"><span class="icon">🛒</span>Courses</button>
-      <button class="quick-btn" onclick="showPage('job')"><span class="icon">📅</span>Job parents</button>`;
+      <button class="quick-btn" onclick="showPage('job')"><span class="icon">📅</span>Job</button>`;
   }
 
   function installApp(){
@@ -1064,7 +1071,7 @@ function getTacheIcon(label){return TACHES_FIXES.find(t=>t.label===label)?.icon|
 function getToutesLesTachesEnfant(enfant, jour) {
   const today = new Date();
   const dow = today.getDay();
-  const dateStr = today.toISOString().split('T')[0];
+  const dateStr = formatDateYYYYMMDD(today);
   const taches = [];
 
   // 1 — Tâches fixes configurées dans Admin
@@ -1353,8 +1360,9 @@ async function loadAdminConfig(){
   renderPreview(currentPreviewEnfant);
   loadPonctuelles();
   // Initialiser la date du champ ponctuel à aujourd'hui
-  const today=new Date().toISOString().split('T')[0];
-  if(document.getElementById('ponct-date')) document.getElementById('ponct-date').value=today;
+  const today = formatDateYYYYMMDD();
+if (document.getElementById('ponct-date')) {
+  document.getElementById('ponct-date').value = today;
 }
 
 function renderAdminSummary(){
@@ -1400,7 +1408,7 @@ async function loadPonctuelles(){
     if(c.length>=3) items.push({tache:c[0],enfant:c[1],date:c[2].trim()});
   });
   // Afficher seulement les futures et aujourd'hui
-  const today=new Date().toISOString().split('T')[0];
+  const today= formatDateYYYYMMDD();
   const futures=items.filter(i=>i.date>=today).sort((a,b)=>a.date.localeCompare(b.date));
   const container=document.getElementById('ponct-list');
   if(!futures.length){container.innerHTML='<div class="loading" style="padding:8px">Aucune tâche ponctuelle à venir</div>';return;}
@@ -1448,7 +1456,7 @@ function renderPreviewParents(){
   const today=new Date();
   const dow=today.getDay();
   const jourIdx=dow===0?6:dow-1;
-  const dateStr=today.toISOString().split('T')[0];
+  const dateStr= formatDateYYYYMMDD(today);
 
   const tachesActives=TACHES_PARENTS.filter(t=>isTacheParentActive(t));
   const ponctParents=tachesPonctuelles.filter(t=>['Mélanie','Yann'].includes(t.enfant)&&t.date===dateStr);
@@ -1534,5 +1542,7 @@ function renderPreview(enfant){
   document.getElementById('preview-content').innerHTML=html;
 }
 </script>
+
+  
 </body>
 </html>
