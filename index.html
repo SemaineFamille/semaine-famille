@@ -1590,6 +1590,7 @@ async function loadPonctuelles(){
       <button class="btn-delete" onclick="deletePonctuelle('${i.tache.replace(/'/g,"\\'")}','${i.enfant}','${i.date}')">✕</button>
     </div>`).join('');
 }
+</script>
 <script>
 async function deletePonctuelle(tache,enfant,date){
   await apiCall({action:'supprimer',sheet:'TACHES_PONCTUELLES',tache,enfant,date});
