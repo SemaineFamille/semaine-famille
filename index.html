@@ -1063,15 +1063,8 @@ async function clearListe(){
 
 // ===================== TÂCHES =====================
 async function loadTaches(){
-  console.log('1 - loadTaches démarré');
   document.getElementById('taches-content').innerHTML='<div class="loading"><div class="spinner"></div>Chargement...</div>';
-  const [cText,tText,pText]=await Promise.all([ 
-   const [cText,tText,pText]=await Promise.all([
-    apiCall({action:'lire',sheet:'TACHES_CONFIG'}),
-    apiCall({action:'lire',sheet:'TACHES'}),
-    apiCall({action:'lire',sheet:'TACHES_PONCTUELLES'})
-  ]);
-  console.log('2 - données reçues');
+  const [cText,tText,pText]=await Promise.all([
     apiCall({action:'lire',sheet:'TACHES_CONFIG'}),
     apiCall({action:'lire',sheet:'TACHES'}),
     apiCall({action:'lire',sheet:'TACHES_PONCTUELLES'})
@@ -1086,41 +1079,25 @@ async function loadTaches(){
     const c=line.split('|');
     if(c.length>=4) tachesData.push({tache:c[0],enfant:c[1],jour:c[2],etat:c[3]?.trim()});
   });
- tachesPonctuelles=[];
-parseLines(pText).forEach(line=>{
-  const c=line.split('|');
-  if(c.length>=3){
-    const rawDate = c[2].trim();
-    // Extraire yyyy-mm-dd depuis n'importe quel format
-    let date = rawDate;
-    const parsed = new Date(rawDate);
-    if(!isNaN(parsed.getTime())){
-      const y = parsed.getFullYear();
-      const m = String(parsed.getMonth()+1).padStart(2,'0');
-      const d = String(parsed.getDate()).padStart(2,'0');
-      date = `${y}-${m}-${d}`;
+  tachesPonctuelles=[];
+  parseLines(pText).forEach(line=>{
+    const c=line.split('|');
+    if(c.length>=3){
+      const rawDate = c[2].trim();
+      let date = rawDate;
+      const parsed = new Date(rawDate);
+      if(!isNaN(parsed.getTime())){
+        const y = parsed.getFullYear();
+        const m = String(parsed.getMonth()+1).padStart(2,'0');
+        const d = String(parsed.getDate()).padStart(2,'0');
+        date = `${y}-${m}-${d}`;
+      }
+      tachesPonctuelles.push({tache:c[0], enfant:c[1], date:date, icon:'📌'});
     }
-    tachesPonctuelles.push({tache:c[0], enfant:c[1], date:date, icon:'📌'});
-  }
-});
-function getTachesEnRetard(enfant) {
-  const hier = new Date();
-  hier.setDate(hier.getDate() - 1);
-  const hierIdx = hier.getDay() === 0 ? 6 : hier.getDay() - 1;
-  const jourHier = JOURS[hierIdx];
-  const dateHier = formatDateYYYYMMDD(hier);
-
-  const toutesHier = getToutesLesTachesEnfant(enfant, jourHier);
- console.log('Hier:', jourHier, '| Tâches hier:', JSON.stringify(toutesHier));
-
-  // Garder seulement celles non validées hier
-  return toutesHier.filter(t => {
-    const etat = tachesData.find(td =>
-      td.tache === t.tache && td.enfant === enfant && td.jour === jourHier
-    );
-    return !etat || etat.etat?.trim() !== 'Fait';
-  }).map(t => ({ ...t, jourReel: jourHier, enRetard: true }));
+  });
+  renderTaches();
 }
+
  console.log('3 - avant renderTaches');
   renderTaches();
   console.log('4 - après renderTaches');
@@ -1141,13 +1118,9 @@ function getToutesLesTachesEnfant(enfant, jour) {
   });
 
   // 2 — Tâches récurrentes (visible jeudi ET vendredi)
-  if(dow===4||dow===5){
+ if(dow===4||dow===5){
     TACHES_RECURRENTES.filter(t=>t.personne===enfant).forEach(t=>{
-      console.log('Jour actuel dow:', dow, '| enfant:', enfant, '| dateStr:', dateStr);
-TACHES_RECURRENTES.filter(t=>t.personne===enfant).forEach(t=>{
-  console.log('Récurrente testée:', t.tache, '| active:', isTacheRecurrenteActive(t, dateStr));
-});
-     if(isTacheRecurrenteActive(t, dateStr)){
+      if(isTacheRecurrenteActive(t, dateStr)){
         if(!taches.find(x=>x.tache===t.tache)){
           taches.push({
             tache:t.tache, icon:t.icon, source:'recurrente',
