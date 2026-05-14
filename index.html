@@ -1671,24 +1671,7 @@ function renderPreview(enfant){
   document.getElementById('preview-content').innerHTML=html;
 }
 
- console.log('Script chargé');
-const _origLog = console.log;
-console.log = function(...args){
-  _origLog(...args);
-  const box = document.getElementById('debug-box');
-  if(box){
-    box.style.display='block';
-    box.innerHTML += args.map(a => typeof a==='object'?JSON.stringify(a):a).join(' ') + '<br>';
-    box.scrollTop = box.scrollHeight;
-  }
-};
-window.onerror = function(msg, src, line, col, err){
-  const box = document.getElementById('debug-box');
-  if(box){
-    box.style.display='block';
-    box.innerHTML += '❌ ' + msg + ' (ligne ' + line + ')<br>';
-  }
-};
+
 </script>
 
 
