@@ -1781,12 +1781,26 @@ function renderPreview(enfant){
 }
 </script>
 <div id="debug-box" style="position:fixed;bottom:0;left:0;right:0;background:#000;color:#0f0;
-font-size:11px;padding:8px;max-height:200px;overflow-y:auto;z-index:9999;font-family:monospace"></div>
+font-size:11px;padding:8px;max-height:200px;overflow-y:auto;z-index:9999;font-family:monospace;
+display:none"></div>
 
 <script>
+const _origLog = console.log;
+console.log = function(...args){
+  _origLog(...args);
+  const box = document.getElementById('debug-box');
+  if(box){
+    box.style.display='block';
+    box.innerHTML += args.map(a => typeof a==='object'?JSON.stringify(a):a).join(' ') + '<br>';
+    box.scrollTop = box.scrollHeight;
+  }
+};
 window.onerror = function(msg, src, line, col, err){
   const box = document.getElementById('debug-box');
-  if(box) box.innerHTML += '❌ ' + msg + ' (ligne ' + line + ')<br>';
+  if(box){
+    box.style.display='block';
+    box.innerHTML += '❌ ' + msg + ' (ligne ' + line + ')<br>';
+  }
 };
 </script>
 </body>
