@@ -528,10 +528,7 @@ if ("serviceWorker" in navigator) {
     <button class="btn btn-primary" onclick="saveTachePonctuelle()">📌 Ajouter cette tâche</button>
     <div id="ponct-list" style="margin-top:12px"></div>
   </div>
-  <div class="card">
-    <div class="card-title">Récapitulatif</div>
-    <div id="admin-list"><div class="loading">Chargement...</div></div>
-  </div>
+ 
   <div class="card">
     <div class="card-title">👁️ Vue enfant — Aujourd'hui</div>
     <div class="inner-tabs" id="preview-tabs">
@@ -1564,7 +1561,7 @@ async function loadAdminConfig(){
     if(c.length>=9) tachesConfig.push({tache:c[0],enfant:c[1],lundi:c[2],mardi:c[3],mercredi:c[4],jeudi:c[5],vendredi:c[6],samedi:c[7],dimanche:c[8],active:c[9]?.trim()});
   });
   renderAdminForm();
-  renderAdminSummary();
+  
   renderPreview(currentPreviewEnfant);
  
   loadPonctuelles();
@@ -1575,28 +1572,7 @@ if (document.getElementById('ponct-date')) {
 }
  } 
 
-function renderAdminSummary(){
-  if(!tachesConfig.length){
-    document.getElementById('admin-list').innerHTML='<div class="loading">Aucune configuration</div>';
-    return;
-  }
-  const byEnfant={};
-  tachesConfig.forEach(t=>{if(!byEnfant[t.enfant])byEnfant[t.enfant]=[];byEnfant[t.enfant].push(t);});
-  let html='';
-  Object.entries(byEnfant).forEach(([enfant,taches])=>{
-    html+=`<div class="enfant-section"><div class="enfant-title">👤 ${enfant}</div>`;
-    taches.forEach(t=>{
-      const icon=TACHES_FIXES.find(tf=>tf.label===t.tache)?.icon||'📋';
-      const jours=JOURS.filter(j=>t[j]==='TRUE').map(j=>JOURS_COURTS[JOURS.indexOf(j)]).join(' ');
-      html+=`<div class="tache-item" style="margin-bottom:4px">
-        <div class="tache-info"><span class="tache-icon">${icon}</span><span class="tache-name">${t.tache}</span></div>
-        <span style="font-size:0.8rem;color:var(--text-light);font-weight:700">${jours||'—'}</span>
-      </div>`;
-    });
-    html+='</div>';
-  });
-  document.getElementById('admin-list').innerHTML=html;
-}
+
 
 async function saveTachePonctuelle(){
   const tache=document.getElementById('ponct-tache').value.trim();
