@@ -1263,55 +1263,63 @@ async function loadJob(){
   renderCal();
 }
  
-function renderCal(){
-  document.getElementById('cal-month-title').textContent=`${MOIS_NOMS[calMonth]} ${calYear}`;
-  const grid=document.getElementById('cal-grid');
-  let html=JOURS_COURTS.map(j=>`<div class="cal-day-name">${j}</div>`).join('');
-  let dow=new Date(calYear,calMonth,1).getDay();
-  dow=dow===0?6:dow-1;
-  for(let i=0;i<dow;i++) html+=`<div class="cal-day empty"></div>`;
-  const days=new Date(calYear,calMonth+1,0).getDate();
-  const today=new Date();
-  const isNow=today.getFullYear()===calYear&&today.getMonth()===calMonth;
-  for(let d=1;d<=days;d++){
-    const dd=jobData[String(d)]||{};
+
+function renderCal() {
+  document.getElementById('cal-month-title').textContent = `${MOIS_NOMS[calMonth]} ${calYear}`;
+  const grid = document.getElementById('cal-grid');
+
+  let html = JOURS_COURTS.map(j => `<div class="cal-day-name">${j}</div>`).join('');
+
+  let dow = new Date(calYear, calMonth, 1).getDay();
+  dow = dow === 0 ? 6 : dow - 1;
+  for (let i = 0; i < dow; i++) html += `<div class="cal-day empty"></div>`;
+
+  const days = new Date(calYear, calMonth + 1, 0).getDate();
+  const today = new Date();
+  const isNow = today.getFullYear() === calYear && today.getMonth() === calMonth;
+
+  const emptySlot = `<span style="display:inline-block;width:30px;height:30px"></span>`;
+
+  for (let d = 1; d <= days; d++) {
+    const dd = jobData[String(d)] || {};
+    const isToday = isNow && d === today.getDate();
+    const hasData = Object.keys(dd).length > 0;
+
     const iconJeremie = dd['Jeremie']
- ? '<img src="image/Jeremie.png" class="cal-icon cal-jourlock;width:30px;height:30px"></span>';
+      ? `<img src="image/Jeremie.png" class="cal-icon cal-jour" alt="Jérémie">`
+      : emptySlot;
 
+    const iconMelanie = dd['Melanie'] === 'jour'
+      ? `<img src="image/Melanie.png" class="cal-icon cal-jour" alt="Mélanie">`
+      : dd['Melanie'] === 'nuit'
+      ? `<img src="image/Melanie.png" class="cal-icon cal-nuit" alt="Mélanie">`
+      : emptySlot;
 
+    const iconYann = dd['Yann'] === 'jour'
+      ? `<img src="image/Yann.png" class="cal-icon cal-jour" alt="Yann">`
+      : dd['Yann'] === 'nuit'
+      ? `<img src="image/Yann.png" class="cal-icon cal-nuit" alt="Yann">`
+      : emptySlot;
 
-const iconMelanie = dd['Melanie'] === 'jour'
-  ? '<img src="image/Melanie.png" class="cal-icon cal-jour">'
-  : dd['Melanie'] === 'nuit'
-  ? '<img src="image/Melanie.png" class="cal-icon cal-nuit">'
-  : '<span style="display:inline-block;width:30px;height:30px"></span>';
+    const iconsHtml = `
+      <div style="display:flex;flex-direction:column;align-items:center;gap:1px">
+        <div>${iconJeremie}</div>
+        <div style="display:flex;flex-direction:row;gap:1px">${iconMelanie}${iconYann}</div>
+      </div>
+    `;
 
-const iconYann = dd['Yann'] === 'jour'
-  ? '<img src="image/Yann.png" class="cal-icon cal-jour">'
-  : dd['Yann'] === 'nuit'
-  ? '<img src="image/Yann.png" class="cal-icon cal-nuit">'
-  : '<span style="display:inline-block;width:30px;height:30px"></span>';
-
-// Construire le bloc AVANT
-const iconsHtml = `
-  <div style="display:flex;flex-direction:column;align-items:center;gap:1px">
-    <div>${iconJeremie}</div>
-    <div style="display:flex;flex-direction:row;gap:1px">${iconMelanie}${iconYann}</div>
-  </div>
-`;
-
-// Puis correctement injecter dans ton html
-html += `
-  <div class="cal-day ${icons.length ? 'has-data' : ''} ${isToday ? 'today' : ''}" onclick="openJobModal(${d})">
-    <span class="day-num ${isToday ? 'today-num' : ''}">${d}</span>
-    ${iconsHtml}
-  </div>
-`;
-
-
+    html += `
+      <div class="cal-day ${hasData ? 'has-data' : ''} ${isToday ? 'today' : ''}"
+           onclick="openJobModal(${d})">
+        <span class="day-num ${isToday ? 'today-num' : ''}">${d}</span>
+        ${iconsHtml}
+      </div>
+    `;
   }
-  grid.innerHTML=html;
+
+  grid.innerHTML = html;
 }
+
  
 function changeMonth(dir){
   calMonth+=dir;
