@@ -560,8 +560,8 @@ function formatDateYYYYMMDD(date = new Date()) {
 const JOURS=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
 const JOURS_LABEL=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
 const JOURS_COURTS=['Lu','Ma','Me','Je','Ve','Sa','Di'];
-const MEMBRES=['alessia','antonin','clement','jeremie','melanie','yann'];
-const MEMBRES_LABEL=['Alessia','Antonin','Clément','Jérémie','Mélanie','Yann'];
+const MEMBRES=['alessia','antonin','clement','jeremie','mel & yann'];
+const MEMBRES_LABEL=['Alessia','Antonin','Clément','Jérémie','Mél & Yann'];
 const MOIS_NOMS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 
 const TACHES_FIXES=[
@@ -1159,7 +1159,7 @@ function getToutesLesTachesEnfant(enfant, jour) {
   }
 
   // 3 — Tâches ponctuelles du jour (fonctionne pour tous y compris parents)
-  const enfantsPonct = enfant === 'Mél & Yann' ? ['Mélanie','Yann'] : [enfant];
+  const enfantsPonct = enfant === 'Mél & Yann' ? ['Mél & Yann'] : [enfant];
 console.log('Recherche ponct pour:', enfant, '→ liste:', JSON.stringify(enfantsPonct));
 console.log('Toutes ponctuelles:', JSON.stringify(tachesPonctuelles));
 console.log('dateStr:', dateStr);
@@ -1256,7 +1256,7 @@ function renderTachesParentSelf(jour, jourIdx){
   const dateStr = formatDateYYYYMMDD(new Date());
   const tachesActives = TACHES_PARENTS.filter(t => isTacheParentActive(t));
   const ponctParents = tachesPonctuelles.filter(t =>
-    (t.enfant === 'Mél & Yann' || ['Mélanie','Yann'].includes(t.enfant)) && t.date === dateStr
+    (t.enfant === 'Mél & Yann' || ['Mél & Yann'].includes(t.enfant)) && t.date === dateStr
   );
   
 
