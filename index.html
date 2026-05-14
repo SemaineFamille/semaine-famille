@@ -41,11 +41,11 @@
   vertical-align: middle;
 }
 .cal-icon {
-  width: 36px;      /* tu peux mettre 14px, 16px, 20px selon ce que tu veux */
-  height: 36px;
+  width: 24px;      /* tu peux mettre 14px, 16px, 20px selon ce que tu veux */
+  height: 24px;
   object-fit: contain;
   display: block;
-  margin: 0px auto; /* centre l’image dans la case */
+  margin: 0; /* centre l’image dans la case */
   border-radius: 50%; /* arrondi joli */
   padding: 0px;       /* espace pour le contour */
 }
@@ -1438,25 +1438,25 @@ function renderCal(){
     const icons = [
   dd['Jeremie']
     ? '<img src="image/Jeremie.png" class="cal-icon cal-jour">'
-    : '<span style="display:block;width:36px;height:36px;margin:0px auto"></span>',
+    : '<span style="display:block;width:24px;height:24px;margin:0px auto"></span>',
 
   dd['Melanie']==='jour'
     ? '<img src="image/Melanie.png" class="cal-icon cal-jour">'
     : dd['Melanie']==='nuit'
     ? '<img src="image/Melanie.png" class="cal-icon cal-nuit">'
-    : '<span style="display:block;width:36px;height:36px;margin:0px auto"></span>',
+    : '<span style="display:block;width:24px;height:24px;margin:0px auto"></span>',
 
   dd['Yann']==='jour'
     ? '<img src="image/Yann.png" class="cal-icon cal-jour">'
     : dd['Yann']==='nuit'
     ? '<img src="image/Yann.png" class="cal-icon cal-nuit">'
-    : '<span style="display:block;width:36px;height:36px;margin:0px auto"></span>',
+    : '<span style="display:block;width:24px;height:24px;margin:0px auto"></span>',
 ];
     
     const isToday=isNow&&d===today.getDate();
     html+=`<div class="cal-day ${icons.length?'has-data':''} ${isToday?'today':''}" onclick="openJobModal(${d})">
       <span class="day-num ${isToday?'today-num':''}">${d}</span>
-      <span class="day-icons">${icons.join('<br>')}</span>
+      <div style="display:flex;flex-direction:row;justify-content:center;gap:1px;flex-wrap:wrap">${icons.join('')}</div>
     </div>`;
   }
   grid.innerHTML=html;
