@@ -1278,31 +1278,36 @@ function renderCal(){
     const iconJeremie = dd['Jeremie']
  ? '<img src="image/Jeremie.png" class="cal-icon cal-jourlock;width:30px;height:30px"></span>';
 
-const iconMelanie = dd['Melanie']==='jour'
- 
- 'image/Melanie.png'
+
+
+const iconMelanie = dd['Melanie'] === 'jour'
+  ? '<img src="image/Melanie.png" class="cal-icon cal-jour">'
   : dd['Melanie'] === 'nuit'
-  ? 'image/Melanie.png'
+  ? '<img src="image/Melanie.png" class="cal-icon cal-nuit">'
   : '<span style="display:inline-block;width:30px;height:30px"></span>';
 
-const iconYann = dd['Yann']==='jour'
- 
- ? 'image/Yann.png'
+const iconYann = dd['Yann'] === 'jour'
+  ? '<img src="image/Yann.png" class="cal-icon cal-jour">'
   : dd['Yann'] === 'nuit'
-  ? 'image/Yann.png'
+  ? '<img src="image/Yann.png" class="cal-icon cal-nuit">'
   : '<span style="display:inline-block;width:30px;height:30px"></span>';
 
-    const isToday=isNow&&d===today.getDate();
-    html+=`<div class="cal-day ${icons.length?'has-data':''} ${isToday?'today':''}" onclick="openJobModal(${d})">
-      <span class="day-num ${isToday?'today-num':''}">${d}</span>
-      
-      
+// Construire le bloc AVANT
 const iconsHtml = `
   <div style="display:flex;flex-direction:column;align-items:center;gap:1px">
     <div>${iconJeremie}</div>
     <div style="display:flex;flex-direction:row;gap:1px">${iconMelanie}${iconYann}</div>
   </div>
 `;
+
+// Puis correctement injecter dans ton html
+html += `
+  <div class="cal-day ${icons.length ? 'has-data' : ''} ${isToday ? 'today' : ''}" onclick="openJobModal(${d})">
+    <span class="day-num ${isToday ? 'today-num' : ''}">${d}</span>
+    ${iconsHtml}
+  </div>
+`;
+
 
   }
   grid.innerHTML=html;
