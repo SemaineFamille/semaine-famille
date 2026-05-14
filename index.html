@@ -1275,15 +1275,28 @@ function renderCal(){
   const isNow=today.getFullYear()===calYear&&today.getMonth()===calMonth;
   for(let d=1;d<=days;d++){
     const dd=jobData[String(d)]||{};
-    const icons=[
-      dd['Jeremie']?'<img src="image/Jeremie.png" class="cal-icon cal-jour">':`<span style="display:inline-block;width:30px;height:30px"></span>`,
-      dd['Melanie']==='jour'?'<img src="image/Melanie.png" class="cal-icon cal-jour">':dd['Melanie']==='nuit'?'<img src="image/Melanie.png" class="cal-icon cal-nuit">':`<span style="display:inline-block;width:30px;height:30px"></span>`,
-      dd['Yann']==='jour'?'<img src="image/Yann.png" class="cal-icon cal-jour">':dd['Yann']==='nuit'?'<img src="image/Yann.png" class="cal-icon cal-nuit">':`<span style="display:inline-block;width:30px;height:30px"></span>`
-    ];
+    const iconJeremie = dd['Jeremie']
+  ? '<img src="image/Jeremie.png" class="cal-icon cal-jour">'
+  : `<span style="display:inline-block;width:30px;height:30px"></span>`;
+
+const iconMelanie = dd['Melanie']==='jour'
+  ? '<img src="image/Melanie.png" class="cal-icon cal-jour">'
+  : dd['Melanie']==='nuit'
+  ? '<img src="image/Melanie.png" class="cal-icon cal-nuit">'
+  : `<span style="display:inline-block;width:30px;height:30px"></span>`;
+
+const iconYann = dd['Yann']==='jour'
+  ? '<img src="image/Yann.png" class="cal-icon cal-jour">'
+  : dd['Yann']==='nuit'
+  ? '<img src="image/Yann.png" class="cal-icon cal-nuit">'
+  : `<span style="display:inline-block;width:30px;height:30px"></span>`;
     const isToday=isNow&&d===today.getDate();
     html+=`<div class="cal-day ${icons.length?'has-data':''} ${isToday?'today':''}" onclick="openJobModal(${d})">
       <span class="day-num ${isToday?'today-num':''}">${d}</span>
-      <div style="display:flex;flex-direction:row;justify-content:center;gap:1px">${icons.join('')}</div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:1px">
+  <div>${iconJeremie}</div>
+  <div style="display:flex;flex-direction:row;gap:1px">${iconMelanie}${iconYann}</div>
+</div>
     </div>`;
   }
   grid.innerHTML=html;
