@@ -1118,6 +1118,7 @@ function getTachesEnRetard(enfant) {
   const dateHier = formatDateYYYYMMDD(hier);
 
   const toutesHier = getToutesLesTachesEnfant(enfant, jourHier);
+ console.log('Hier:', jourHier, '| Tâches hier:', JSON.stringify(toutesHier));
 
   // Garder seulement celles non validées hier
   return toutesHier.filter(t => {
@@ -1146,7 +1147,11 @@ function getToutesLesTachesEnfant(enfant, jour) {
   // 2 — Tâches récurrentes (visible jeudi ET vendredi)
   if(dow===4||dow===5){
     TACHES_RECURRENTES.filter(t=>t.personne===enfant).forEach(t=>{
-      if(isTacheRecurrenteActive(t, dateStr)){
+      console.log('Jour actuel dow:', dow, '| enfant:', enfant, '| dateStr:', dateStr);
+TACHES_RECURRENTES.filter(t=>t.personne===enfant).forEach(t=>{
+  console.log('Récurrente testée:', t.tache, '| active:', isTacheRecurrenteActive(t, dateStr));
+});
+     if(isTacheRecurrenteActive(t, dateStr)){
         if(!taches.find(x=>x.tache===t.tache)){
           taches.push({
             tache:t.tache, icon:t.icon, source:'recurrente',
