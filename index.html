@@ -1416,20 +1416,23 @@ function renderCal(){
   const isNow=today.getFullYear()===calYear&&today.getMonth()===calMonth;
   for(let d=1;d<=days;d++){
     const dd=jobData[String(d)]||{};
-    const icons=[];
-    if(dd['Jeremie'])
-    icons.push('<img src="image/Jeremie.png" class="cal-icon cal-jour">');
-    if(dd['Melanie']==='jour')
-    icons.push('<img src="image/Melanie.png" class="cal-icon cal-jour">');
+    const icons = [
+  dd['Jeremie']
+    ? '<img src="image/Jeremie.png" class="cal-icon cal-jour">'
+    : '<span style="display:block;width:20px;height:20px;margin:1px auto"></span>',
 
-if(dd['Melanie']==='nuit')
-    icons.push('<img src="image/Melanie.png" class="cal-icon cal-nuit">');
+  dd['Melanie']==='jour'
+    ? '<img src="image/Melanie.png" class="cal-icon cal-jour">'
+    : dd['Melanie']==='nuit'
+    ? '<img src="image/Melanie.png" class="cal-icon cal-nuit">'
+    : '<span style="display:block;width:20px;height:20px;margin:1px auto"></span>',
 
-   if(dd['Yann']==='jour')
-    icons.push('<img src="image/Yann.png" class="cal-icon cal-jour">');
-
-if(dd['Yann']==='nuit')
-    icons.push('<img src="image/Yann.png" class="cal-icon cal-nuit">');
+  dd['Yann']==='jour'
+    ? '<img src="image/Yann.png" class="cal-icon cal-jour">'
+    : dd['Yann']==='nuit'
+    ? '<img src="image/Yann.png" class="cal-icon cal-nuit">'
+    : '<span style="display:block;width:20px;height:20px;margin:1px auto"></span>',
+];
     
     const isToday=isNow&&d===today.getDate();
     html+=`<div class="cal-day ${icons.length?'has-data':''} ${isToday?'today':''}" onclick="openJobModal(${d})">
