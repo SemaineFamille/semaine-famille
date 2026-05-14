@@ -1095,14 +1095,26 @@ async function loadTaches(){
       tachesPonctuelles.push({tache:c[0], enfant:c[1], date:date, icon:'📌'});
     }
   });
+ function getTachesEnRetard(enfant) {
+  const hier = new Date();
+  hier.setDate(hier.getDate() - 1);
+  const hierIdx = hier.getDay() === 0 ? 6 : hier.getDay() - 1;
+  const jourHier = JOURS[hierIdx];
+
+  const toutesHier = getToutesLesTachesEnfant(enfant, jourHier);
+
+  return toutesHier.filter(t => {
+    const etat = tachesData.find(td =>
+      td.tache === t.tache && td.enfant === enfant && td.jour === jourHier
+    );
+    return !etat || etat.etat?.trim() !== 'Fait';
+  }).map(t => ({ ...t, jourReel: jourHier, enRetard: true }));
+}
+
+function renderTaches(){
   renderTaches();
 }
 
- console.log('3 - avant renderTaches');
-  renderTaches();
-  console.log('4 - après renderTaches');
-  renderTaches();
-}
 
 function getTacheIcon(label){return TACHES_FIXES.find(t=>t.label===label)?.icon||'📋';}
 
