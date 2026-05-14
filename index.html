@@ -725,22 +725,37 @@ function launchConfetti(type) {
   }
   draw();
 }
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt',(e)=>{
+  e.preventDefault();
+  deferredPrompt=e;
+  const btn=document.getElementById('installBtn');
+  if(btn) btn.style.display='block';
+});
+
+window.addEventListener('appinstalled',()=>{
+  showToast('✅ App installée sur votre écran d\'accueil !');
+  deferredPrompt=null;
+});
+
+function installApp(){
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(()=>{deferredPrompt=null;});
+  }
+}
+
 function login(user){
   currentUser=user;
   isParent=(user==='parent');
   document.getElementById('loginScreen').classList.add('hidden');
   document.getElementById('mainNav').style.display='block';
-
-  // Adapter l'interface selon l'utilisateur
   const userName=isParent?'👨‍👩‍👧‍👦 Parents':user;
   document.getElementById('navUserName').textContent=userName;
   document.getElementById('accueil-title').textContent=`⭐ Bonjour ${isParent?'!':user+' !'} `;
-
-  // Onglet Admin visible seulement pour les parents, Job visible par tous
   document.getElementById('jobTab').style.display='';
   document.getElementById('adminTab').style.display=isParent?'':'none';
-
-  // Accueil adapté
   const qnav=document.getElementById('quick-nav-grid');
   if(isParent){
     qnav.innerHTML=`
@@ -758,38 +773,12 @@ function login(user){
       <button class="quick-btn" onclick="showPage('courses')"><span class="icon">🛒</span>Courses</button>
       <button class="quick-btn" onclick="showPage('job')"><span class="icon">📅</span>Job</button>`;
   }
-
-  function installApp(){
-  if(deferredPrompt){
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(()=>{deferredPrompt=null;});
+  // Ajuster padding pour iPhone (encoche)
+  if(CSS.supports('padding-top: env(safe-area-inset-top)')){
+    document.querySelector('.nav').style.paddingTop='env(safe-area-inset-top)';
   }
-}
-
-// Vérifier anniversaires et fêtes au chargement
-checkCelebrations();
-showPage('accueil');
-
-// PWA — Installation
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt',(e)=>{
-  e.preventDefault();
-  deferredPrompt=e;
-  // Afficher bouton d'installation si disponible
-  const btn=document.getElementById('installBtn');
-  if(btn) btn.style.display='block';
-});
-
-window.addEventListener('appinstalled',()=>{
-  showToast('✅ App installée sur votre écran d\'accueil !');
-  deferredPrompt=null;
-});
-
-// Ajuster padding pour iPhone (encoche)
-if(CSS.supports('padding-top: env(safe-area-inset-top)')){
-  document.querySelector('.nav').style.paddingTop='env(safe-area-inset-top)';
-}
-  // Pré-charger les tâches si enfant
+  checkCelebrations();
+  showPage('accueil');
   if(!isParent) loadTaches();
 }
 
