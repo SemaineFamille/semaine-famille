@@ -1301,12 +1301,13 @@ function renderCal() {
       ? `<img src="image/Yann.png" class="cal-icon cal-nuit" alt="Yann">`
       : emptySlot;
 
-    const iconsHtml = `
-      <div style="display:flex;flex-direction:column;align-items:center;gap:1px">
-        <div>${iconJeremie}</div>
-        <div style="display:flex;flex-direction:row;gap:1px">${iconMelanie}${iconYann}</div>
-      </div>
-    `;
+   const iconsHtml = `
+  <div class="day-icons">
+    <div class="slot slot-jeremie">${iconJeremie}</div>
+    <div class="slot slot-melanie">${iconMelanie}</div>
+    <div class="slot slot-yann">${iconYann}</div>
+  </div>
+`;
 
     html += `
       <div class="cal-day ${hasData ? 'has-data' : ''} ${isToday ? 'today' : ''}"
