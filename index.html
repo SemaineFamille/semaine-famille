@@ -1690,21 +1690,7 @@ window.onerror = function(msg, src, line, col, err){
   }
 };
 </script>
- <script>
-function login(user) {
-  // Sauvegarde l’utilisateur choisi
-  localStorage.setItem("user", user);
 
-  // Si c’est le parent → ouvrir le modal admin
-  if (user === "parent") {
-    document.getElementById("adminModal").classList.add("show");
-    return;
-  }
-
-  // Sinon → ouvrir le calendrier
-  window.location.href = "calendrier.html";
-}
-</script>
 
 </body>
 </html>
