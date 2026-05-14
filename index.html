@@ -173,7 +173,7 @@ input[type="text"]:focus,select:focus{outline:none;border-color:var(--violet);}
 /* JOB */
 .cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .cal-month{font-size:1.1rem;font-weight:800;color:var(--violet);}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0, 1fr));gap:3px;width:100%;max-width:100%;box-sizing:border-box;}
 .cal-day-name{text-align:center;font-size:0.65rem;font-weight:700;color:var(--text-light);padding:4px 0;text-transform:uppercase;}
 .cal-day{border-radius:8px;background:var(--bg);display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:all 0.2s;border:2px solid transparent;min-height:10px;padding:2px 1px;}
 .cal-day:hover{border-color:var(--violet);background:#e8d5f0;}
