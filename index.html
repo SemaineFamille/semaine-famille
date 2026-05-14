@@ -1074,8 +1074,15 @@ async function clearListe(){
 
 // ===================== TÂCHES =====================
 async function loadTaches(){
+  console.log('1 - loadTaches démarré');
   document.getElementById('taches-content').innerHTML='<div class="loading"><div class="spinner"></div>Chargement...</div>';
-  const [cText,tText,pText]=await Promise.all([
+  const [cText,tText,pText]=await Promise.all([ 
+   const [cText,tText,pText]=await Promise.all([
+    apiCall({action:'lire',sheet:'TACHES_CONFIG'}),
+    apiCall({action:'lire',sheet:'TACHES'}),
+    apiCall({action:'lire',sheet:'TACHES_PONCTUELLES'})
+  ]);
+  console.log('2 - données reçues');
     apiCall({action:'lire',sheet:'TACHES_CONFIG'}),
     apiCall({action:'lire',sheet:'TACHES'}),
     apiCall({action:'lire',sheet:'TACHES_PONCTUELLES'})
@@ -1125,6 +1132,9 @@ function getTachesEnRetard(enfant) {
     return !etat || etat.etat?.trim() !== 'Fait';
   }).map(t => ({ ...t, jourReel: jourHier, enRetard: true }));
 }
+ console.log('3 - avant renderTaches');
+  renderTaches();
+  console.log('4 - après renderTaches');
   renderTaches();
 }
 
