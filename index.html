@@ -1121,10 +1121,13 @@ parseLines(pText).forEach(line=>{
 async function loadMenu(){
   document.getElementById('menu-loading').style.display='block';
   document.getElementById('menu-content').style.display='none';
-  const [pText,mText]=await Promise.all([
-    apiCall({action:'lire',sheet:'PRESENCES'}),
-    apiCall({action:'lire',sheet:'MENU'})
-  ]);
+ 
+const start = ymd(new Date());
+const [pText, mText] = await Promise.all([
+  apiCall({ action:'lire', sheet:'PRESENCES', start, days: 7 }),
+  apiCall({ action:'lire', sheet:'MENU' })
+]);
+
   presencesData={};
   parseLines(pText).forEach(line=>{
     const c=line.split('|');
