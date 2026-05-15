@@ -230,6 +230,12 @@ input[type="text"]:focus,select:focus{outline:none;border-color:var(--violet);}
 .pres-tot{font-size:0.78rem;font-weight:900;color:var(--violet);background:white;padding:6px 10px;border-radius:999px;white-space:nowrap;}
 .pres-section-title{font-size:0.85rem;font-weight:900;color:var(--text-light);text-transform:uppercase;letter-spacing:1px;margin:12px 0 8px;}
 
+.parent-mini-ind{
+  font-size:1.05rem;
+  font-weight:900;
+  opacity:.75;
+}
+
 
 /* ===== ENFANTS: GRILLE 2 COLONNES ===== */
 
@@ -934,12 +940,26 @@ function showToast(msg){
   setTimeout(()=>t.classList.remove('show'),2500);
 }
  
+
 async function apiCall(params){
   try{
-    const r=await fetch(SCRIPT_URL+'?'+new URLSearchParams(params).toString());
-    return await r.text();
-  }catch(e){console.error(e);return '';}
+    // anti-cache : ajoute un timestamp à chaque requête
+    const qs = new URLSearchParams({ ...params, _ts: String(Date.now()) }).toString();
+    const url = SCRIPT_URL + '?' + qs;
+
+    const r = await fetch(url, { cache: 'no-store' });
+    const text = await r.text();
+
+    // petit debug utile si ça ne s'enregistre pas
+    // console.log("apiCall", params.action, r.status, text);
+
+    return text;
+  }catch(e){
+    console.error(e);
+    return '';
+  }
 }
+
  
 function parseLines(text){
   if(!text||text.trim()==='ok'||text.trim()==='') return [];
@@ -969,10 +989,18 @@ function showPage(name){
 
 // ---------- PRESENCES (bloc propre) ----------
 
+
 function getPresenceValue(dateStr, repas, personId){
   const key = `${dateStr}_${repas}`;
-  return presencesData[key]?.[personId] === 'TRUE';
+  const v = presencesData[key]?.[personId];
+
+  if(v === true) return true;
+  if(v === false) return false;
+
+  const s = String(v ?? '').trim().toUpperCase();
+  return (s === 'TRUE' || s === '1' || s === 'YES' || s === 'OUI');
 }
+
 
 function setPresenceValueLocal(dateStr, repas, personId, boolVal){
   const key = `${dateStr}_${repas}`;
@@ -985,18 +1013,32 @@ function computeCount(dateStr, repas){
 }
 
  
+
 function renderParentMini(dateStr, repas){
   return `<div class="parent-mini-grid">` +
     PRES_MEMBRES.map(p=>{
       const on = getPresenceValue(dateStr, repas, p.id);
-      const editable = (p.id === 'melanie' || p.id === 'yann'); // seuls eux modifiables
+      const editable = (p.id === 'melanie' || p.id === 'yann'); // seuls parents éditables
+
+      // ✅ on = ✅ ; off = — (pas de rouge)
+      const symbol = on ? '✅' : '—';
+
+      // Non éditable : pas de bouton, juste un indicateur
+      if(!editable){
+        return `<div class="parent-mini-item">
+          <span class="parent-mini-name">${p.label}</span>
+          <span class="parent-mini-ind">${symbol}</span>
+        </div>`;
+      }
+
+      // Éditable : bouton toggle
       return `<div class="parent-mini-item">
         <span class="parent-mini-name">${p.label}</span>
         <button
           id="btn_${dateStr}_${repas}_${p.id}"
-          class="parent-mini-btn ${on ? 'on' : 'off'} ${editable ? '' : 'disabled'}"
-          ${editable ? `onclick="togglePresenceAs('${dateStr}','${repas}','${p.id}')"` : ``}
-        >${on ? '✅' : '❌'}</button>
+          class="parent-mini-btn ${on ? 'on' : 'off'}"
+          onclick="togglePresenceAs('${dateStr}','${repas}','${p.id}')"
+        >${symbol}</button>
       </div>`;
     }).join('') +
   `</div>`;
@@ -1088,6 +1130,7 @@ async function togglePresence(dateStr, repas){
   refreshOneButton(dateStr, repas);
   refreshCounts();
   showToast('💾 Sauvegarde...');
+ showToast('⚠️ Erreur sauvegarde: ' + String(res).slice(0,40));
 
   const res = await apiCall({
     action:'set_presence',
