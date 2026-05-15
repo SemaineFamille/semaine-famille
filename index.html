@@ -211,6 +211,25 @@ input[type="text"]:focus,select:focus{outline:none;border-color:var(--violet);}
   width: 100%;
   border-radius: 10px;
 }
+
+/* PRESENCES */
+
+.pres-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px;border-radius:12px;background:var(--bg);margin-bottom:8px;}
+.pres-date{font-weight:800;color:var(--violet);font-size:0.95rem;min-width:92px;}
+.pres-btns{display:flex;gap:8px;flex:1;justify-content:center;}
+.pres-btn{
+  border:none;border-radius:999px;padding:10px 12px;font-family:'Nunito',sans-serif;
+  font-weight:900;cursor:pointer;transition:transform .08s, background .2s, opacity .2s;
+  min-width:92px;
+}
+.pres-btn:active{transform:scale(0.97);}
+.pres-btn.off{background:#ffffff;color:var(--text);border:2px solid #e0d0e8;}
+.pres-btn.on.midi{background:#FFD54F;color:#3b2a00;}
+.pres-btn.on.soir{background:#90CAF9;color:#0b2a4a;}
+.pres-btn.disabled{opacity:.45;cursor:default;pointer-events:none;}
+.pres-tot{font-size:0.78rem;font-weight:900;color:var(--violet);background:white;padding:6px 10px;border-radius:999px;white-space:nowrap;}
+.pres-section-title{font-size:0.85rem;font-weight:900;color:var(--text-light);text-transform:uppercase;letter-spacing:1px;margin:12px 0 8px;}
+
 <style>
 
 
