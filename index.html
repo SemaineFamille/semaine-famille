@@ -568,8 +568,6 @@ function formatDateYYYYMMDD(date = new Date()) {
 const JOURS=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
 const JOURS_LABEL=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
 const JOURS_COURTS=['Lu','Ma','Me','Je','Ve','Sa','Di'];
-const MEMBRES=['alessia','antonin','clement','jeremie','mel & yann'];
-const MEMBRES_LABEL=['Alessia','Antonin','Clément','Jérémie','Mél & Yann'];
 const MOIS_NOMS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
  
 const TACHES_FIXES=[
@@ -1078,16 +1076,19 @@ dates.forEach(({date,label})=>{
   document.getElementById('menu-content').style.display='block';
 }
  
+
 async function saveMenu(){
   showToast('Enregistrement...');
-  for(const jour of JOURS){
+  const dates = rollingDates(7);
+  for(const {date} of dates){
     for(const repas of ['midi','soir']){
-      const plat=document.getElementById(`menu_${jour}_${repas}`)?.value?.trim()||'';
-      await apiCall({action:'enregistrer',sheet:'MENU',jour,repas,plat:plat||'-'});
+      const plat = document.getElementById(`menu_${date}_${repas}`)?.value?.trim() || '';
+      await apiCall({action:'enregistrer',sheet:'MENU',jour:date,repas,plat:plat||'-'});
     }
   }
   showToast('✅ Menu enregistré !');
 }
+
  
 async function clearMenu(){
   if(!confirm('Effacer tout le menu ?')) return;
