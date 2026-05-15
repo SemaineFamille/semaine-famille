@@ -582,18 +582,19 @@ const PRES_MEMBRES = [
   { id:'yann', label:'Yann' }
 ]; 
 
-function userToId(u){function userToId(uessia':'alessia',
+function userToId(u){
+  const map = {
+    'Alessia':'alessia',
     'Antonin':'antonin',
-    'Clément':'clement','Clement':'clement',
+    'Clément':'clement', 'Clement':'clement',
     'Diego':'diego',
-    'Jérémie':'jeremie','Jeremie':'jeremie',
-    'Mélanie':'melanie','Melanie':'melanie',
+    'Jérémie':'jeremie', 'Jeremie':'jeremie',
+    'Mélanie':'melanie', 'Melanie':'melanie',
     'Yann':'yann',
     'parent':'parent'
   };
-  return map[u] || String(u||'').toLowerCase();
+  return map[u] || String(u || '').toLowerCase();
 }
-  const map = {
 
 const TACHES_FIXES=[
   {id:'lessive',    label:'Monter ta lessive',       icon:'👕'},
@@ -658,10 +659,12 @@ const ANNIVERSAIRES = [
 
  
 
+
 function canEditMember(memberId){
-  if(isParent) return (memberId === 'melanie' || memberId === 'yann'); // parents éditent Mélanie+Yann
-  return memberId === normalizeUserId(currentUser);                   // enfant édite lui-même
+  if(isParent) return (memberId === 'melanie' || memberId === 'yann');
+  return memberId === userToId(currentUser);
 }
+
 
 function checkCelebrations() {
   const now = new Date();
