@@ -996,11 +996,26 @@ if(isParent){
   document.getElementById('present-content').innerHTML = html;
 }
 
-async function togglePresence(dateStr, repas){
-  if(isParent) return;
-  const me = userToId(currentUser);
-  const current = getPresenceValue(dateStr, repas, me);
-  const next = !current;
+
+async function togglePresence(dateStr, repas, personId = null){
+
+  // ✅ déterminer qui on modifie
+  let target;
+
+  if(isParent){
+    // parent = doit passer la personne explicitement
+    if(!personId) return;
+    if(!(personId === 'melanie' || personId === 'yann')) return;
+    target = personId;
+  } else {
+    // enfant = lui-même
+    target = userToId(currentUser);
+  }
+
+  
+const current = getPresenceValue(dateStr, repas, target);
+const next = !current;
+
 
 async function togglePresenceAs(dateStr, repas, personId){
   // Sécurité : parents ne peuvent éditer que Mélanie/Yann
@@ -1009,6 +1024,11 @@ async function togglePresenceAs(dateStr, repas, personId){
 
   const current = getPresenceValue(dateStr, repas, personId);
   const next = !current;
+
+ 
+setPresenceValueLocal(dateStr, repas, target, next);
+refreshOneButtonAs(dateStr, repas, target);
+
 
   // Optimistic UI
   setPresenceValueLocal(dateStr, repas, personId, next);
@@ -1060,7 +1080,7 @@ function refreshOneButtonAs(dateStr, repas, personId){
     sheet:'PRESENCES',
     jour: dateStr,
     repas: repas,
-    person: me,
+    person: target,
     value: next ? 'TRUE' : 'FALSE'
   });
 
