@@ -651,8 +651,7 @@ function normalizeUserId(u){
     'Mélanie':'melanie','Melanie':'melanie',
     'Yann':'yann'
   };
-  return map[u] || String(u||'').toLowerCase();
-}
+ 
 
 function canEditMember(memberId){
   if(isParent) return (memberId === 'melanie' || memberId === 'yann'); // parents éditent Mélanie+Yann
@@ -1759,8 +1758,6 @@ function renderPreviewParents(){
 }
 
  
-  return map[u] || String(u||'').toLowerCase();
-}
 
 function addDays(date, n){
   const d = new Date(date);
