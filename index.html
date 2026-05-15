@@ -572,7 +572,15 @@ const MOIS_NOMS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Ao�
 const MEMBRES = ['alessia','antonin','clement','diego','jeremie','melanie','yann'];
 const MEMBRES_LABEL = ['Alessia','Antonin','Clément','Diego','Jérémie','Mélanie','Yann'];
 
- 
+const PRES_MEMBRES = [
+  { id:'alessia', label:'Alessia' },
+  { id:'antonin', label:'Antonin' },
+  { id:'clement', label:'Clément' },
+  { id:'diego', label:'Diego' },
+  { id:'jeremie', label:'Jérémie' },
+  { id:'melanie', label:'Mélanie' },
+  { id:'yann', label:'Yann' }
+]; 
 const TACHES_FIXES=[
   {id:'lessive',    label:'Monter ta lessive',       icon:'👕'},
   {id:'vaisselle',  label:'Vider le lave-vaisselle', icon:'🍽️'},
@@ -1731,26 +1739,6 @@ function renderPreviewParents(){
 }
 
  
-const PRES_MEMBRES = [
-  { id:'alessia', label:'Alessia' },
-  { id:'antonin', label:'Antonin' },
-  { id:'clement', label:'Clément' },
-  { id:'diego', label:'Diego' },
-  { id:'jeremie', label:'Jérémie' },
-  { id:'melanie', label:'Mélanie' },
-  { id:'yann', label:'Yann' }
-];
-
-function userToId(u){
-  const map = {
-    'Alessia':'alessia',
-    'Antonin':'antonin',
-    'Clément':'clement','Clement':'clement',
-    'Diego':'diego',
-    'Jérémie':'jeremie','Jeremie':'jeremie',
-    'Mélanie':'melanie','Melanie':'melanie',
-    'Yann':'yann'
-  };
   return map[u] || String(u||'').toLowerCase();
 }
 
