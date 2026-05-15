@@ -897,6 +897,9 @@ function showPage(name){
   if(name==='admin') loadAdminConfig();
 }
  
+
+// ---------- PRESENCES (bloc propre) ----------
+
 function getPresenceValue(dateStr, repas, personId){
   const key = `${dateStr}_${repas}`;
   return presencesData[key]?.[personId] === 'TRUE';
@@ -912,7 +915,6 @@ function computeCount(dateStr, repas){
   return PRES_MEMBRES.filter(p => getPresenceValue(dateStr, repas, p.id)).length;
 }
 
-// UI: enfant = boutons pour lui, parents = lecture seule + toute la famille visible
 function buildPresencesUI(){
   const dates = rollingDates(7);
   const me = userToId(currentUser);
@@ -921,7 +923,7 @@ function buildPresencesUI(){
   html += `<div class="card">
     <div class="card-title">👥 Présences — 7 jours glissants</div>
     <div style="color:var(--text-light);font-weight:700;font-size:0.85rem">
-      ${isParent ? "Lecture seule (vue famille)" : "Clique sur 🌞 Midi / 🌙 Soir pour indiquer ta présence. Sauvegarde automatique."}
+      ${isParent ? "Récap famille + modification possible pour Mélanie & Yann" : "Clique sur 🌞 Midi / 🌙 Soir pour indiquer ta présence (auto-save)."}
     </div>
   </div>`;
 
@@ -937,28 +939,25 @@ function buildPresencesUI(){
         <div class="pres-date">${date}</div>
         <div class="pres-btns">`;
 
-   
-if(isParent){
-  html += `<div style="width:100%;display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">` +
-    PRES_MEMBRES.map(p=>{
-      const on = getPresenceValue(date,'midi',p.id);
-      const editable = (p.id === 'melanie' || p.id === 'yann'); // ✅ seuls eux
-      return `<div class="pres-row" style="margin:0;padding:8px;">
-          <div style="font-weight:900">${p.label}</div>
-          <button
-            id="btn_${date}_midi_${p.id}"
-            class="pres-btn ${on?'on midi':'off'} ${editable?'':'disabled'}"
-            ${editable ? `onclick="togglePresenceAs('${date}','midi','${p.id}')"` : ``}
-          >${on?'✅':'—'}</button>
-        </div>`;
-    }).join('') +
-  `</div>`;
-} else {
-
-      // Enfant: seulement ses boutons
+    if(isParent){
+      html += `<div style="width:100%;display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">` +
+        PRES_MEMBRES.map(p=>{
+          const on = getPresenceValue(date,'midi',p.id);
+          const editable = (p.id === 'melanie' || p.id === 'yann');
+          return `<div class="pres-row" style="margin:0;padding:8px;">
+            <div style="font-weight:900">${p.label}</div>
+            <button
+              id="btn_${date}_midi_${p.id}"
+              class="pres-btn ${on?'on midi':'off'} ${editable?'':'disabled'}"
+              ${editable ? `onclick="togglePresenceAs('${date}','midi','${p.id}')"` : ``}
+            >${on?'✅':'—'}</button>
+          </div>`;
+        }).join('') +
+      `</div>`;
+    } else {
       const on = getPresenceValue(date,'midi',me);
       html += `<button class="pres-btn ${on?'on midi':'off'}" id="btn_${date}_midi"
-                onclick="togglePresence('${date}','midi')">🌞 Midi</button>`;
+        onclick="togglePresence('${date}','midi')">🌞 Midi</button>`;
     }
 
     html += `</div>
@@ -970,27 +969,25 @@ if(isParent){
         <div class="pres-date">${date}</div>
         <div class="pres-btns">`;
 
-  
-if(isParent){
-  html += `<div style="width:100%;display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">` +
-    PRES_MEMBRES.map(p=>{
-      const on = getPresenceValue(date,'soir',p.id);
-      const editable = (p.id === 'melanie' || p.id === 'yann');
-      return `<div class="pres-row" style="margin:0;padding:8px;">
-          <div style="font-weight:900">${p.label}</div>
-          <button
-            id="btn_${date}_soir_${p.id}"
-            class="pres-btn ${on?'on soir':'off'} ${editable?'':'disabled'}"
-            ${editable ? `onclick="togglePresenceAs('${date}','soir','${p.id}')"` : ``}
-          >${on?'✅':'—'}</button>
-        </div>`;
-    }).join('') +
-  `</div>`;
-} else {
-
+    if(isParent){
+      html += `<div style="width:100%;display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">` +
+        PRES_MEMBRES.map(p=>{
+          const on = getPresenceValue(date,'soir',p.id);
+          const editable = (p.id === 'melanie' || p.id === 'yann');
+          return `<div class="pres-row" style="margin:0;padding:8px;">
+            <div style="font-weight:900">${p.label}</div>
+            <button
+              id="btn_${date}_soir_${p.id}"
+              class="pres-btn ${on?'on soir':'off'} ${editable?'':'disabled'}"
+              ${editable ? `onclick="togglePresenceAs('${date}','soir','${p.id}')"` : ``}
+            >${on?'✅':'—'}</button>
+          </div>`;
+        }).join('') +
+      `</div>`;
+    } else {
       const on = getPresenceValue(date,'soir',me);
       html += `<button class="pres-btn ${on?'on soir':'off'}" id="btn_${date}_soir"
-                onclick="togglePresence('${date}','soir')">🌙 Soir</button>`;
+        onclick="togglePresence('${date}','soir')">🌙 Soir</button>`;
     }
 
     html += `</div>
@@ -1002,29 +999,8 @@ if(isParent){
   document.getElementById('present-content').innerHTML = html;
 }
 
-
-async function togglePresence(dateStr, repas, personId = null){
-
-  // ✅ déterminer qui on modifie
-  let target;
-
-  if(isParent){
-    // parent = doit passer la personne explicitement
-    if(!personId) return;
-    if(!(personId === 'melanie' || personId === 'yann')) return;
-    target = personId;
-  } else {
-    // enfant = lui-même
-    target = userToId(currentUser);
-  }
-
-  
-const current = getPresenceValue(dateStr, repas, target);
-const next = !current;
-
-
 async function togglePresence(dateStr, repas){
-  if(isParent) return; // parents ne cliquent pas sur ce bouton-là
+  if(isParent) return; // parents utilisent togglePresenceAs
   const me = userToId(currentUser);
 
   const current = getPresenceValue(dateStr, repas, me);
@@ -1085,47 +1061,6 @@ async function togglePresenceAs(dateStr, repas, personId){
   }
 }
 
-function refreshOneButtonAs(dateStr, repas, personId){
-  const on = getPresenceValue(dateStr, repas, personId);
-  const btn = document.getElementById(`btn_${dateStr}_${repas}_${personId}`);
-  if(!btn) return;
-  btn.classList.toggle('off', !on);
-  btn.classList.toggle('on', on);
-  btn.classList.toggle('midi', repas==='midi' && on);
-  btn.classList.toggle('soir', repas==='soir' && on);
-  btn.textContent = on ? '✅' : '—';
-}
-
-
- 
-
-  // Optimistic UI
-  setPresenceValueLocal(dateStr, repas, me, next);
-  refreshOneButton(dateStr, repas);
-  refreshCounts(); // met à jour les totaux affichés
-  showToast('💾 Sauvegarde...');
-
-  // Save immédiat
-  const res = await apiCall({
-    action:'set_presence',
-    sheet:'PRESENCES',
-    jour: dateStr,
-    repas: repas,
-    person: target,
-    value: next ? 'TRUE' : 'FALSE'
-  });
-
-  if(String(res).trim() !== 'ok'){
-    // rollback si erreur
-    setPresenceValueLocal(dateStr, repas, me, current);
-    refreshOneButton(dateStr, repas);
-    refreshCounts();
-    showToast('⚠️ Erreur sauvegarde');
-  } else {
-    showToast('✅ Enregistré');
-  }
-}
-
 function refreshOneButton(dateStr, repas){
   const me = userToId(currentUser);
   const on = getPresenceValue(dateStr, repas, me);
@@ -1137,42 +1072,56 @@ function refreshOneButton(dateStr, repas){
   btn.classList.toggle('soir', repas==='soir' && on);
 }
 
-function refreshCounts(){
-  // Rebuild complet (simple et sûr)
-  // Si tu veux optimiser, on peut cibler uniquement les badges, mais là c’est clean.
-  buildPresencesUI();
+function refreshOneButtonAs(dateStr, repas, personId){
+  const on = getPresenceValue(dateStr, repas, personId);
+  const btn = document.getElementById(`btn_${dateStr}_${repas}_${personId}`);
+  if(!btn) return;
+  btn.classList.toggle('off', !on);
+  btn.classList.toggle('on', on);
+  btn.classList.toggle('midi', repas==='midi' && on);
+  btn.classList.toggle('soir', repas==='soir' && on);
+  btn.textContent = on ? '✅' : '—';
 }
 
+function refreshCounts(){
+  buildPresencesUI();
+}
 
 async function loadPresences(){
-  document.getElementById('present-loading').style.display='block';
-  document.getElementById('present-content').style.display='none';
+  const loading = document.getElementById('present-loading');
+  const content = document.getElementById('present-content');
+  loading.style.display='block';
+  content.style.display='none';
 
-  const start = ymd(new Date());
-  const text = await apiCall({ action:'lire', sheet:'PRESENCES', start, days: 7 });
+  try{
+    const start = ymd(new Date());
+    const text = await apiCall({ action:'lire', sheet:'PRESENCES', start, days: 7 });
 
-  presencesData = {};
-  parseLines(text).forEach(line=>{
-    const c = line.split('|');
-    // jour|repas|alessia|antonin|clement|diego|jeremie|melanie|yann
-    if(c.length >= 9){
-      const key = `${c[0]}_${c[1]}`;
-      presencesData[key] = {
-        alessia: c[2],
-        antonin: c[3],
-        clement: c[4],
-        diego:   c[5],
-        jeremie: c[6],
-        melanie: c[7],
-        yann:    c[8].trim()
-      };
-    }
-  });
+    presencesData = {};
+    parseLines(text).forEach(line=>{
+      const c = line.split('|');
+      if(c.length >= 9){
+        const key = `${c[0]}_${c[1]}`;
+        presencesData[key] = {
+          alessia: c[2], antonin: c[3], clement: c[4], diego: c[5],
+          jeremie: c[6], melanie: c[7], yann: c[8].trim()
+        };
+      }
+    });
 
-  document.getElementById('present-loading').style.display='none';
-  document.getElementById('present-content').style.display='block';
-  buildPresencesUI();
+    content.style.display='block';
+    buildPresencesUI();
+  } catch(e){
+    console.error(e);
+    content.style.display='block';
+    content.innerHTML = `<div class="card"><div class="card-title">Erreur Présences</div>
+      <div style="color:var(--text-light);font-weight:700">Impossible de charger les données.</div></div>`;
+  } finally {
+    loading.style.display='none';
+  }
 }
+``
+
 
 
 
