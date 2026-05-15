@@ -864,67 +864,174 @@ function showPage(name){
   if(name==='admin') loadAdminConfig();
 }
  
+function getPresenceValue(dateStr, repas, personId){
+  const key = `${dateStr}_${repas}`;
+  return presencesData[key]?.[personId] === 'TRUE';
+}
+
+function setPresenceValueLocal(dateStr, repas, personId, boolVal){
+  const key = `${dateStr}_${repas}`;
+  if(!presencesData[key]) presencesData[key] = {};
+  presencesData[key][personId] = boolVal ? 'TRUE' : 'FALSE';
+}
+
+function computeCount(dateStr, repas){
+  return PRES_MEMBRES.filter(p => getPresenceValue(dateStr, repas, p.id)).length;
+}
+
+// UI: enfant = boutons pour lui, parents = lecture seule + toute la famille visible
 function buildPresencesUI(){
-  let html='';
-  JOURS.forEach((jour,ji)=>{
-    html+=`<div class="jour-header">${JOURS_LABEL[ji]}</div>`;
-    ['midi','soir'].forEach(repas=>{
-      const key=`${jour}_${repas}`;
-      const data=presencesData[key]||{};
-      const count=MEMBRES.filter(m=>data[m]==='TRUE').length;
-      html+=`<div class="repas-label">${repas.toUpperCase()} <span class="total-badge" id="total_${key}">${count} présent${count>1?'s':''}</span></div><div class="checkboxes-grid">`;
-      MEMBRES.forEach((m,mi)=>{
-        html+=`<label class="checkbox-item">
-          <input type="checkbox" id="cb_${key}_${m}" ${data[m]==='TRUE'?'checked':''} onchange="updateTotal('${key}')">
-          <label for="cb_${key}_${m}">${MEMBRES_LABEL[mi]}</label>
-        </label>`;
-      });
-      html+=`</div><div class="divider"></div>`;
-    });
+  const dates = rollingDates(7);
+  const me = userToId(currentUser);
+  let html = '';
+
+  html += `<div class="card">
+    <div class="card-title">👥 Présences — 7 jours glissants</div>
+    <div style="color:var(--text-light);font-weight:700;font-size:0.85rem">
+      ${isParent ? "Lecture seule (vue famille)" : "Clique sur 🌞 Midi / 🌙 Soir pour indiquer ta présence. Sauvegarde automatique."}
+    </div>
+  </div>`;
+
+  dates.forEach(({date,label})=>{
+    const midiCount = computeCount(date,'midi');
+    const soirCount = computeCount(date,'soir');
+
+    html += `<div class="card">
+      <div class="jour-header">${label}</div>
+
+      <div class="pres-section-title">🌞 Midi</div>
+      <div class="pres-row">
+        <div class="pres-date">${date}</div>
+        <div class="pres-btns">`;
+
+    if(isParent){
+      // Parents: affichage toute la famille (lecture seule)
+      html += `<div style="width:100%;display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">` +
+        PRES_MEMBRES.map(p=>{
+          const on = getPresenceValue(date,'midi',p.id);
+          return `<div class="pres-row" style="margin:0;padding:8px;">
+              <div style="font-weight:900">${p.label}</div>
+              <button class="pres-btn ${on?'on midi':'off'} disabled">${on?'✅':'—'}</button>
+            </div>`;
+        }).join('') +
+      `</div>`;
+    } else {
+      // Enfant: seulement ses boutons
+      const on = getPresenceValue(date,'midi',me);
+      html += `<button class="pres-btn ${on?'on midi':'off'}" id="btn_${date}_midi"
+                onclick="togglePresence('${date}','midi')">🌞 Midi</button>`;
+    }
+
+    html += `</div>
+        <div class="pres-tot">👥 ${midiCount}</div>
+      </div>
+
+      <div class="pres-section-title">🌙 Soir</div>
+      <div class="pres-row">
+        <div class="pres-date">${date}</div>
+        <div class="pres-btns">`;
+
+    if(isParent){
+      html += `<div style="width:100%;display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">` +
+        PRES_MEMBRES.map(p=>{
+          const on = getPresenceValue(date,'soir',p.id);
+          return `<div class="pres-row" style="margin:0;padding:8px;">
+              <div style="font-weight:900">${p.label}</div>
+              <button class="pres-btn ${on?'on soir':'off'} disabled">${on?'✅':'—'}</button>
+            </div>`;
+        }).join('') +
+      `</div>`;
+    } else {
+      const on = getPresenceValue(date,'soir',me);
+      html += `<button class="pres-btn ${on?'on soir':'off'}" id="btn_${date}_soir"
+                onclick="togglePresence('${date}','soir')">🌙 Soir</button>`;
+    }
+
+    html += `</div>
+        <div class="pres-tot">👥 ${soirCount}</div>
+      </div>
+    </div>`;
   });
-  document.getElementById('present-content').innerHTML=html;
+
+  document.getElementById('present-content').innerHTML = html;
 }
- 
-function updateTotal(key){
-  const count=MEMBRES.filter(m=>document.getElementById(`cb_${key}_${m}`)?.checked).length;
-  const el=document.getElementById(`total_${key}`);
-  if(el) el.textContent=`${count} présent${count>1?'s':''}`;
+
+async function togglePresence(dateStr, repas){
+  if(isParent) return;
+  const me = userToId(currentUser);
+  const current = getPresenceValue(dateStr, repas, me);
+  const next = !current;
+
+  // Optimistic UI
+  setPresenceValueLocal(dateStr, repas, me, next);
+  refreshOneButton(dateStr, repas);
+  refreshCounts(); // met à jour les totaux affichés
+  showToast('💾 Sauvegarde...');
+
+  // Save immédiat
+  const res = await apiCall({
+    action:'set_presence',
+    sheet:'PRESENCES',
+    jour: dateStr,
+    repas: repas,
+    person: me,
+    value: next ? 'TRUE' : 'FALSE'
+  });
+
+  if(String(res).trim() !== 'ok'){
+    // rollback si erreur
+    setPresenceValueLocal(dateStr, repas, me, current);
+    refreshOneButton(dateStr, repas);
+    refreshCounts();
+    showToast('⚠️ Erreur sauvegarde');
+  } else {
+    showToast('✅ Enregistré');
+  }
 }
- 
+
+function refreshOneButton(dateStr, repas){
+  const me = userToId(currentUser);
+  const on = getPresenceValue(dateStr, repas, me);
+  const btn = document.getElementById(`btn_${dateStr}_${repas}`);
+  if(!btn) return;
+  btn.classList.toggle('off', !on);
+  btn.classList.toggle('on', on);
+  btn.classList.toggle('midi', repas==='midi' && on);
+  btn.classList.toggle('soir', repas==='soir' && on);
+}
+
+function refreshCounts(){
+  // Rebuild complet (simple et sûr)
+  // Si tu veux optimiser, on peut cibler uniquement les badges, mais là c’est clean.
+  buildPresencesUI();
+}
+
 async function loadPresences(){
   document.getElementById('present-loading').style.display='block';
   document.getElementById('present-content').style.display='none';
-  const text=await apiCall({action:'lire',sheet:'PRESENCES'});
-  presencesData={};
+
+  const start = ymd(new Date());
+  const text = await apiCall({ action:'lire', sheet:'PRESENCES', start, days: 7 });
+
+  presencesData = {};
   parseLines(text).forEach(line=>{
-    const c=line.split('|');
-    if(c.length>=8) presencesData[`${c[0]}_${c[1]}`]={alessia:c[2],antonin:c[3],clement:c[4],jeremie:c[5],melanie:c[6],yann:c[7].trim()};
+    const c = line.split('|');
+    // jour|repas|alessia|antonin|clement|diego|jeremie|melanie|yann
+    if(c.length >= 9){
+      const key = `${c[0]}_${c[1]}`;
+      presencesData[key] = {
+        alessia: c[2], antonin: c[3], clement: c[4], diego: c[5],
+        jeremie: c[6], melanie: c[7], yann: c[8].trim()
+      };
+    }
   });
+
   document.getElementById('present-loading').style.display='none';
   document.getElementById('present-content').style.display='block';
   buildPresencesUI();
 }
- 
-async function savePresences(){
-  showToast('Enregistrement...');
-  for(const jour of JOURS){
-    for(const repas of ['midi','soir']){
-      const key=`${jour}_${repas}`;
-      const p={action:'enregistrer',sheet:'PRESENCES',jour,repas};
-      MEMBRES.forEach(m=>{p[m]=document.getElementById(`cb_${key}_${m}`)?.checked?'TRUE':'FALSE';});
-      await apiCall(p);
-    }
-  }
-  showToast('✅ Présences enregistrées !');
-}
- 
-async function clearPresences(){
-  if(!confirm('Effacer toutes les présences ?')) return;
-  await apiCall({action:'effacer',sheet:'PRESENCES'});
-  presencesData={};
-  buildPresencesUI();
-  showToast('🗑️ Présences effacées');
-}
+
+
  
 async function loadMenu(){
   document.getElementById('menu-loading').style.display='block';
