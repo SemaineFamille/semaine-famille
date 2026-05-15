@@ -253,6 +253,53 @@ input[type="text"]:focus,select:focus{outline:none;border-color:var(--violet);}
 .kid-grid .pres-tot{ display:none; }    /* optionnel : inutile pour l’enfant */
 .kid-grid .pres-btn{ width:100%; min-width:0; padding:8px 8px; font-size:0.9rem; }
 
+ 
+/* ===== PARENTS: GRILLE COMPACTE ✅/❌ ===== */
+.parent-mini-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:6px;
+}
+@media (max-width:360px){
+  .parent-mini-grid{ grid-template-columns: 1fr; }
+}
+
+.parent-mini-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:#fff;
+  border-radius:10px;
+  padding:6px 8px;
+}
+
+.parent-mini-name{
+  font-size:0.82rem;
+  font-weight:800;
+  color:var(--text);
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  max-width:70%;
+}
+
+.parent-mini-btn{
+  border:none;
+  background:transparent;
+  font-size:1.15rem;
+  font-weight:900;
+  cursor:pointer;
+  line-height:1;
+}
+
+.parent-mini-btn.disabled{
+  opacity:.30;
+  pointer-events:none;
+}
+
+.parent-mini-btn.on{ transform:scale(1.08); }
+.parent-mini-btn.off{ opacity:.65; }
+
 
 /* MENU */
 .menu-jour-card{background:white;border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:var(--shadow);}
@@ -937,6 +984,24 @@ function computeCount(dateStr, repas){
   return PRES_MEMBRES.filter(p => getPresenceValue(dateStr, repas, p.id)).length;
 }
 
+ 
+function renderParentMini(dateStr, repas){
+  return `<div class="parent-mini-grid">` +
+    PRES_MEMBRES.map(p=>{
+      const on = getPresenceValue(dateStr, repas, p.id);
+      const editable = (p.id === 'melanie' || p.id === 'yann'); // seuls eux modifiables
+      return `<div class="parent-mini-item">
+        <span class="parent-mini-name">${p.label}</span>
+        <button
+          id="btn_${dateStr}_${repas}_${p.id}"
+          class="parent-mini-btn ${on ? 'on' : 'off'} ${editable ? '' : 'disabled'}"
+          ${editable ? `onclick="togglePresenceAs('${dateStr}','${repas}','${p.id}')"` : ``}
+        >${on ? '✅' : '❌'}</button>
+      </div>`;
+    }).join('') +
+  `</div>`;
+}
+
 
 function buildPresencesUI(){
   const dates = rollingDates(7);
@@ -1085,16 +1150,21 @@ function refreshOneButton(dateStr, repas){
   btn.classList.toggle('soir', repas==='soir' && on);
 }
 
+
 function refreshOneButtonAs(dateStr, repas, personId){
   const on = getPresenceValue(dateStr, repas, personId);
-  const btn = document.getElementById(`btn_${dateStr}_${repas}_${personId}`);
-  if(!btn) return;
-  btn.classList.toggle('off', !on);
-  btn.classList.toggle('on', on);
-  btn.classList.toggle('midi', repas==='midi' && on);
-  btn.classList.toggle('soir', repas==='soir' && on);
-  btn.textContent = on ? '✅' : '—';
+
+  // bouton parent mini
+  const btnMini = document.getElementById(`btn_${dateStr}_${repas}_${personId}`);
+  if(btnMini){
+    btnMini.classList.toggle('on', on);
+    btnMini.classList.toggle('off', !on);
+    btnMini.textContent = on ? '✅' : '❌';
+  }
+
+  // (optionnel) si tu as aussi des boutons "pres-btn" ailleurs
 }
+
 
 function refreshCounts(){
   buildPresencesUI();
