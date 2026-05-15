@@ -367,6 +367,25 @@ input[type="text"]:focus,select:focus{outline:none;border-color:var(--violet);}
   font-size: 18px;
   cursor: pointer;
   width: 100%; /* important pour que tous aient la même taille */
+
+.pres-section-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin:10px 0 6px;
+}
+
+.pres-tot-inline{
+  font-size:0.78rem;
+  font-weight:900;
+  color:var(--violet);
+  background:white;
+  padding:6px 10px;
+  border-radius:999px;
+  white-space:nowrap;
+}
+
+ 
 }
 </style>
  <script>
@@ -942,21 +961,21 @@ function showToast(msg){
  
 
 
+
 async function apiCall(params){
   try{
-    // anti-cache: change l’URL à chaque appel (bypass caches/SW)
+    // Anti-cache : URL différente à chaque appel (utile avec PWA/caches)
     const qs = new URLSearchParams({ ...params, _ts: String(Date.now()) }).toString();
     const url = SCRIPT_URL + '?' + qs;
 
-    const r = await fetch(url, { cache: 'no-store' }); // no-store = pas de cache HTTP [3](https://developer.mozilla.org/en-US/docs/Web/API/Request/cache)
-    const text = await r.text();
-
-    // On renvoie un objet pour pouvoir diagnostiquer
-    return { ok: r.ok, status: r.status, text };
+    const r = await fetch(url, { cache: 'no-store' }); // bypass cache HTTP [1](https://onedrive.live.com/?id=bf10cab2-7a2e-412f-afc8-b792b3903cb3&cid=1c787430ae2bd4d8&web=1)
+    return await r.text();
   }catch(e){
-    return { ok:false, status:0, text:String(e?.message || e) };
+    console.error(e);
+    return '';
   }
 }
+
 
  
 function parseLines(text){
@@ -985,8 +1004,8 @@ function showPage(name){
 }
  
 
-// ---------- PRESENCES (bloc propre) ----------
 
+// ---------- PRESENCES (BLOC COMPLET) ----------
 
 function getPresenceValue(dateStr, repas, personId){
   const key = `${dateStr}_${repas}`;
@@ -999,7 +1018,6 @@ function getPresenceValue(dateStr, repas, personId){
   return (s === 'TRUE' || s === '1' || s === 'YES' || s === 'OUI');
 }
 
-
 function setPresenceValueLocal(dateStr, repas, personId, boolVal){
   const key = `${dateStr}_${repas}`;
   if(!presencesData[key]) presencesData[key] = {};
@@ -1010,18 +1028,14 @@ function computeCount(dateStr, repas){
   return PRES_MEMBRES.filter(p => getPresenceValue(dateStr, repas, p.id)).length;
 }
 
- 
-
+/** Parents : ✅ si présent, sinon —. Bouton cliquable uniquement pour Mélanie & Yann */
 function renderParentMini(dateStr, repas){
   return `<div class="parent-mini-grid">` +
     PRES_MEMBRES.map(p=>{
       const on = getPresenceValue(dateStr, repas, p.id);
-      const editable = (p.id === 'melanie' || p.id === 'yann'); // seuls parents éditables
-
-      // ✅ on = ✅ ; off = — (pas de rouge)
+      const editable = (p.id === 'melanie' || p.id === 'yann');
       const symbol = on ? '✅' : '—';
 
-      // Non éditable : pas de bouton, juste un indicateur
       if(!editable){
         return `<div class="parent-mini-item">
           <span class="parent-mini-name">${p.label}</span>
@@ -1029,7 +1043,6 @@ function renderParentMini(dateStr, repas){
         </div>`;
       }
 
-      // Éditable : bouton toggle
       return `<div class="parent-mini-item">
         <span class="parent-mini-name">${p.label}</span>
         <button
@@ -1042,13 +1055,11 @@ function renderParentMini(dateStr, repas){
   `</div>`;
 }
 
-
 function buildPresencesUI(){
   const dates = rollingDates(7);
   const me = userToId(currentUser);
   let html = '';
 
-  // Carte titre (reste hors grille)
   html += `<div class="card">
     <div class="card-title">👥 Présences — 7 jours glissants</div>
     <div style="color:var(--text-light);font-weight:700;font-size:0.85rem">
@@ -1058,57 +1069,64 @@ function buildPresencesUI(){
     </div>
   </div>`;
 
-  // ✅ Ouvrir la grille uniquement pour les enfants
+  // Grille 2 colonnes uniquement pour les enfants
   if(!isParent){
     html += `<div class="kid-grid">`;
   }
 
-  // Cartes des jours
   dates.forEach(({date,label})=>{
     const midiCount = computeCount(date,'midi');
     const soirCount = computeCount(date,'soir');
 
     html += `<div class="card">
-      <div class="jour-header">${label}</div>
-
-      <div class="pres-section-title">🌞 Midi</div>
-      <div class="pres-row">
-        <div class="pres-date">${date}</div>
-        <div class="pres-btns">`;
+      <div class="jour-header">${label}</div>`;
 
     if(isParent){
-      // ... ta version parents (mini ✅/❌)
-      html += renderParentMini(date, 'midi'); // si tu as factorisé, sinon ton bloc
+      // ✅ Parents : total bien placé dans l’entête Midi/Soir + grille compacte
+      html += `
+        <div class="pres-section-head">
+          <div class="pres-section-title">🌞 Midi</div>
+          <div class="pres-tot-inline">👥 ${midiCount}</div>
+        </div>
+        ${renderParentMini(date,'midi')}
+
+        <div class="pres-section-head" style="margin-top:10px">
+          <div class="pres-section-title">🌙 Soir</div>
+          <div class="pres-tot-inline">👥 ${soirCount}</div>
+        </div>
+        ${renderParentMini(date,'soir')}
+      `;
     } else {
-      const on = getPresenceValue(date,'midi',me);
-      html += `<button class="pres-btn ${on?'on midi':'off'}" id="btn_${date}_midi"
-        onclick="togglePresence('${date}','midi')">🌞</button>`;
+      // Enfant : boutons compacts
+      const onMidi = getPresenceValue(date,'midi',me);
+      const onSoir = getPresenceValue(date,'soir',me);
+
+      html += `
+        <div class="pres-section-title">🌞 Midi</div>
+        <div class="pres-row">
+          <div class="pres-date">${date}</div>
+          <div class="pres-btns">
+            <button class="pres-btn ${onMidi?'on midi':'off'}" id="btn_${date}_midi"
+              onclick="togglePresence('${date}','midi')">🌞</button>
+          </div>
+          <div class="pres-tot">👥 ${midiCount}</div>
+        </div>
+
+        <div class="pres-section-title">🌙 Soir</div>
+        <div class="pres-row">
+          <div class="pres-date">${date}</div>
+          <div class="pres-btns">
+            <button class="pres-btn ${onSoir?'on soir':'off'}" id="btn_${date}_soir"
+              onclick="togglePresence('${date}','soir')">🌙</button>
+          </div>
+          <div class="pres-tot">👥 ${soirCount}</div>
+        </div>
+      `;
     }
 
-    html += `</div>
-        <div class="pres-tot">👥 ${midiCount}</div>
-      </div>
-
-      <div class="pres-section-title">🌙 Soir</div>
-      <div class="pres-row">
-        <div class="pres-date">${date}</div>
-        <div class="pres-btns">`;
-
-    if(isParent){
-      html += renderParentMini(date, 'soir');
-    } else {
-      const on = getPresenceValue(date,'soir',me);
-      html += `<button class="pres-btn ${on?'on soir':'off'}" id="btn_${date}_soir"
-        onclick="togglePresence('${date}','soir')">🌙</button>`;
-    }
-
-    html += `</div>
-        <div class="pres-tot">👥 ${soirCount}</div>
-      </div>
-    </div>`;
+    html += `</div>`;
   });
 
-  // ✅ Fermer la grille uniquement pour les enfants
   if(!isParent){
     html += `</div>`;
   }
@@ -1116,43 +1134,52 @@ function buildPresencesUI(){
   document.getElementById('present-content').innerHTML = html;
 }
 
-
 async function togglePresence(dateStr, repas){
-  if(isParent) return; // parents utilisent togglePresenceAs
-  const me = userToId(currentUser);
+  if(isParent) return;
 
+  const me = userToId(currentUser);
   const current = getPresenceValue(dateStr, repas, me);
   const next = !current;
 
+  // UI optimiste
   setPresenceValueLocal(dateStr, repas, me, next);
   refreshOneButton(dateStr, repas);
   refreshCounts();
   showToast('💾 Sauvegarde...');
- showToast('⚠️ Erreur sauvegarde: ' + String(res).slice(0,40));
 
-  
-const res = await apiCall({
-  action:'set_presence',
-  sheet:'PRESENCES',
-  jour: dateStr,
-  repas: repas,
-  person: me,
-  value: next ? 'TRUE' : 'FALSE'
-});
+  // 1) Essai action set_presence
+  let res = await apiCall({
+    action:'set_presence',
+    sheet:'PRESENCES',
+    jour: dateStr,
+    repas: repas,
+    person: me,
+    value: next ? 'TRUE' : 'FALSE'
+  });
 
-// Si Apps Script renvoie autre chose que "ok", on rollback + message clair
-const out = String(res.text || '').trim();
-if(!res.ok || out !== 'ok'){
-  setPresenceValueLocal(dateStr, repas, me, current);
-  refreshOneButton(dateStr, repas);
-  refreshCounts();
+  // 2) Fallback si ton Apps Script n’a pas set_presence
+  if(String(res).trim() !== 'ok'){
+    res = await apiCall({
+      action:'enregistrer',
+      sheet:'PRESENCES',
+      jour: dateStr,
+      repas: repas,
+      person: me,
+      value: next ? 'TRUE' : 'FALSE'
+    });
+  }
 
-  // Affiche l’erreur réelle (status + début de réponse)
-  showToast(`⚠️ Save KO (${res.status}) ${out.slice(0,60)}`);
-} else {
-  showToast('✅ Enregistré');
-}
-
+  if(String(res).trim() !== 'ok'){
+    // rollback
+    setPresenceValueLocal(dateStr, repas, me, current);
+    refreshOneButton(dateStr, repas);
+    refreshCounts();
+    showToast('⚠️ Sauvegarde impossible');
+  } else {
+    showToast('✅ Enregistré');
+    // recharge derrière pour être sûr que les totaux reflètent le serveur
+    loadPresences();
+  }
 }
 
 async function togglePresenceAs(dateStr, repas, personId){
@@ -1162,34 +1189,44 @@ async function togglePresenceAs(dateStr, repas, personId){
   const current = getPresenceValue(dateStr, repas, personId);
   const next = !current;
 
+  // UI optimiste
   setPresenceValueLocal(dateStr, repas, personId, next);
   refreshOneButtonAs(dateStr, repas, personId);
   refreshCounts();
   showToast('💾 Sauvegarde...');
 
-  
-const res = await apiCall({
-  action:'set_presence',
-  sheet:'PRESENCES',
-  jour: dateStr,
-  repas: repas,
-  person: me,
-  value: next ? 'TRUE' : 'FALSE'
-});
+  // 1) Essai action set_presence
+  let res = await apiCall({
+    action:'set_presence',
+    sheet:'PRESENCES',
+    jour: dateStr,
+    repas: repas,
+    person: personId,
+    value: next ? 'TRUE' : 'FALSE'
+  });
 
-// Si Apps Script renvoie autre chose que "ok", on rollback + message clair
-const out = String(res.text || '').trim();
-if(!res.ok || out !== 'ok'){
-  setPresenceValueLocal(dateStr, repas, me, current);
-  refreshOneButton(dateStr, repas);
-  refreshCounts();
+  // 2) Fallback si ton Apps Script n’a pas set_presence
+  if(String(res).trim() !== 'ok'){
+    res = await apiCall({
+      action:'enregistrer',
+      sheet:'PRESENCES',
+      jour: dateStr,
+      repas: repas,
+      person: personId,
+      value: next ? 'TRUE' : 'FALSE'
+    });
+  }
 
-  // Affiche l’erreur réelle (status + début de réponse)
-  showToast(`⚠️ Save KO (${res.status}) ${out.slice(0,60)}`);
-} else {
-  showToast('✅ Enregistré');
-}
-
+  if(String(res).trim() !== 'ok'){
+    // rollback
+    setPresenceValueLocal(dateStr, repas, personId, current);
+    refreshOneButtonAs(dateStr, repas, personId);
+    refreshCounts();
+    showToast('⚠️ Sauvegarde impossible');
+  } else {
+    showToast('✅ Enregistré');
+    loadPresences();
+  }
 }
 
 function refreshOneButton(dateStr, repas){
@@ -1203,21 +1240,15 @@ function refreshOneButton(dateStr, repas){
   btn.classList.toggle('soir', repas==='soir' && on);
 }
 
-
 function refreshOneButtonAs(dateStr, repas, personId){
   const on = getPresenceValue(dateStr, repas, personId);
-
-  // bouton parent mini
   const btnMini = document.getElementById(`btn_${dateStr}_${repas}_${personId}`);
   if(btnMini){
     btnMini.classList.toggle('on', on);
     btnMini.classList.toggle('off', !on);
-    btnMini.textContent = on ? '✅' : '❌';
+    btnMini.textContent = on ? '✅' : '—'; // pas de ❌
   }
-
-  // (optionnel) si tu as aussi des boutons "pres-btn" ailleurs
 }
-
 
 function refreshCounts(){
   buildPresencesUI();
@@ -1250,16 +1281,14 @@ async function loadPresences(){
   } catch(e){
     console.error(e);
     content.style.display='block';
-    content.innerHTML = `<div class="card"><div class="card-title">Erreur Présences</div>
-      <div style="color:var(--text-light);font-weight:700">Impossible de charger les données.</div></div>`;
+    content.innerHTML = `<div class="card">
+      <div class="card-title">Erreur Présences</div>
+      <div style="color:var(--text-light);font-weight:700">${String(e?.message || e)}</div>
+    </div>`;
   } finally {
     loading.style.display='none';
   }
 }
-``
-
-
-
 
  
 async function loadMenu(){
