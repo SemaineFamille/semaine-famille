@@ -231,6 +231,28 @@ input[type="text"]:focus,select:focus{outline:none;border-color:var(--violet);}
 .pres-section-title{font-size:0.85rem;font-weight:900;color:var(--text-light);text-transform:uppercase;letter-spacing:1px;margin:12px 0 8px;}
 
 
+/* ===== ENFANTS: GRILLE 2 COLONNES ===== */
+
+.kid-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+
+/* petits écrans → 1 colonne */
+@media (max-width:360px){
+  .kid-grid{ grid-template-columns:1fr; }
+}
+
+/* densité pour gagner de la hauteur */
+.kid-grid .card{ margin:0; padding:12px; }
+.kid-grid .jour-header{ padding:8px 10px; font-size:0.85rem; margin-bottom:8px; }
+.kid-grid .pres-section-title{ margin:8px 0 6px; font-size:0.75rem; }
+.kid-grid .pres-row{ padding:8px; margin-bottom:6px; }
+.kid-grid .pres-date{ display:none; }   /* optionnel : la date est déjà dans le header */
+.kid-grid .pres-tot{ display:none; }    /* optionnel : inutile pour l’enfant */
+.kid-grid .pres-btn{ width:100%; min-width:0; padding:8px 8px; font-size:0.9rem; }
+
 
 /* MENU */
 .menu-jour-card{background:white;border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:var(--shadow);}
@@ -915,18 +937,28 @@ function computeCount(dateStr, repas){
   return PRES_MEMBRES.filter(p => getPresenceValue(dateStr, repas, p.id)).length;
 }
 
+
 function buildPresencesUI(){
   const dates = rollingDates(7);
   const me = userToId(currentUser);
   let html = '';
 
+  // Carte titre (reste hors grille)
   html += `<div class="card">
     <div class="card-title">👥 Présences — 7 jours glissants</div>
     <div style="color:var(--text-light);font-weight:700;font-size:0.85rem">
-      ${isParent ? "Récap famille + modification possible pour Mélanie & Yann" : "Clique sur 🌞 Midi / 🌙 Soir pour indiquer ta présence (auto-save)."}
+      ${isParent
+        ? "Récap famille + modification possible pour Mélanie & Yann"
+        : "Clique sur 🌞 Midi / 🌙 Soir pour indiquer ta présence (auto-save)."}
     </div>
   </div>`;
 
+  // ✅ Ouvrir la grille uniquement pour les enfants
+  if(!isParent){
+    html += `<div class="kid-grid">`;
+  }
+
+  // Cartes des jours
   dates.forEach(({date,label})=>{
     const midiCount = computeCount(date,'midi');
     const soirCount = computeCount(date,'soir');
@@ -940,24 +972,12 @@ function buildPresencesUI(){
         <div class="pres-btns">`;
 
     if(isParent){
-      html += `<div style="width:100%;display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">` +
-        PRES_MEMBRES.map(p=>{
-          const on = getPresenceValue(date,'midi',p.id);
-          const editable = (p.id === 'melanie' || p.id === 'yann');
-          return `<div class="pres-row" style="margin:0;padding:8px;">
-            <div style="font-weight:900">${p.label}</div>
-            <button
-              id="btn_${date}_midi_${p.id}"
-              class="pres-btn ${on?'on midi':'off'} ${editable?'':'disabled'}"
-              ${editable ? `onclick="togglePresenceAs('${date}','midi','${p.id}')"` : ``}
-            >${on?'✅':'—'}</button>
-          </div>`;
-        }).join('') +
-      `</div>`;
+      // ... ta version parents (mini ✅/❌)
+      html += renderParentMini(date, 'midi'); // si tu as factorisé, sinon ton bloc
     } else {
       const on = getPresenceValue(date,'midi',me);
       html += `<button class="pres-btn ${on?'on midi':'off'}" id="btn_${date}_midi"
-        onclick="togglePresence('${date}','midi')">🌞 Midi</button>`;
+        onclick="togglePresence('${date}','midi')">🌞</button>`;
     }
 
     html += `</div>
@@ -970,24 +990,11 @@ function buildPresencesUI(){
         <div class="pres-btns">`;
 
     if(isParent){
-      html += `<div style="width:100%;display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">` +
-        PRES_MEMBRES.map(p=>{
-          const on = getPresenceValue(date,'soir',p.id);
-          const editable = (p.id === 'melanie' || p.id === 'yann');
-          return `<div class="pres-row" style="margin:0;padding:8px;">
-            <div style="font-weight:900">${p.label}</div>
-            <button
-              id="btn_${date}_soir_${p.id}"
-              class="pres-btn ${on?'on soir':'off'} ${editable?'':'disabled'}"
-              ${editable ? `onclick="togglePresenceAs('${date}','soir','${p.id}')"` : ``}
-            >${on?'✅':'—'}</button>
-          </div>`;
-        }).join('') +
-      `</div>`;
+      html += renderParentMini(date, 'soir');
     } else {
       const on = getPresenceValue(date,'soir',me);
       html += `<button class="pres-btn ${on?'on soir':'off'}" id="btn_${date}_soir"
-        onclick="togglePresence('${date}','soir')">🌙 Soir</button>`;
+        onclick="togglePresence('${date}','soir')">🌙</button>`;
     }
 
     html += `</div>
@@ -996,8 +1003,14 @@ function buildPresencesUI(){
     </div>`;
   });
 
+  // ✅ Fermer la grille uniquement pour les enfants
+  if(!isParent){
+    html += `</div>`;
+  }
+
   document.getElementById('present-content').innerHTML = html;
 }
+
 
 async function togglePresence(dateStr, repas){
   if(isParent) return; // parents utilisent togglePresenceAs
