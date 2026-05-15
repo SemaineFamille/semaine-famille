@@ -895,7 +895,7 @@ function showPage(name){
   if(name==='taches') loadTaches();
   if(name==='job') initCal();
   if(name==='admin') loadAdminConfig();
-}
+
  
 
 // ---------- PRESENCES (bloc propre) ----------
@@ -1136,17 +1136,22 @@ const [pText, mText] = await Promise.all([
   apiCall({ action:'lire', sheet:'MENU' })
 ]);
 
-  presencesData={};
  
 presencesData = {};
-parseLines  if(c.length >= 9){parseLines(pText).forEach(line=>{
+parseLines(pText).forEach(line=>{
+  const c = line.split('|');
+  if(c.length >= 9){
     presencesData[`${c[0]}_${c[1]}`] = {
-      alessia: c[2], antonin: c[3], clement: c[4], diego: c[5],
-      jeremie: c[6], melanie: c[7], yann: c[8].trim()
+      alessia: c[2],
+      antonin: c[3],
+      clement: c[4],
+      diego:   c[5],
+      jeremie: c[6],
+      melanie: c[7],
+      yann:    c[8].trim()
     };
   }
 });
-  const c = line.split('|');
 
   menuData={};
   parseLines(mText).forEach(line=>{
