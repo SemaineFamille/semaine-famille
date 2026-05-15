@@ -569,6 +569,9 @@ const JOURS=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
 const JOURS_LABEL=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
 const JOURS_COURTS=['Lu','Ma','Me','Je','Ve','Sa','Di'];
 const MOIS_NOMS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+const MEMBRES = ['alessia','antonin','clement','diego','jeremie','melanie','yann'];
+const MEMBRES_LABEL = ['Alessia','Antonin','Clément','Diego','Jérémie','Mélanie','Yann'];
+
  
 const TACHES_FIXES=[
   {id:'lessive',    label:'Monter ta lessive',       icon:'👕'},
@@ -630,6 +633,24 @@ const ANNIVERSAIRES = [
   { nom: 'Mélanie',  jour: 28, mois: 3  },
 ];
  
+function normalizeUserId(u){
+  const map = {
+    'Alessia':'alessia',
+    'Antonin':'antonin',
+    'Clément':'clement','Clement':'clement',
+    'Diego':'diego',
+    'Jérémie':'jeremie','Jeremie':'jeremie',
+    'Mélanie':'melanie','Melanie':'melanie',
+    'Yann':'yann'
+  };
+  return map[u] || String(u||'').toLowerCase();
+}
+
+function canEditMember(memberId){
+  if(isParent) return (memberId === 'melanie' || memberId === 'yann'); // parents éditent Mélanie+Yann
+  return memberId === normalizeUserId(currentUser);                   // enfant édite lui-même
+}
+
 function checkCelebrations() {
   const now = new Date();
   const jour = now.getDate();
@@ -902,18 +923,24 @@ function buildPresencesUI(){
         <div class="pres-date">${date}</div>
         <div class="pres-btns">`;
 
-    if(isParent){
-      // Parents: affichage toute la famille (lecture seule)
-      html += `<div style="width:100%;display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">` +
-        PRES_MEMBRES.map(p=>{
-          const on = getPresenceValue(date,'midi',p.id);
-          return `<div class="pres-row" style="margin:0;padding:8px;">
-              <div style="font-weight:900">${p.label}</div>
-              <button class="pres-btn ${on?'on midi':'off'} disabled">${on?'✅':'—'}</button>
-            </div>`;
-        }).join('') +
-      `</div>`;
-    } else {
+   
+if(isParent){
+  html += `<div style="width:100%;display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">` +
+    PRES_MEMBRES.map(p=>{
+      const on = getPresenceValue(date,'midi',p.id);
+      const editable = (p.id === 'melanie' || p.id === 'yann'); // ✅ seuls eux
+      return `<div class="pres-row" style="margin:0;padding:8px;">
+          <div style="font-weight:900">${p.label}</div>
+          <button
+            id="btn_${date}_midi_${p.id}"
+            class="pres-btn ${on?'on midi':'off'} ${editable?'':'disabled'}"
+            ${editable ? `onclick="togglePresenceAs('${date}','midi','${p.id}')"` : ``}
+          >${on?'✅':'—'}</button>
+        </div>`;
+    }).join('') +
+  `</div>`;
+} else {
+
       // Enfant: seulement ses boutons
       const on = getPresenceValue(date,'midi',me);
       html += `<button class="pres-btn ${on?'on midi':'off'}" id="btn_${date}_midi"
@@ -929,17 +956,24 @@ function buildPresencesUI(){
         <div class="pres-date">${date}</div>
         <div class="pres-btns">`;
 
-    if(isParent){
-      html += `<div style="width:100%;display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">` +
-        PRES_MEMBRES.map(p=>{
-          const on = getPresenceValue(date,'soir',p.id);
-          return `<div class="pres-row" style="margin:0;padding:8px;">
-              <div style="font-weight:900">${p.label}</div>
-              <button class="pres-btn ${on?'on soir':'off'} disabled">${on?'✅':'—'}</button>
-            </div>`;
-        }).join('') +
-      `</div>`;
-    } else {
+  
+if(isParent){
+  html += `<div style="width:100%;display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">` +
+    PRES_MEMBRES.map(p=>{
+      const on = getPresenceValue(date,'soir',p.id);
+      const editable = (p.id === 'melanie' || p.id === 'yann');
+      return `<div class="pres-row" style="margin:0;padding:8px;">
+          <div style="font-weight:900">${p.label}</div>
+          <button
+            id="btn_${date}_soir_${p.id}"
+            class="pres-btn ${on?'on soir':'off'} ${editable?'':'disabled'}"
+            ${editable ? `onclick="togglePresenceAs('${date}','soir','${p.id}')"` : ``}
+          >${on?'✅':'—'}</button>
+        </div>`;
+    }).join('') +
+  `</div>`;
+} else {
+
       const on = getPresenceValue(date,'soir',me);
       html += `<button class="pres-btn ${on?'on soir':'off'}" id="btn_${date}_soir"
                 onclick="togglePresence('${date}','soir')">🌙 Soir</button>`;
@@ -959,6 +993,52 @@ async function togglePresence(dateStr, repas){
   const me = userToId(currentUser);
   const current = getPresenceValue(dateStr, repas, me);
   const next = !current;
+
+async function togglePresenceAs(dateStr, repas, personId){
+  // Sécurité : parents ne peuvent éditer que Mélanie/Yann
+  if(!isParent) return;
+  if(!(personId === 'melanie' || personId === 'yann')) return;
+
+  const current = getPresenceValue(dateStr, repas, personId);
+  const next = !current;
+
+  // Optimistic UI
+  setPresenceValueLocal(dateStr, repas, personId, next);
+  refreshOneButtonAs(dateStr, repas, personId);
+  refreshCounts();
+  showToast('💾 Sauvegarde...');
+
+  const res = await apiCall({
+    action:'set_presence',
+    sheet:'PRESENCES',
+    jour: dateStr,
+    repas: repas,
+    person: personId,
+    value: next ? 'TRUE' : 'FALSE'
+  });
+
+  if(String(res).trim() !== 'ok'){
+    // rollback
+    setPresenceValueLocal(dateStr, repas, personId, current);
+    refreshOneButtonAs(dateStr, repas, personId);
+    refreshCounts();
+    showToast('⚠️ Erreur sauvegarde');
+  } else {
+    showToast('✅ Enregistré');
+  }
+}
+
+function refreshOneButtonAs(dateStr, repas, personId){
+  const on = getPresenceValue(dateStr, repas, personId);
+  const btn = document.getElementById(`btn_${dateStr}_${repas}_${personId}`);
+  if(!btn) return;
+  btn.classList.toggle('off', !on);
+  btn.classList.toggle('on', on);
+  btn.classList.toggle('midi', repas==='midi' && on);
+  btn.classList.toggle('soir', repas==='soir' && on);
+  btn.textContent = on ? '✅' : '—';
+}
+ 
 
   // Optimistic UI
   setPresenceValueLocal(dateStr, repas, me, next);
