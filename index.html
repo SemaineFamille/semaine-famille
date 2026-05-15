@@ -1091,18 +1091,25 @@ async function loadPresences(){
   const start = ymd(new Date());
   const text = await apiCall({ action:'lire', sheet:'PRESENCES', start, days: 7 });
 
-  presencesData = {};
-  parseLines(text).forEach(line=>{
-    const c = line.split('|');
-    // jour|repas|alessia|antonin|clement|diego|jeremie|melanie|yann
-    if(c.length >= 9){
-      const key = `${c[0]}_${c[1]}`;
-      presencesData[key] = {
-        alessia: c[2], antonin: c[3], clement: c[4], diego: c[5],
-        jeremie: c[6], melanie: c[7], yann: c[8].trim()
-      };
-    }
-  });
+ 
+presencesData = {};
+parseLines(pText).forEach(line=>{
+  const c = line.split('|');
+  // jour|repas|alessia|antonin|clement|diego|jeremie|melanie|yann
+  if(c.length >= 9){
+    const key = `${c[0]}_${c[1]}`;
+    presencesData[key] = {
+      alessia: c[2],
+      antonin: c[3],
+      clement: c[4],
+      diego:   c[5],
+      jeremie: c[6],
+      melanie: c[7],
+      yann:    c[8].trim()
+    };
+  }
+});
+
 
   document.getElementById('present-loading').style.display='none';
   document.getElementById('present-content').style.display='block';
