@@ -581,6 +581,20 @@ const PRES_MEMBRES = [
   { id:'melanie', label:'Mélanie' },
   { id:'yann', label:'Yann' }
 ]; 
+
+function userToId(u){function userToId(uessia':'alessia',
+    'Antonin':'antonin',
+    'Clément':'clement','Clement':'clement',
+    'Diego':'diego',
+    'Jérémie':'jeremie','Jeremie':'jeremie',
+    'Mélanie':'melanie','Melanie':'melanie',
+    'Yann':'yann',
+    'parent':'parent'
+  };
+  return map[u] || String(u||'').toLowerCase();
+}
+  const map = {
+
 const TACHES_FIXES=[
   {id:'lessive',    label:'Monter ta lessive',       icon:'👕'},
   {id:'vaisselle',  label:'Vider le lave-vaisselle', icon:'🍽️'},
@@ -641,16 +655,7 @@ const ANNIVERSAIRES = [
   { nom: 'Mélanie',  jour: 28, mois: 3  },
 ];
  
-function normalizeUserId(u){
-  const map = {
-    'Alessia':'alessia',
-    'Antonin':'antonin',
-    'Clément':'clement','Clement':'clement',
-    'Diego':'diego',
-    'Jérémie':'jeremie','Jeremie':'jeremie',
-    'Mélanie':'melanie','Melanie':'melanie',
-    'Yann':'yann'
-  };
+
  
 
 function canEditMember(memberId){
@@ -1016,20 +1021,44 @@ const current = getPresenceValue(dateStr, repas, target);
 const next = !current;
 
 
+async function togglePresence(dateStr, repas){
+  if(isParent) return; // parents ne cliquent pas sur ce bouton-là
+  const me = userToId(currentUser);
+
+  const current = getPresenceValue(dateStr, repas, me);
+  const next = !current;
+
+  setPresenceValueLocal(dateStr, repas, me, next);
+  refreshOneButton(dateStr, repas);
+  refreshCounts();
+  showToast('💾 Sauvegarde...');
+
+  const res = await apiCall({
+    action:'set_presence',
+    sheet:'PRESENCES',
+    jour: dateStr,
+    repas: repas,
+    person: me,
+    value: next ? 'TRUE' : 'FALSE'
+  });
+
+  if(String(res).trim() !== 'ok'){
+    setPresenceValueLocal(dateStr, repas, me, current);
+    refreshOneButton(dateStr, repas);
+    refreshCounts();
+    showToast('⚠️ Erreur sauvegarde');
+  } else {
+    showToast('✅ Enregistré');
+  }
+}
+
 async function togglePresenceAs(dateStr, repas, personId){
-  // Sécurité : parents ne peuvent éditer que Mélanie/Yann
   if(!isParent) return;
   if(!(personId === 'melanie' || personId === 'yann')) return;
 
   const current = getPresenceValue(dateStr, repas, personId);
   const next = !current;
 
- 
-setPresenceValueLocal(dateStr, repas, target, next);
-refreshOneButtonAs(dateStr, repas, target);
-
-
-  // Optimistic UI
   setPresenceValueLocal(dateStr, repas, personId, next);
   refreshOneButtonAs(dateStr, repas, personId);
   refreshCounts();
@@ -1045,7 +1074,6 @@ refreshOneButtonAs(dateStr, repas, target);
   });
 
   if(String(res).trim() !== 'ok'){
-    // rollback
     setPresenceValueLocal(dateStr, repas, personId, current);
     refreshOneButtonAs(dateStr, repas, personId);
     refreshCounts();
@@ -1065,6 +1093,8 @@ function refreshOneButtonAs(dateStr, repas, personId){
   btn.classList.toggle('soir', repas==='soir' && on);
   btn.textContent = on ? '✅' : '—';
 }
+
+
  
 
   // Optimistic UI
