@@ -941,22 +941,20 @@ function showToast(msg){
 }
  
 
+
 async function apiCall(params){
   try{
-    // anti-cache : ajoute un timestamp à chaque requête
+    // anti-cache: change l’URL à chaque appel (bypass caches/SW)
     const qs = new URLSearchParams({ ...params, _ts: String(Date.now()) }).toString();
     const url = SCRIPT_URL + '?' + qs;
 
-    const r = await fetch(url, { cache: 'no-store' });
+    const r = await fetch(url, { cache: 'no-store' }); // no-store = pas de cache HTTP [3](https://developer.mozilla.org/en-US/docs/Web/API/Request/cache)
     const text = await r.text();
 
-    // petit debug utile si ça ne s'enregistre pas
-    // console.log("apiCall", params.action, r.status, text);
-
-    return text;
+    // On renvoie un objet pour pouvoir diagnostiquer
+    return { ok: r.ok, status: r.status, text };
   }catch(e){
-    console.error(e);
-    return '';
+    return { ok:false, status:0, text:String(e?.message || e) };
   }
 }
 
@@ -1132,23 +1130,29 @@ async function togglePresence(dateStr, repas){
   showToast('💾 Sauvegarde...');
  showToast('⚠️ Erreur sauvegarde: ' + String(res).slice(0,40));
 
-  const res = await apiCall({
-    action:'set_presence',
-    sheet:'PRESENCES',
-    jour: dateStr,
-    repas: repas,
-    person: me,
-    value: next ? 'TRUE' : 'FALSE'
-  });
+  
+const res = await apiCall({
+  action:'set_presence',
+  sheet:'PRESENCES',
+  jour: dateStr,
+  repas: repas,
+  person: me,
+  value: next ? 'TRUE' : 'FALSE'
+});
 
-  if(String(res).trim() !== 'ok'){
-    setPresenceValueLocal(dateStr, repas, me, current);
-    refreshOneButton(dateStr, repas);
-    refreshCounts();
-    showToast('⚠️ Erreur sauvegarde');
-  } else {
-    showToast('✅ Enregistré');
-  }
+// Si Apps Script renvoie autre chose que "ok", on rollback + message clair
+const out = String(res.text || '').trim();
+if(!res.ok || out !== 'ok'){
+  setPresenceValueLocal(dateStr, repas, me, current);
+  refreshOneButton(dateStr, repas);
+  refreshCounts();
+
+  // Affiche l’erreur réelle (status + début de réponse)
+  showToast(`⚠️ Save KO (${res.status}) ${out.slice(0,60)}`);
+} else {
+  showToast('✅ Enregistré');
+}
+
 }
 
 async function togglePresenceAs(dateStr, repas, personId){
@@ -1163,23 +1167,29 @@ async function togglePresenceAs(dateStr, repas, personId){
   refreshCounts();
   showToast('💾 Sauvegarde...');
 
-  const res = await apiCall({
-    action:'set_presence',
-    sheet:'PRESENCES',
-    jour: dateStr,
-    repas: repas,
-    person: personId,
-    value: next ? 'TRUE' : 'FALSE'
-  });
+  
+const res = await apiCall({
+  action:'set_presence',
+  sheet:'PRESENCES',
+  jour: dateStr,
+  repas: repas,
+  person: me,
+  value: next ? 'TRUE' : 'FALSE'
+});
 
-  if(String(res).trim() !== 'ok'){
-    setPresenceValueLocal(dateStr, repas, personId, current);
-    refreshOneButtonAs(dateStr, repas, personId);
-    refreshCounts();
-    showToast('⚠️ Erreur sauvegarde');
-  } else {
-    showToast('✅ Enregistré');
-  }
+// Si Apps Script renvoie autre chose que "ok", on rollback + message clair
+const out = String(res.text || '').trim();
+if(!res.ok || out !== 'ok'){
+  setPresenceValueLocal(dateStr, repas, me, current);
+  refreshOneButton(dateStr, repas);
+  refreshCounts();
+
+  // Affiche l’erreur réelle (status + début de réponse)
+  showToast(`⚠️ Save KO (${res.status}) ${out.slice(0,60)}`);
+} else {
+  showToast('✅ Enregistré');
+}
+
 }
 
 function refreshOneButton(dateStr, repas){
