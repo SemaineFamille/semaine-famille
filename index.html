@@ -1051,20 +1051,28 @@ async function loadMenu(){
     if(c.length>=3) menuData[`${c[0]}_${c[1]}`]=c.slice(2).join('|').trim();
   });
   let html='';
-  JOURS.forEach((jour,ji)=>{
-    html+=`<div class="menu-jour-card"><div class="jour-header" style="margin-bottom:12px">${JOURS_LABEL[ji]}</div>`;
-    ['midi','soir'].forEach(repas=>{
-      const key=`${jour}_${repas}`;
-      const count=MEMBRES.filter(m=>presencesData[key]?.[m]==='TRUE').length;
-      const val=(menuData[key]||'').replace(/"/g,'&quot;').replace(/^-$/,'').trim();
-      html+=`<div class="menu-repas-row">
-        <span class="menu-repas-label">${repas}</span>
-        <input type="text" class="menu-repas-input" id="menu_${key}" placeholder="Repas du ${repas}..." value="${val}">
-        <span class="menu-presences">👥 ${count}</span>
-      </div>`;
-    });
-    html+=`</div>`;
+
+const dates = rollingDates(7);
+dates.forEach(({date,label})=>{
+  html += `<div class="menu-jour-card">
+    <div class="jour-header" style="margin-bottom:12px">${label}</div>`;
+
+  ['midi','soir'].forEach(repas=>{
+    const key = `${date}_${repas}`;
+    const count = PRES_MEMBRES.filter(p => presencesData[key]?.[p.id] === 'TRUE').length;
+    const val = (menuData[key] || '').replace(/"/g,'&quot;').replace(/^-$/,'').trim();
+
+    html += `<div class="menu-repas-row">
+      <span class="menu-repas-label">${repas}</span>
+      <input type="text" class="menu-repas-input" id="menu_${key}" placeholder="Repas du ${repas}..." value="${val}">
+      <span class="menu-presences">👥 ${count}</span>
+    </div>`;
   });
+
+  html += `</div>`;
+});
+
+ 
   document.getElementById('menu-content').innerHTML=html;
   document.getElementById('menu-loading').style.display='none';
   document.getElementById('menu-content').style.display='block';
