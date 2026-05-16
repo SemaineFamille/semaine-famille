@@ -7,15 +7,15 @@
   <title>Semaine Famille</title>
 
   <!-- Manifest PWA -->
-  <link rel="manifest" href="/semaine-famille/manifest.json" />
-  <meta name="theme-color" content="#9C27B0" />
+  <link rel="manifest" href="/semaine-famille/manifest.json">
+  <meta name="theme-color" content="#9C27B0">
 
   <!-- iOS -->
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Famille" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Famille">
 
-  <!-- Icône -->
+  <!-- Icône iOS -->
   <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%239C27B0'/><text y='72' x='50' text-anchor='middle' font-size='60'>⭐</text></svg>">
 
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -30,54 +30,109 @@
     *{margin:0;padding:0;box-sizing:border-box;}
     body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);}
 
-    /* LOGIN */
-    .login-screen{position:fixed;inset:0;background:linear-gradient(135deg,var(--violet),var(--rose));z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;}
-    .login-screen.hidden{display:none;}
-    .login-logo{font-size:4rem;margin-bottom:12px;}
-    .login-title{font-size:2rem;font-weight:900;color:white;margin-bottom:6px;}
-    .login-sub{color:rgba(255,255,255,0.85);font-weight:700;margin-bottom:22px;font-size:1rem;}
-    .login-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;width:100%;max-width:340px;}
-    .login-btn{
-      padding:18px;border-radius:16px;border:none;
-      font-family:'Nunito',sans-serif;font-weight:900;font-size:1rem;
-      cursor:pointer;transition:all .15s;box-shadow:0 4px 12px rgba(0,0,0,0.2);
-      color:white;
+    /* TOAST */
+    .toast{
+      position:fixed;bottom:20px;left:50%;
+      transform:translateX(-50%) translateY(120px);
+      background:var(--violet);color:white;
+      padding:12px 18px;border-radius:24px;
+      font-weight:900;font-size:0.9rem;z-index:1000;
+      transition:transform .25s;box-shadow:0 4px 20px rgba(0,0,0,0.2);
+      max-width:92vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
     }
-    .login-btn:hover{transform:translateY(-2px);}
-    .login-btn:active{transform:scale(0.98);}
-    .login-btn .avatar{font-size:2rem;display:block;margin-bottom:4px;}
-    .login-btn.parent{grid-column:span 2;}
+    .toast.show{transform:translateX(-50%) translateY(0);}
+
+    /* LOGIN */
+    .login-screen{
+      position:fixed;inset:0;
+      background:linear-gradient(135deg,var(--violet),var(--rose));
+      z-index:500;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;padding:22px;
+    }
+    .login-screen.hidden{display:none;}
+    .login-logo{font-size:4rem;margin-bottom:10px;}
+    .login-title{font-size:2rem;font-weight:900;color:white;margin-bottom:6px;}
+    .login-sub{color:rgba(255,255,255,0.85);font-weight:800;margin-bottom:18px;font-size:1rem;}
+
+    /* 6 cases identiques */
+    .grid-6{
+      width:100%;max-width:420px;
+      display:grid;grid-template-columns:repeat(3,1fr);
+      gap:12px;
+    }
+    @media (max-width:380px){
+      .grid-6{grid-template-columns:repeat(2,1fr);}
+    }
+    .tile{
+      border:none;border-radius:16px;
+      padding:16px 10px;
+      font-family:'Nunito',sans-serif;
+      font-weight:900;
+      color:white;
+      cursor:pointer;
+      box-shadow:0 4px 12px rgba(0,0,0,0.22);
+      transition:transform .15s;
+      text-align:center;
+      min-height:86px;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+    }
+    .tile:active{transform:scale(0.98);}
+    .tile .emoji{font-size:1.8rem;display:block;margin-bottom:6px;}
+    .tile.small{min-height:74px;padding:14px 10px;}
 
     /* NAV */
     .nav{background:var(--violet);position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,0.2);display:none;}
-    .nav-title{background:var(--rose);color:white;padding:10px 16px;font-size:1rem;font-weight:900;display:flex;align-items:center;justify-content:space-between;}
+    .nav-title{
+      background:var(--rose);color:white;padding:10px 16px;
+      font-size:1rem;font-weight:900;display:flex;align-items:center;justify-content:space-between;
+    }
     .nav-user{display:flex;align-items:center;gap:10px;}
-    .nav-user-name{font-size:0.9rem;font-weight:800;}
-    .nav-logout{background:rgba(255,255,255,0.2);border:none;color:white;padding:4px 10px;border-radius:20px;font-weight:800;font-size:0.8rem;cursor:pointer;}
+    .nav-user-name{font-size:0.9rem;font-weight:900;}
+    .nav-logout{background:rgba(255,255,255,0.2);border:none;color:white;padding:4px 10px;border-radius:20px;font-weight:900;font-size:0.8rem;cursor:pointer;}
+
     .nav-tabs{display:flex;overflow-x:auto;scrollbar-width:none;}
     .nav-tabs::-webkit-scrollbar{display:none;}
-    .nav-tab{flex:1;min-width:80px;padding:11px 3px;color:rgba(255,255,255,0.75);text-align:center;font-weight:900;font-size:0.75rem;cursor:pointer;border:none;background:none;transition:all .15s;border-bottom:3px solid transparent;white-space:nowrap;}
+    .nav-tab{
+      flex:1;min-width:80px;padding:11px 3px;color:rgba(255,255,255,0.75);
+      text-align:center;font-weight:900;font-size:0.75rem;cursor:pointer;border:none;background:none;
+      border-bottom:3px solid transparent;white-space:nowrap;
+    }
     .nav-tab.active{color:var(--yellow);border-bottom-color:var(--yellow);}
 
     /* PAGES */
-    .page{display:none;padding:16px;max-width:600px;margin:0 auto;padding-bottom:48px;}
+    .page{display:none;padding:16px;max-width:650px;margin:0 auto;padding-bottom:48px;}
     .page.active{display:block;}
     .card{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow);}
-    .card-title{font-size:0.95rem;font-weight:900;color:var(--violet);margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--bg);text-transform:uppercase;letter-spacing:1px;}
-    .jour-header{background:linear-gradient(135deg,var(--rose),var(--violet));color:white;padding:10px 14px;border-radius:12px;font-weight:900;font-size:0.95rem;letter-spacing:1px;margin-bottom:8px;text-align:center;}
+    .card-title{
+      font-size:0.95rem;font-weight:900;color:var(--violet);
+      margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--bg);
+      text-transform:uppercase;letter-spacing:1px;
+    }
+    .jour-header{
+      background:linear-gradient(135deg,var(--rose),var(--violet));
+      color:white;padding:10px 14px;border-radius:12px;font-weight:900;font-size:0.95rem;
+      letter-spacing:1px;margin-bottom:8px;text-align:center;
+    }
+
+    /* ACCUEIL (6 cases) */
+    .hero{text-align:center;padding:12px 10px 10px;}
+    .hero h1{font-size:1.7rem;font-weight:900;color:var(--violet);margin-bottom:4px;}
+    .hero p{color:var(--text-light);font-weight:800;margin-bottom:14px;}
 
     /* LOADING */
-    .loading{text-align:center;color:var(--text-light);padding:20px;font-weight:700;}
+    .loading{text-align:center;color:var(--text-light);padding:20px;font-weight:800;}
     .spinner{width:32px;height:32px;border:3px solid var(--bg);border-top-color:var(--violet);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 8px;}
     @keyframes spin{to{transform:rotate(360deg);}}
 
-    /* TOAST */
-    .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--violet);color:white;padding:12px 18px;border-radius:24px;font-weight:900;font-size:0.9rem;z-index:1000;transition:transform .25s;box-shadow:0 4px 20px rgba(0,0,0,0.2);max-width:92vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .toast.show{transform:translateX(-50%) translateY(0);}
-
-    /* PRESENCES - Enfants */
-    .pres-section-title{font-size:0.78rem;font-weight:900;color:var(--text-light);text-transform:uppercase;letter-spacing:1px;margin:10px 0 6px;}
-    .pres-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px;border-radius:12px;background:var(--bg);margin-bottom:8px;}
+    /* PRESENCES - ENFANTS */
+    .pres-section-title{
+      font-size:0.78rem;font-weight:900;color:var(--text-light);
+      text-transform:uppercase;letter-spacing:1px;margin:10px 0 6px;
+    }
+    .pres-row{
+      display:flex;align-items:center;justify-content:space-between;
+      gap:10px;padding:10px;border-radius:12px;background:var(--bg);margin-bottom:8px;
+    }
     .pres-date{font-weight:900;color:var(--violet);font-size:0.9rem;min-width:92px;}
     .pres-btns{display:flex;gap:8px;flex:1;justify-content:center;}
     .pres-btn{
@@ -91,16 +146,19 @@
     .pres-btn.on.soir{background:#90CAF9;color:#0b2a4a;}
     .pres-tot{font-size:0.78rem;font-weight:900;color:var(--violet);background:white;padding:6px 10px;border-radius:999px;white-space:nowrap;}
 
-    /* ENFANTS: GRILLE 2 colonnes */
+    /* ENFANTS: 2 colonnes */
     .kid-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
     @media (max-width:360px){ .kid-grid{grid-template-columns:1fr;} }
     .kid-grid .card{margin:0;padding:12px;}
-    .kid-grid .pres-date{display:none;}    /* date déjà dans le header */
+    .kid-grid .pres-date{display:none;}
     .kid-grid .pres-btn{width:100%;min-width:0;padding:8px 8px;font-size:0.9rem;}
 
-    /* PARENTS: total aligné + grille compacte */
+    /* PARENTS */
     .pres-section-head{display:flex;align-items:center;justify-content:space-between;margin:10px 0 6px;}
-    .pres-tot-inline{font-size:0.78rem;font-weight:900;color:var(--violet);background:white;padding:6px 10px;border-radius:999px;white-space:nowrap;}
+    .pres-tot-inline{
+      font-size:0.78rem;font-weight:900;color:var(--violet);
+      background:white;padding:6px 10px;border-radius:999px;white-space:nowrap;
+    }
     .parent-mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
     @media (max-width:360px){ .parent-mini-grid{grid-template-columns:1fr;} }
     .parent-mini-item{display:flex;justify-content:space-between;align-items:center;background:#fff;border-radius:10px;padding:6px 8px;}
@@ -109,19 +167,10 @@
     .parent-mini-btn{border:none;background:transparent;font-size:1.15rem;font-weight:900;cursor:pointer;line-height:1;}
     .parent-mini-btn.on{transform:scale(1.08);}
     .parent-mini-btn.off{opacity:.65;}
-
-    /* ACCUEIL */
-    .screen1-hero{text-align:center;padding:18px 12px 8px;}
-    .screen1-hero h1{font-size:1.8rem;font-weight:900;color:var(--violet);margin-bottom:6px;}
-    .screen1-hero p{color:var(--text-light);font-weight:700;margin-bottom:14px;}
-    .quick-nav{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
-    .quick-btn{background:linear-gradient(135deg,var(--violet),var(--rose));color:white;padding:16px;border-radius:16px;font-weight:900;font-size:1rem;text-align:center;cursor:pointer;border:none;transition:all .15s;box-shadow:0 4px 12px rgba(156,39,176,0.3);}
-    .quick-btn:active{transform:scale(0.98);}
   </style>
 
   <script>
-    // IMPORTANT: Service worker désactivé pendant la stabilisation (évite cache PWA)
-    // Quand tout marche, tu peux réactiver et ajouter un sw.js propre.
+    // IMPORTANT: on désactive temporairement le service worker (sw.js) pour éviter les caches PWA
     // if ("serviceWorker" in navigator) navigator.serviceWorker.register("/semaine-famille/sw.js");
   </script>
 </head>
@@ -133,24 +182,25 @@
     <div class="login-logo">⭐</div>
     <div class="login-title">Semaine Famille</div>
     <div class="login-sub">Qui es-tu ?</div>
-    <div class="login-grid">
-      <button class="login-btn" style="background:linear-gradient(135deg,#E91E63,#9C27B0)" onclick="login('Alessia')">
-        <span class="avatar">👧🦄</span>Alessia
+
+    <div class="grid-6">
+      <button class="tile" style="background:linear-gradient(135deg,#E91E63,#9C27B0)" onclick="login('Alessia')">
+        <span class="emoji">👧🦄</span>Alessia
       </button>
-      <button class="login-btn" style="background:linear-gradient(135deg,#2196F3,#00BCD4)" onclick="login('Antonin')">
-        <span class="avatar">👦🎸</span>Antonin
+      <button class="tile" style="background:linear-gradient(135deg,#2196F3,#00BCD4)" onclick="login('Antonin')">
+        <span class="emoji">👦🎸</span>Antonin
       </button>
-      <button class="login-btn" style="background:linear-gradient(135deg,#4CAF50,#8BC34A)" onclick="login('Clément')">
-        <span class="avatar">👦🥋</span>Clément
+      <button class="tile" style="background:linear-gradient(135deg,#4CAF50,#8BC34A)" onclick="login('Clément')">
+        <span class="emoji">👦🥋</span>Clément
       </button>
-      <button class="login-btn" style="background:linear-gradient(135deg,#FF9800,#FF5722)" onclick="login('Diego')">
-        <span class="avatar">👦⚽</span>Diego
+      <button class="tile" style="background:linear-gradient(135deg,#FF9800,#FF5722)" onclick="login('Diego')">
+        <span class="emoji">👦⚽</span>Diego
       </button>
-      <button class="login-btn" style="background:linear-gradient(135deg,#9C27B0,#673AB7)" onclick="login('Jérémie')">
-        <span class="avatar">👦🥐</span>Jérémie
+      <button class="tile" style="background:linear-gradient(135deg,#9C27B0,#673AB7)" onclick="login('Jérémie')">
+        <span class="emoji">👦🥐</span>Jérémie
       </button>
-      <button class="login-btn parent" style="background:linear-gradient(135deg,#FF5722,#E64A19)" onclick="login('parent')">
-        <span class="avatar">👩🏻‍🤝‍👨🏼🚑</span>Mélanie & Yann
+      <button class="tile" style="background:linear-gradient(135deg,#FF5722,#E64A19)" onclick="login('parent')">
+        <span class="emoji">👨‍👩‍👧‍👦</span>Parents
       </button>
     </div>
   </div>
@@ -167,28 +217,43 @@
         <button class="nav-logout" onclick="logout()">Changer</button>
       </div>
     </div>
-    <div class="nav-tabs" id="navTabs">
+    <div class="nav-tabs">
       <button class="nav-tab active" onclick="showPage('accueil')">🏠 Accueil</button>
       <button class="nav-tab" onclick="showPage('present')">👥 Présences</button>
       <button class="nav-tab" onclick="showPage('menu')">🍽️ Menu</button>
       <button class="nav-tab" onclick="showPage('courses')">🛒 Courses</button>
       <button class="nav-tab" onclick="showPage('taches')">✅ Tâches</button>
       <button class="nav-tab" onclick="showPage('job')">📅 Job</button>
-      <button class="nav-tab" onclick="showPage('admin')" id="adminTab">⚙️ Admin</button>
     </div>
   </div>
 
   <!-- ACCUEIL -->
   <div class="page active" id="page-accueil">
-    <div class="screen1-hero">
+    <div class="hero">
       <h1 id="accueil-title">⭐ Bonjour !</h1>
       <p>Organisation de la famille</p>
     </div>
-    <div class="quick-nav">
-      <button class="quick-btn" onclick="showPage('present')">👥 Présences</button>
-      <button class="quick-btn" onclick="showPage('menu')">🍽️ Menu</button>
-      <button class="quick-btn" onclick="showPage('courses')">🛒 Courses</button>
-      <button class="quick-btn" onclick="showPage('taches')">✅ Tâches</button>
+
+    <!-- 6 cases sur l'accueil aussi -->
+    <div class="grid-6">
+      <button class="tile small" style="background:linear-gradient(135deg,#9C27B0,#F50870)" onclick="showPage('present')">
+        <span class="emoji">👥</span>Présences
+      </button>
+      <button class="tile small" style="background:linear-gradient(135deg,#00BCD4,#2196F3)" onclick="showPage('menu')">
+        <span class="emoji">🍽️</span>Menu
+      </button>
+      <button class="tile small" style="background:linear-gradient(135deg,#FF5722,#FF9800)" onclick="showPage('courses')">
+        <span class="emoji">🛒</span>Courses
+      </button>
+      <button class="tile small" style="background:linear-gradient(135deg,#4CAF50,#8BC34A)" onclick="showPage('taches')">
+        <span class="emoji">✅</span>Tâches
+      </button>
+      <button class="tile small" style="background:linear-gradient(135deg,#673AB7,#9C27B0)" onclick="showPage('job')">
+        <span class="emoji">📅</span>Job
+      </button>
+      <button class="tile small" style="background:linear-gradient(135deg,#607D8B,#455A64)" onclick="adminOrToast()">
+        <span class="emoji">⚙️</span>Admin
+      </button>
     </div>
   </div>
 
@@ -198,12 +263,11 @@
     <div id="present-content" style="display:none"></div>
   </div>
 
-  <!-- Autres pages (placeholders pour ne pas casser ton app) -->
-  <div class="page" id="page-menu"><div class="card"><div class="card-title">🍽️ Menu</div><div class="loading">Section conservée – à recoller ensuite si besoin.</div></div></div>
-  <div class="page" id="page-courses"><div class="card"><div class="card-title">🛒 Courses</div><div class="loading">Section conservée – à recoller ensuite si besoin.</div></div></div>
-  <div class="page" id="page-taches"><div class="card"><div class="card-title">✅ Tâches</div><div class="loading">Section conservée – à recoller ensuite si besoin.</div></div></div>
-  <div class="page" id="page-job"><div class="card"><div class="card-title">📅 Job</div><div class="loading">Section conservée – à recoller ensuite si besoin.</div></div></div>
-  <div class="page" id="page-admin"><div class="card"><div class="card-title">⚙️ Admin</div><div class="loading">Section conservée – à recoller ensuite si besoin.</div></div></div>
+  <!-- Placeholders (pour ne pas casser) -->
+  <div class="page" id="page-menu"><div class="card"><div class="card-title">🍽️ Menu</div><div class="loading">Section à recoller (Menu)</div></div></div>
+  <div class="page" id="page-courses"><div class="card"><div class="card-title">🛒 Courses</div><div class="loading">Section à recoller (Courses)</div></div></div>
+  <div class="page" id="page-taches"><div class="card"><div class="card-title">✅ Tâches</div><div class="loading">Section à recoller (Tâches)</div></div></div>
+  <div class="page" id="page-job"><div class="card"><div class="card-title">📅 Job</div><div class="loading">Section à recoller (Job)</div></div></div>
 
 <script>
   // =========================
@@ -223,17 +287,24 @@
 
   let currentUser = null;
   let isParent = false;
-
   let presencesData = {};
 
   // =========================
-  // UTILITAIRES
+  // UI helpers
   // =========================
   function showToast(msg){
     const t = document.getElementById('toast');
     t.textContent = msg;
     t.classList.add('show');
     setTimeout(()=>t.classList.remove('show'), 2500);
+  }
+
+  function adminOrToast(){
+    if(isParent){
+      showToast("⚙️ Admin (à recoller)");
+    }else{
+      showToast("🔒 Réservé aux parents");
+    }
   }
 
   function userToId(u){
@@ -250,6 +321,9 @@
     return map[u] || String(u||'').toLowerCase();
   }
 
+  // =========================
+  // Dates
+  // =========================
   function addDays(date, n){ const d=new Date(date); d.setDate(d.getDate()+n); return d; }
   function ymd(date){
     const y=date.getFullYear();
@@ -272,7 +346,42 @@
     });
   }
 
-  // API : retourne du texte (pas d'objet) + anti-cache
+  // NORMALISE la date venant du script (ex: 15/05/2026 -> 2026-05-15)
+  function normalizeDateAny(raw){
+    const s = String(raw||'').trim();
+
+    // yyyy-mm-dd
+    if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+
+    // dd/mm/yyyy
+    if(/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)){
+      const [dd,mm,yyyy] = s.split('/');
+      return `${yyyy}-${String(mm).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;
+    }
+
+    // dd.mm.yyyy
+    if(/^\d{1,2}\.\d{1,2}\.\d{4}$/.test(s)){
+      const [dd,mm,yyyy] = s.split('.');
+      return `${yyyy}-${String(mm).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;
+    }
+
+    // fallback: tente parse Date
+    const d = new Date(s);
+    if(!isNaN(d.getTime())) return ymd(d);
+
+    return s; // dernier recours
+  }
+
+  function normalizeRepas(raw){
+    const s = String(raw||'').trim().toLowerCase();
+    if(s.includes('mid')) return 'midi';
+    if(s.includes('soir') || s.includes('nuit') || s.includes('eve')) return 'soir';
+    return s;
+  }
+
+  // =========================
+  // API
+  // =========================
   async function apiCall(params){
     try{
       const qs = new URLSearchParams({ ...params, _ts: String(Date.now()) }).toString();
@@ -299,7 +408,6 @@
 
     document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('mainNav').style.display = 'block';
-    document.getElementById('adminTab').style.display = isParent ? '' : 'none';
 
     document.getElementById('navUserName').textContent = isParent ? '👨‍👩‍👧‍👦 Parents' : user;
     document.getElementById('accueil-title').textContent = `⭐ Bonjour ${isParent ? '!' : user+' !'}`;
@@ -324,7 +432,7 @@
 
     document.getElementById('page-'+name).classList.add('active');
 
-    const order=['accueil','present','menu','courses','taches','job','admin'];
+    const order=['accueil','present','menu','courses','taches','job'];
     const idx=order.indexOf(name);
     if(idx>=0) document.querySelectorAll('.nav-tab')[idx].classList.add('active');
 
@@ -366,7 +474,7 @@
         }
         return `<div class="parent-mini-item">
           <span class="parent-mini-name">${p.label}</span>
-          <button id="btn_${dateStr}_${repas}_${p.id}" class="parent-mini-btn ${on?'on':'off'}"
+          <button class="parent-mini-btn ${on?'on':'off'}"
             onclick="togglePresenceAs('${dateStr}','${repas}','${p.id}')">${symbol}</button>
         </div>`;
       }).join('') +
@@ -380,7 +488,7 @@
 
     html += `<div class="card">
       <div class="card-title">👥 Présences — 7 jours glissants</div>
-      <div style="color:var(--text-light);font-weight:800;font-size:0.85rem">
+      <div style="color:var(--text-light);font-weight:900;font-size:0.85rem">
         ${isParent
           ? "Récap famille + modification possible pour Mélanie & Yann"
           : "Clique sur 🌞 / 🌙 pour indiquer ta présence (auto-save)."}
@@ -419,8 +527,7 @@
           <div class="pres-row">
             <div class="pres-date">${date}</div>
             <div class="pres-btns">
-              <button class="pres-btn ${onMidi?'on midi':'off'}" id="btn_${date}_midi"
-                onclick="togglePresence('${date}','midi')">🌞</button>
+              <button class="pres-btn ${onMidi?'on midi':'off'}" onclick="togglePresence('${date}','midi')">🌞</button>
             </div>
             <div class="pres-tot">👥 ${midiCount}</div>
           </div>
@@ -429,8 +536,7 @@
           <div class="pres-row">
             <div class="pres-date">${date}</div>
             <div class="pres-btns">
-              <button class="pres-btn ${onSoir?'on soir':'off'}" id="btn_${date}_soir"
-                onclick="togglePresence('${date}','soir')">🌙</button>
+              <button class="pres-btn ${onSoir?'on soir':'off'}" onclick="togglePresence('${date}','soir')">🌙</button>
             </div>
             <div class="pres-tot">👥 ${soirCount}</div>
           </div>
@@ -441,7 +547,6 @@
     });
 
     if(!isParent) html += `</div>`;
-
     document.getElementById('present-content').innerHTML = html;
   }
 
@@ -459,10 +564,13 @@
       parseLines(text).forEach(line=>{
         const c = line.split('|');
         if(c.length >= 9){
-          const key = `${c[0]}_${c[1]}`;
+          const dateNorm = normalizeDateAny(c[0]);
+          const repasNorm = normalizeRepas(c[1]);
+          const key = `${dateNorm}_${repasNorm}`;
+
           presencesData[key] = {
             alessia: c[2], antonin: c[3], clement: c[4], diego: c[5],
-            jeremie: c[6], melanie: c[7], yann: c[8].trim()
+            jeremie: c[6], melanie: c[7], yann: (c[8]||'').trim()
           };
         }
       });
@@ -497,7 +605,7 @@
       jour: dateStr, repas, person: me, value: next?'TRUE':'FALSE'
     });
 
-    // fallback si ton Apps Script utilise "enregistrer" plutôt que set_presence
+    // fallback si ton script attend "enregistrer"
     if(String(res).trim() !== 'ok'){
       res = await apiCall({
         action:'enregistrer', sheet:'PRESENCES',
@@ -505,7 +613,6 @@
       });
     }
 
-    // relecture serveur (pour que parent voit la même chose)
     await loadPresences();
 
     if(String(res).trim() !== 'ok'){
