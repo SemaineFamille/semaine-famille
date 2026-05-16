@@ -270,6 +270,12 @@
   <div class="page" id="page-job"><div class="card"><div class="card-title">📅 Job</div><div class="loading">Section à recoller (Job)</div></div></div>
 
 <script>
+
+  
+function delay(ms){
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
   // =========================
   // CONFIG
   // =========================
@@ -589,70 +595,129 @@
     }
   }
 
-  async function togglePresence(dateStr, repas){
-    if(isParent) return;
+ 
+async function togglePresence(dateStr, repas){
+  if(isParent next = !current;  if(isParent) return;
 
-    const me = userToId(currentUser);
-    const current = getPresenceValue(dateStr, repas, me);
-    const next = !current;
+  // UI optimiste (on garde ça quoiqu'il arrive)
+  setPresenceValueLocal(dateStr, repas, me, next);
+  buildPresencesUI();
+  showToast('💾 Sauvegarde...');
 
-    setPresenceValueLocal(dateStr, repas, me, next);
-    buildPresencesUI();
-    showToast('💾 Sauvegarde...');
+  // 1) Essai set_presence
+  let res = await apiCall({
+    action:'set_presence',
+    sheet:'PRESENCES',
+    jour: dateStr,
+    repas: repas,
+    person: me,
+    value: next ? 'TRUE' : 'FALSE'
+  });
 
-    let res = await apiCall({
-      action:'set_presence', sheet:'PRESENCES',
-      jour: dateStr, repas, person: me, value: next?'TRUE':'FALSE'
+  // 2) Fallback si ton script attend "enregistrer"
+  if(String(res).trim() !== 'ok'){
+    res = await apiCall({
+      action:'enregistrer',
+      sheet:'PRESENCES',
+      jour: dateStr,
+      repas: repas,
+      person: me,
+      value: next ? 'TRUE' : 'FALSE'
     });
-
-    // fallback si ton script attend "enregistrer"
-    if(String(res).trim() !== 'ok'){
-      res = await apiCall({
-        action:'enregistrer', sheet:'PRESENCES',
-        jour: dateStr, repas, person: me, value: next?'TRUE':'FALSE'
-      });
-    }
-
-    await loadPresences();
-
-    if(String(res).trim() !== 'ok'){
-      showToast('⚠️ Pas enregistré (script)');
-    } else {
-      showToast('✅ Enregistré');
-    }
   }
 
-  async function togglePresenceAs(dateStr, repas, personId){
-    if(!isParent) return;
-    if(!(personId === 'melanie' || personId === 'yann')) return;
+  if(String(res).trim() !== 'ok'){
+    // Si le serveur refuse, on rollback
+    setPresenceValueLocal(dateStr, repas, me, current);
+    buildPresencesUI();
+    showToast('⚠️ Sauvegarde impossible');
+    return;
+  }
 
-    const current = getPresenceValue(dateStr, repas, personId);
-    const next = !current;
+  // ✅ Le serveur dit "ok", mais la lecture peut être en retard.
+  showToast('✅ Sauvé');
+
+  // 3) Relecture avec délai + retries (évite l'effet "ça s'efface")
+  for(let attempt=0; attempt<3; attempt++){
+    await delay(350 + attempt*350); // 350ms, 700ms, 1050ms
+    await loadPresences();
+
+    const after = getPresenceValue(dateStr, repas, me);
+    if(after === next){
+      // c'est bien visible côté lecture, terminé
+      return;
+    }
+
+    // sinon on remet l'état optimiste à l'écran et on retentera la relecture
+    setPresenceValueLocal(dateStr, repas, me, next);
+    buildPresencesUI();
+  }
+
+  // Après 3 essais, on garde l'état local (et ça se corrigera à la prochaine lecture)
+  showToast('⏳ Sync en cours…');
+}
+
+  const me = userToId(currentUser);
+  const current = getPresenceValue(dateStr, repas, me);
+
+
+ 
+async function togglePresenceAs(dateStr, repas, personId){
+  if(!isParent) return;
+  if(!(personId === 'melanie' || personId === 'yann')) return;
+
+  const current = getPresenceValue(dateStr, repas, personId);
+  const next = !current;
+
+  setPresenceValueLocal(dateStr, repas, personId, next);
+  buildPresencesUI();
+  showToast('💾 Sauvegarde...');
+
+  let res = await apiCall({
+    action:'set_presence',
+    sheet:'PRESENCES',
+    jour: dateStr,
+    repas: repas,
+    person: personId,
+    value: next ? 'TRUE' : 'FALSE'
+  });
+
+  if(String(res).trim() !== 'ok'){
+    res = await apiCall({
+      action:'enregistrer',
+      sheet:'PRESENCES',
+      jour: dateStr,
+      repas: repas,
+      person: personId,
+      value: next ? 'TRUE' : 'FALSE'
+    });
+  }
+
+  if(String(res).trim() !== 'ok'){
+    setPresenceValueLocal(dateStr, repas, personId, current);
+    buildPresencesUI();
+    showToast('⚠️ Sauvegarde impossible');
+    return;
+  }
+
+  showToast('✅ Sauvé');
+
+  for(let attempt=0; attempt<3; attempt++){
+    await delay(350 + attempt*350);
+    await loadPresences();
+
+    const after = getPresenceValue(dateStr, repas, personId);
+    if(after === next){
+      return;
+    }
 
     setPresenceValueLocal(dateStr, repas, personId, next);
     buildPresencesUI();
-    showToast('💾 Sauvegarde...');
-
-    let res = await apiCall({
-      action:'set_presence', sheet:'PRESENCES',
-      jour: dateStr, repas, person: personId, value: next?'TRUE':'FALSE'
-    });
-
-    if(String(res).trim() !== 'ok'){
-      res = await apiCall({
-        action:'enregistrer', sheet:'PRESENCES',
-        jour: dateStr, repas, person: personId, value: next?'TRUE':'FALSE'
-      });
-    }
-
-    await loadPresences();
-
-    if(String(res).trim() !== 'ok'){
-      showToast('⚠️ Pas enregistré (script)');
-    } else {
-      showToast('✅ Enregistré');
-    }
   }
+
+  showToast('⏳ Sync en cours…');
+}
+
 </script>
 
 </body>
