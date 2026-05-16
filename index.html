@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -5,12 +6,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Semaine Famille</title>
 
+  <!-- Manifest PWA -->
   <link rel="manifest" href="/semaine-famille/manifest.json">
   <meta name="theme-color" content="#9C27B0">
+
+  <!-- iOS -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Famille">
   <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%239C27B0'/><text y='72' x='50' text-anchor='middle' font-size='60'>⭐</text></svg>">
+
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 
   <style>
@@ -23,6 +28,7 @@
     *{margin:0;padding:0;box-sizing:border-box;}
     body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);}
 
+    /* TOAST */
     .toast{
       position:fixed;bottom:20px;left:50%;
       transform:translateX(-50%) translateY(120px);
@@ -34,6 +40,7 @@
     }
     .toast.show{transform:translateX(-50%) translateY(0);}
 
+    /* LOGIN */
     .login-screen{
       position:fixed;inset:0;
       background:linear-gradient(135deg,var(--violet),var(--rose));
@@ -45,6 +52,7 @@
     .login-title{font-size:2rem;font-weight:900;color:white;margin-bottom:6px;}
     .login-sub{color:rgba(255,255,255,0.85);font-weight:800;margin-bottom:18px;font-size:1rem;}
 
+    /* 6 cases identiques */
     .grid-6{
       width:100%;max-width:420px;
       display:grid;grid-template-columns:repeat(3,1fr);
@@ -70,6 +78,7 @@
     .tile .emoji{font-size:1.8rem;display:block;margin-bottom:6px;}
     .tile.small{min-height:74px;padding:14px 10px;}
 
+    /* NAV */
     .nav{background:var(--violet);position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,0.2);display:none;}
     .nav-title{
       background:var(--rose);color:white;padding:10px 16px;
@@ -88,6 +97,7 @@
     }
     .nav-tab.active{color:var(--yellow);border-bottom-color:var(--yellow);}
 
+    /* PAGES */
     .page{display:none;padding:16px;max-width:650px;margin:0 auto;padding-bottom:48px;}
     .page.active{display:block;}
     .card{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow);}
@@ -102,14 +112,17 @@
       letter-spacing:1px;margin-bottom:8px;text-align:center;
     }
 
+    /* ACCUEIL */
     .hero{text-align:center;padding:12px 10px 10px;}
     .hero h1{font-size:1.7rem;font-weight:900;color:var(--violet);margin-bottom:4px;}
     .hero p{color:var(--text-light);font-weight:800;margin-bottom:14px;}
 
+    /* LOADING */
     .loading{text-align:center;color:var(--text-light);padding:20px;font-weight:800;}
     .spinner{width:32px;height:32px;border:3px solid var(--bg);border-top-color:var(--violet);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 8px;}
     @keyframes spin{to{transform:rotate(360deg);}}
 
+    /* PRESENCES - ENFANTS */
     .pres-section-title{
       font-size:0.78rem;font-weight:900;color:var(--text-light);
       text-transform:uppercase;letter-spacing:1px;margin:10px 0 6px;
@@ -131,12 +144,14 @@
     .pres-btn.on.soir{background:#90CAF9;color:#0b2a4a;}
     .pres-tot{font-size:0.78rem;font-weight:900;color:var(--violet);background:white;padding:6px 10px;border-radius:999px;white-space:nowrap;}
 
+    /* ENFANTS: 2 colonnes */
     .kid-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
     @media (max-width:360px){ .kid-grid{grid-template-columns:1fr;} }
     .kid-grid .card{margin:0;padding:12px;}
     .kid-grid .pres-date{display:none;}
     .kid-grid .pres-btn{width:100%;min-width:0;padding:8px 8px;font-size:0.9rem;}
 
+    /* PARENTS */
     .pres-section-head{display:flex;align-items:center;justify-content:space-between;margin:10px 0 6px;}
     .pres-tot-inline{
       font-size:0.78rem;font-weight:900;color:var(--violet);
@@ -151,10 +166,15 @@
     .parent-mini-btn.on{transform:scale(1.08);}
     .parent-mini-btn.off{opacity:.65;}
   </style>
+
+  <script>
+    // IMPORTANT: on NE REGISTER PAS de service worker ici.
+    // Un service worker peut intercepter les fetch et servir du cache (fetch event). [1](https://onedrive.live.com/?id=ae2bd4d8-7430-2078-801c-900f00000000&cid=1c787430ae2bd4d8&web=1)[2](https://web.dev/articles/service-worker-caching-and-http-caching)
+    // On le purge au lancement pour stopper l'effet "ça s'efface après sauvé".
+  </script>
 </head>
 
 <body>
-
   <!-- LOGIN -->
   <div class="login-screen" id="loginScreen">
     <div class="login-logo">⭐</div>
@@ -162,28 +182,15 @@
     <div class="login-sub">Qui es-tu ?</div>
 
     <div class="grid-6">
-      <button class="tile" style="background:linear-gradient(135deg,#E91E63,#9C27B0)" onclick="login('Alessia')">
-        <span class="emoji">👧🦄</span>Alessia
-      </button>
-      <button class="tile" style="background:linear-gradient(135deg,#2196F3,#00BCD4)" onclick="login('Antonin')">
-        <span class="emoji">👦🎸</span>Antonin
-      </button>
-      <button class="tile" style="background:linear-gradient(135deg,#4CAF50,#8BC34A)" onclick="login('Clément')">
-        <span class="emoji">👦🥋</span>Clément
-      </button>
-      <button class="tile" style="background:linear-gradient(135deg,#FF9800,#FF5722)" onclick="login('Diego')">
-        <span class="emoji">👦⚽</span>Diego
-      </button>
-      <button class="tile" style="background:linear-gradient(135deg,#9C27B0,#673AB7)" onclick="login('Jérémie')">
-        <span class="emoji">👦🥐</span>Jérémie
-      </button>
-      <button class="tile" style="background:linear-gradient(135deg,#FF5722,#E64A19)" onclick="login('parent')">
-        <span class="emoji">👨‍👩‍👧‍👦</span>Parents
-      </button>
+      <button class="tile" style="background:linear-gradient(135deg,#E91E63,#9C27B0)" onclick="login('Alessia')"><span class="emoji">👧🦄</span>Alessia</button>
+      <button class="tile" style="background:linear-gradient(135deg,#2196F3,#00BCD4)" onclick="login('Antonin')"><span class="emoji">👦🎸</span>Antonin</button>
+      <button class="tile" style="background:linear-gradient(135deg,#4CAF50,#8BC34A)" onclick="login('Clément')"><span class="emoji">👦🥋</span>Clément</button>
+      <button class="tile" style="background:linear-gradient(135deg,#FF9800,#FF5722)" onclick="login('Diego')"><span class="emoji">👦⚽</span>Diego</button>
+      <button class="tile" style="background:linear-gradient(135deg,#9C27B0,#673AB7)" onclick="login('Jérémie')"><span class="emoji">👦🥐</span>Jérémie</button>
+      <button class="tile" style="background:linear-gradient(135deg,#FF5722,#E64A19)" onclick="login('parent')"><span class="emoji">👨‍👩‍👧‍👦</span>Parents</button>
     </div>
   </div>
 
-  <!-- TOAST -->
   <div class="toast" id="toast"></div>
 
   <!-- NAV -->
@@ -205,31 +212,20 @@
     </div>
   </div>
 
-  <!-- ACCUEIL -->
+  <!-- ACCUEIL : 6 cases identiques (pas de bouton Parents ici) -->
   <div class="page active" id="page-accueil">
     <div class="hero">
       <h1 id="accueil-title">⭐ Bonjour !</h1>
       <p>Organisation de la famille</p>
     </div>
+
     <div class="grid-6">
-      <button class="tile small" style="background:linear-gradient(135deg,#9C27B0,#F50870)" onclick="showPage('present')">
-        <span class="emoji">👥</span>Présences
-      </button>
-      <button class="tile small" style="background:linear-gradient(135deg,#00BCD4,#2196F3)" onclick="showPage('menu')">
-        <span class="emoji">🍽️</span>Menu
-      </button>
-      <button class="tile small" style="background:linear-gradient(135deg,#FF5722,#FF9800)" onclick="showPage('courses')">
-        <span class="emoji">🛒</span>Courses
-      </button>
-      <button class="tile small" style="background:linear-gradient(135deg,#4CAF50,#8BC34A)" onclick="showPage('taches')">
-        <span class="emoji">✅</span>Tâches
-      </button>
-      <button class="tile small" style="background:linear-gradient(135deg,#673AB7,#9C27B0)" onclick="showPage('job')">
-        <span class="emoji">📅</span>Job
-      </button>
-      <button class="tile small" style="background:linear-gradient(135deg,#607D8B,#455A64)" onclick="adminOrToast()">
-        <span class="emoji">⚙️</span>Admin
-      </button>
+      <button class="tile small" style="background:linear-gradient(135deg,#9C27B0,#F50870)" onclick="showPage('present')"><span class="emoji">👥</span>Présences</button>
+      <button class="tile small" style="background:linear-gradient(135deg,#00BCD4,#2196F3)" onclick="showPage('menu')"><span class="emoji">🍽️</span>Menu</button>
+      <button class="tile small" style="background:linear-gradient(135deg,#FF5722,#FF9800)" onclick="showPage('courses')"><span class="emoji">🛒</span>Courses</button>
+      <button class="tile small" style="background:linear-gradient(135deg,#4CAF50,#8BC34A)" onclick="showPage('taches')"><span class="emoji">✅</span>Tâches</button>
+      <button class="tile small" style="background:linear-gradient(135deg,#673AB7,#9C27B0)" onclick="showPage('job')"><span class="emoji">📅</span>Job</button>
+      <button class="tile small" style="background:linear-gradient(135deg,#607D8B,#455A64)" onclick="showToast(isParent?'⚙️ Admin (à recoller)':'🔒 Parents')"><span class="emoji">⚙️</span>Admin</button>
     </div>
   </div>
 
@@ -240,17 +236,12 @@
   </div>
 
   <!-- Placeholders -->
-  <div class="page" id="page-menu"><div class="card"><div class="card-title">🍽️ Menu</div><div class="loading">Section à recoller (Menu)</div></div></div>
-  <div class="page" id="page-courses"><div class="card"><div class="card-title">🛒 Courses</div><div class="loading">Section à recoller (Courses)</div></div></div>
-  <div class="page" id="page-taches"><div class="card"><div class="card-title">✅ Tâches</div><div class="loading">Section à recoller (Tâches)</div></div></div>
-  <div class="page" id="page-job"><div class="card"><div class="card-title">📅 Job</div><div class="loading">Section à recoller (Job)</div></div></div>
+  <div class="page" id="page-menu"><div class="card"><div class="card-title">🍽️ Menu</div><div class="loading">Section à recoller</div></div></div>
+  <div class="page" id="page-courses"><div class="card"><div class="card-title">🛒 Courses</div><div class="loading">Section à recoller</div></div></div>
+  <div class="page" id="page-taches"><div class="card"><div class="card-title">✅ Tâches</div><div class="loading">Section à recoller</div></div></div>
+  <div class="page" id="page-job"><div class="card"><div class="card-title">📅 Job</div><div class="loading">Section à recoller</div></div></div>
 
 <script>
-
-  function delay(ms){
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
   // =========================
   // CONFIG
   // =========================
@@ -269,6 +260,27 @@
   let currentUser = null;
   let isParent = false;
   let presencesData = {};
+  let lastOptimistic = null; // {dateStr, repas, personId, next}
+
+  // =========================
+  // Purge SW + caches (stoppe les réponses "anciennes")
+  // Code basé sur unregister + delete caches. [5](https://stackoverflow.com/questions/47358643/how-do-i-clear-service-worker-caches-when-unregistering)[6](https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerContainer)
+  // =========================
+  (async function purgeServiceWorkerAndCaches(){
+    try{
+      if('serviceWorker' in navigator){
+        const regs = await navigator.serviceWorker.getRegistrations(); // API SW container [6](https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerContainer)
+        await Promise.all(regs.map(r => r.unregister()));
+      }
+      if('caches' in window){
+        const keys = await caches.keys();
+        await Promise.all(keys.map(k => caches.delete(k)));
+      }
+    }catch(e){
+      // pas bloquant
+      console.log('SW purge skipped', e);
+    }
+  })();
 
   // =========================
   // UI helpers
@@ -280,31 +292,18 @@
     setTimeout(()=>t.classList.remove('show'), 2500);
   }
 
-  function adminOrToast(){
-    if(isParent){
-      showToast("⚙️ Admin (à recoller)");
-    }else{
-      showToast("🔒 Réservé aux parents");
-    }
-  }
+  function delay(ms){ return new Promise(r=>setTimeout(r, ms)); }
 
   function userToId(u){
     const map = {
-      'Alessia':'alessia',
-      'Antonin':'antonin',
-      'Clément':'clement','Clement':'clement',
-      'Diego':'diego',
-      'Jérémie':'jeremie','Jeremie':'jeremie',
-      'Mélanie':'melanie','Melanie':'melanie',
-      'Yann':'yann',
-      'parent':'parent'
+      'Alessia':'alessia','Antonin':'antonin','Clément':'clement','Clement':'clement',
+      'Diego':'diego','Jérémie':'jeremie','Jeremie':'jeremie',
+      'Mélanie':'melanie','Melanie':'melanie','Yann':'yann','parent':'parent'
     };
     return map[u] || String(u||'').toLowerCase();
   }
 
-  // =========================
   // Dates
-  // =========================
   function addDays(date, n){ const d=new Date(date); d.setDate(d.getDate()+n); return d; }
   function ymd(date){
     const y=date.getFullYear();
@@ -327,22 +326,18 @@
     });
   }
 
+  // Normalisation (évite mismatch entre Sheet et UI)
   function normalizeDateAny(raw){
     const s = String(raw||'').trim();
     if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
     if(/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)){
-      const [dd,mm,yyyy] = s.split('/');
-      return `${yyyy}-${String(mm).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;
-    }
-    if(/^\d{1,2}\.\d{1,2}\.\d{4}$/.test(s)){
-      const [dd,mm,yyyy] = s.split('.');
+      const [dd,mm,yyyy]=s.split('/');
       return `${yyyy}-${String(mm).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;
     }
     const d = new Date(s);
     if(!isNaN(d.getTime())) return ymd(d);
     return s;
   }
-
   function normalizeRepas(raw){
     const s = String(raw||'').trim().toLowerCase();
     if(s.includes('mid')) return 'midi';
@@ -350,13 +345,12 @@
     return s;
   }
 
-  // =========================
-  // API
-  // =========================
+  // API text + anti-cache
   async function apiCall(params){
     try{
       const qs = new URLSearchParams({ ...params, _ts: String(Date.now()) }).toString();
       const url = SCRIPT_URL + '?' + qs;
+      // cache:no-store = bypass cache HTTP [3](https://onedrive.live.com/?id=bf10cab2-7a2e-412f-afc8-b792b3903cb3&cid=1c787430ae2bd4d8&web=1)
       const r = await fetch(url, { cache:'no-store' });
       return await r.text();
     }catch(e){
@@ -387,9 +381,7 @@
   }
 
   function logout(){
-    currentUser = null;
-    isParent = false;
-    presencesData = {};
+    currentUser=null; isParent=false; presencesData={}; lastOptimistic=null;
 
     document.getElementById('loginScreen').classList.remove('hidden');
     document.getElementById('mainNav').style.display = 'none';
@@ -419,13 +411,11 @@
     const s = String(v ?? '').trim().toUpperCase();
     return (v===true) || (s==='TRUE' || s==='1' || s==='OUI' || s==='YES');
   }
-
   function setPresenceValueLocal(dateStr, repas, personId, boolVal){
     const key = `${dateStr}_${repas}`;
     if(!presencesData[key]) presencesData[key] = {};
     presencesData[key][personId] = boolVal ? 'TRUE' : 'FALSE';
   }
-
   function computeCount(dateStr, repas){
     return PRES_MEMBRES.filter(p => getPresenceValue(dateStr, repas, p.id)).length;
   }
@@ -436,7 +426,6 @@
         const on = getPresenceValue(dateStr, repas, p.id);
         const editable = (p.id === 'melanie' || p.id === 'yann');
         const symbol = on ? '✅' : '—';
-
         if(!editable){
           return `<div class="parent-mini-item">
             <span class="parent-mini-name">${p.label}</span>
@@ -448,8 +437,7 @@
           <button class="parent-mini-btn ${on?'on':'off'}"
             onclick="togglePresenceAs('${dateStr}','${repas}','${p.id}')">${symbol}</button>
         </div>`;
-      }).join('') +
-    `</div>`;
+      }).join('') + `</div>`;
   }
 
   function buildPresencesUI(){
@@ -472,8 +460,7 @@
       const midiCount = computeCount(date,'midi');
       const soirCount = computeCount(date,'soir');
 
-      html += `<div class="card">
-        <div class="jour-header">${label}</div>`;
+      html += `<div class="card"><div class="jour-header">${label}</div>`;
 
       if(isParent){
         html += `
@@ -521,6 +508,26 @@
     document.getElementById('present-content').innerHTML = html;
   }
 
+  // Lecture serveur -> map
+  async function fetchPresencesToMap(){
+    const start = ymd(new Date());
+    const text = await apiCall({ action:'lire', sheet:'PRESENCES', start, days: 7 });
+    const map = {};
+    parseLines(text).forEach(line=>{
+      const c=line.split('|');
+      if(c.length>=9){
+        const dateNorm = normalizeDateAny(c[0]);
+        const repasNorm = normalizeRepas(c[1]);
+        const key = `${dateNorm}_${repasNorm}`;
+        map[key]={
+          alessia:c[2], antonin:c[3], clement:c[4], diego:c[5],
+          jeremie:c[6], melanie:c[7], yann:(c[8]||'').trim()
+        };
+      }
+    });
+    return map;
+  }
+
   async function loadPresences(){
     const loading = document.getElementById('present-loading');
     const content = document.getElementById('present-content');
@@ -528,71 +535,53 @@
     content.style.display='none';
 
     try{
-      const start = ymd(new Date());
-      const text = await apiCall({ action:'lire', sheet:'PRESENCES', start, days: 7 });
+      const map = await fetchPresencesToMap();
+      presencesData = map;
 
-      presencesData = {};
-      parseLines(text).forEach(line=>{
-        const c = line.split('|');
-        if(c.length >= 9){
-          const dateNorm = normalizeDateAny(c[0]);
-          const repasNorm = normalizeRepas(c[1]);
-          const key = `${dateNorm}_${repasNorm}`;
-
-          presencesData[key] = {
-            alessia: c[2], antonin: c[3], clement: c[4], diego: c[5],
-            jeremie: c[6], melanie: c[7], yann: (c[8]||'').trim()
-          };
+      // IMPORTANT: si on a un état optimiste récent, on le garde tant que le serveur n'a pas "rattrapé"
+      if(lastOptimistic){
+        const {dateStr, repas, personId, next} = lastOptimistic;
+        const serverVal = (map[`${dateStr}_${repas}`]?.[personId] || '').toString().trim().toUpperCase();
+        const serverBool = (serverVal === 'TRUE' || serverVal === '1' || serverVal === 'OUI' || serverVal === 'YES');
+        if(serverBool !== next){
+          setPresenceValueLocal(dateStr, repas, personId, next);
+        } else {
+          lastOptimistic = null;
         }
-      });
+      }
 
       content.style.display='block';
       buildPresencesUI();
-    } catch(e){
+    }catch(e){
       console.error(e);
       content.style.display='block';
-      content.innerHTML = `<div class="card">
-        <div class="card-title">Erreur Présences</div>
-        <div class="loading">${String(e?.message || e)}</div>
-      </div>`;
-    } finally {
+      content.innerHTML = `<div class="card"><div class="card-title">Erreur Présences</div><div class="loading">${String(e?.message||e)}</div></div>`;
+    }finally{
       loading.style.display='none';
     }
   }
 
-  // ✅ CORRIGÉ : togglePresence — variables déclarées DANS la fonction, garde en haut propre
+  // Sauvegarde robuste sans “wipe”
   async function togglePresence(dateStr, repas){
-    if(isParent) return;  // garde — enfants seulement
-
-    const me = userToId(currentUser);                          // FIX: déclaré ici
-    const current = getPresenceValue(dateStr, repas, me);      // FIX: déclaré ici
+    if(isParent) return;
+    const me = userToId(currentUser);
+    const current = getPresenceValue(dateStr, repas, me);
     const next = !current;
 
+    // optimiste
+    lastOptimistic = {dateStr, repas, personId:me, next};
     setPresenceValueLocal(dateStr, repas, me, next);
     buildPresencesUI();
     showToast('💾 Sauvegarde...');
 
-    let res = await apiCall({
-      action:'set_presence',
-      sheet:'PRESENCES',
-      jour: dateStr,
-      repas: repas,
-      person: me,
-      value: next ? 'TRUE' : 'FALSE'
-    });
-
+    // écrit
+    let res = await apiCall({ action:'set_presence', sheet:'PRESENCES', jour:dateStr, repas, person:me, value: next?'TRUE':'FALSE' });
     if(String(res).trim() !== 'ok'){
-      res = await apiCall({
-        action:'enregistrer',
-        sheet:'PRESENCES',
-        jour: dateStr,
-        repas: repas,
-        person: me,
-        value: next ? 'TRUE' : 'FALSE'
-      });
+      res = await apiCall({ action:'enregistrer', sheet:'PRESENCES', jour:dateStr, repas, person:me, value: next?'TRUE':'FALSE' });
     }
-
     if(String(res).trim() !== 'ok'){
+      // rollback si le script refuse
+      lastOptimistic = null;
       setPresenceValueLocal(dateStr, repas, me, current);
       buildPresencesUI();
       showToast('⚠️ Sauvegarde impossible');
@@ -601,50 +590,45 @@
 
     showToast('✅ Sauvé');
 
-    for(let attempt=0; attempt<3; attempt++){
-      await delay(350 + attempt*350);
-      await loadPresences();
-      const after = getPresenceValue(dateStr, repas, me);
-      if(after === next) return;
+    // sync (retry) : on attend un peu que la lecture “voit” la modif
+    for(let i=0;i<4;i++){
+      await delay(300 + i*400);
+      const map = await fetchPresencesToMap();
+      const key = `${dateStr}_${repas}`;
+      const v = (map[key]?.[me] || '').toString().trim().toUpperCase();
+      const ok = (v === (next?'TRUE':'FALSE'));
+      if(ok){
+        presencesData = map;
+        lastOptimistic = null;
+        buildPresencesUI();
+        return;
+      }
+      // sinon on garde l'état optimiste (pas d'effacement)
+      presencesData = map;
       setPresenceValueLocal(dateStr, repas, me, next);
       buildPresencesUI();
     }
-
     showToast('⏳ Sync en cours…');
   }
 
   async function togglePresenceAs(dateStr, repas, personId){
     if(!isParent) return;
-    if(!(personId === 'melanie' || personId === 'yann')) return;
+    if(!(personId==='melanie' || personId==='yann')) return;
 
     const current = getPresenceValue(dateStr, repas, personId);
     const next = !current;
 
+    lastOptimistic = {dateStr, repas, personId, next};
     setPresenceValueLocal(dateStr, repas, personId, next);
     buildPresencesUI();
     showToast('💾 Sauvegarde...');
 
-    let res = await apiCall({
-      action:'set_presence',
-      sheet:'PRESENCES',
-      jour: dateStr,
-      repas: repas,
-      person: personId,
-      value: next ? 'TRUE' : 'FALSE'
-    });
-
+    let res = await apiCall({ action:'set_presence', sheet:'PRESENCES', jour:dateStr, repas, person:personId, value: next?'TRUE':'FALSE' });
     if(String(res).trim() !== 'ok'){
-      res = await apiCall({
-        action:'enregistrer',
-        sheet:'PRESENCES',
-        jour: dateStr,
-        repas: repas,
-        person: personId,
-        value: next ? 'TRUE' : 'FALSE'
-      });
+      res = await apiCall({ action:'enregistrer', sheet:'PRESENCES', jour:dateStr, repas, person:personId, value: next?'TRUE':'FALSE' });
     }
-
     if(String(res).trim() !== 'ok'){
+      lastOptimistic = null;
       setPresenceValueLocal(dateStr, repas, personId, current);
       buildPresencesUI();
       showToast('⚠️ Sauvegarde impossible');
@@ -653,18 +637,24 @@
 
     showToast('✅ Sauvé');
 
-    for(let attempt=0; attempt<3; attempt++){
-      await delay(350 + attempt*350);
-      await loadPresences();
-      const after = getPresenceValue(dateStr, repas, personId);
-      if(after === next) return;
+    for(let i=0;i<4;i++){
+      await delay(300 + i*400);
+      const map = await fetchPresencesToMap();
+      const key = `${dateStr}_${repas}`;
+      const v = (map[key]?.[personId] || '').toString().trim().toUpperCase();
+      const ok = (v === (next?'TRUE':'FALSE'));
+      if(ok){
+        presencesData = map;
+        lastOptimistic = null;
+        buildPresencesUI();
+        return;
+      }
+      presencesData = map;
       setPresenceValueLocal(dateStr, repas, personId, next);
       buildPresencesUI();
     }
-
     showToast('⏳ Sync en cours…');
   }
-
 </script>
 
 </body>
