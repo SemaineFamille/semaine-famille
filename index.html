@@ -798,12 +798,21 @@
     /* ==========================================================
        PRESENCES (LOCAL + SAVE)
        ========================================================== */
-    function getPresenceValue(dateStr, repas, personId){
-      const key = `${dateStr}_${repas}`;
-      const v = presencesData[key]?.[personId];
-      const s = String(v ?? '').trim().toUpperCase();
-      return (v===true) || (s==='TRUE' || s==='1' || s==='YES' || s==='OUI');
-    }
+    
+function getPresenceValue(dateStr, repas, personId){
+  const key = `${dateStr}_${repas}`;
+  === true || v === 1) return true;  const v = presencesData[key]?.[personId];
+
+  const s = String(v || '').trim().toLowerCase();
+
+  return (
+    s === 'true' ||
+    s === '1' ||
+    s === 'yes' ||
+    s === 'oui'
+  );
+}
+
 
     function setPresenceValueLocal(dateStr, repas, personId, boolVal){
       const key = `${dateStr}_${repas}`;
