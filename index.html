@@ -452,7 +452,8 @@
     `</div>`;
   }
 
-  function buildPresencesUI(){
+  function buildPresencesUI(containerId){
+    const targetId = containerId || 'present-content';
     const dates = rollingDates(7);
     const me = userToId(currentUser);
     let html = '';
@@ -518,7 +519,7 @@
     });
 
     if(!isParent) html += `</div>`;
-    document.getElementById('present-content').innerHTML = html;
+    document.getElementById(targetId).innerHTML = html;
   }
 
   async function loadPresences(){
@@ -531,8 +532,37 @@
       const start = ymd(new Date());
       const text = await apiCall({ action:'lire', sheet:'PRESENCES', start, days: 7 });
 
+      // ── DEBUG : construit un rapport visible dans l'appli ──────────────
+      const lines = parseLines(text);
+      let debugHtml = `<div class="card" style="border:2px solid #FF5722">
+        <div class="card-title" style="color:#FF5722">🔍 DEBUG — réponse brute Google Sheet</div>
+        <div style="font-size:0.78rem;font-family:monospace;word-break:break-all;line-height:1.7">
+          <b>Texte brut (${text.length} car.) :</b><br>
+          <span style="color:#555">${escHtml(text.slice(0,800))}${text.length>800?'…':''}</span>
+          <hr style="margin:8px 0">
+          <b>Lignes après split '~~~~' : ${lines.length}</b><br>`;
+      lines.forEach((line, li) => {
+        const c = line.split('|');
+        debugHtml += `<br><b>Ligne ${li} (${c.length} colonnes) :</b><br>`;
+        c.forEach((col, ci) => {
+          debugHtml += `&nbsp;&nbsp;[${ci}] <span style="color:#9C27B0">${escHtml(col)}</span><br>`;
+        });
+        if(c.length >= 2){
+          const dateNorm = normalizeDateAny(c[0]);
+          const repasNorm = normalizeRepas(c[1]);
+          debugHtml += `&nbsp;&nbsp;→ clé: <b>${dateNorm}_${repasNorm}</b><br>`;
+        }
+      });
+      debugHtml += `</div>
+        <button onclick="this.parentElement.style.display='none'"
+          style="margin-top:10px;background:var(--violet);color:white;border:none;border-radius:8px;padding:8px 16px;font-weight:900;cursor:pointer">
+          Fermer debug
+        </button>
+      </div>`;
+      // ── FIN DEBUG ───────────────────────────────────────────────────────
+
       presencesData = {};
-      parseLines(text).forEach(line=>{
+      lines.forEach(line=>{
         const c = line.split('|');
         if(c.length >= 9){
           const dateNorm = normalizeDateAny(c[0]);
@@ -547,7 +577,12 @@
       });
 
       content.style.display='block';
-      buildPresencesUI();
+      // Injecte le debug EN PREMIER, puis l'UI normale en dessous
+      const tempDiv = document.createElement('div');
+      document.getElementById('present-content').innerHTML = debugHtml;
+      document.getElementById('present-content').insertAdjacentHTML('beforeend', '<div id="presences-ui"></div>');
+      buildPresencesUI('presences-ui');
+
     } catch(e){
       console.error(e);
       content.style.display='block';
@@ -558,6 +593,10 @@
     } finally {
       loading.style.display='none';
     }
+  }
+
+  function escHtml(s){
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
   // ✅ CORRIGÉ : togglePresence — variables déclarées DANS la fonction, garde en haut propre
