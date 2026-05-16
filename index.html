@@ -938,7 +938,7 @@ function getPresenceValue(dateStr, repas, personId){
           if(c.length >= 9){
             const jour = String(c[0]).trim();
             const repas = String(c[1]).trim().toLowerCase();
-            presencesData[`${jour}_${repas}`] = {
+            presencesData[`${jour}_${repas}`] = {const repas = String(c[1]).trim().toLowerCase();
               alessia:c[2], antonin:c[3], clement:c[4], diego:c[5],
               jeremie:c[6], melanie:c[7], yann:(c[8]||'').trim()
             };
