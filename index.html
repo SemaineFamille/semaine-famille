@@ -799,19 +799,32 @@
        PRESENCES (LOCAL + SAVE)
        ========================================================== */
     
+
 function getPresenceValue(dateStr, repas, personId){
-  const key = `${dateStr}_${repas}`;
-  === true || v === 1) return true;  const v = presencesData[key]?.[personId];
+  const key = dateStr + "_" + repas;
+  const row = presencesData[key];
 
-  const s = String(v || '').trim().toLowerCase();
+  if(!row) return false;
 
-  return (
-    s === 'true' ||
-    s === '1' ||
-    s === 'yes' ||
-    s === 'oui'
-  );
+  let v = row[personId];
+
+  // normalisation ultra-safe
+  if(v === true || v === 1) return true;
+
+  v = String(v).trim().toLowerCase();
+
+  if(
+    v === 'true' ||
+    v === '1' ||
+    v === 'oui' ||
+    v === 'yes'
+  ){
+    return true;
+  }
+
+  return false;
 }
+
 
 
     function setPresenceValueLocal(dateStr, repas, personId, boolVal){
