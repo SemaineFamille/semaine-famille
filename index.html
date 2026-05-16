@@ -351,18 +351,41 @@
   }
 
   // =========================
-  // API
+  // API — JSONP (contourne le CORS de Google Apps Script)
   // =========================
-  async function apiCall(params){
-    try{
-      const qs = new URLSearchParams({ ...params, _ts: String(Date.now()) }).toString();
-      const url = SCRIPT_URL + '?' + qs;
-      const r = await fetch(url, { cache:'no-store' });
-      return await r.text();
-    }catch(e){
-      console.error(e);
-      return '';
-    }
+  function apiCall(params){
+    return new Promise((resolve) => {
+      const cbName = '_cb_' + Date.now() + '_' + Math.floor(Math.random()*1e6);
+      const timeout = setTimeout(() => {
+        delete window[cbName];
+        if(script.parentNode) script.parentNode.removeChild(script);
+        console.warn('apiCall timeout', params);
+        resolve('');
+      }, 12000);
+
+      window[cbName] = function(data){
+        clearTimeout(timeout);
+        delete window[cbName];
+        if(script.parentNode) script.parentNode.removeChild(script);
+        // Le script Google peut retourner un objet {result:...} ou une string directe
+        if(typeof data === 'object' && data !== null){
+          resolve(data.result !== undefined ? String(data.result) : JSON.stringify(data));
+        } else {
+          resolve(String(data ?? ''));
+        }
+      };
+
+      const qs = new URLSearchParams({ ...params, _ts: String(Date.now()), callback: cbName }).toString();
+      const script = document.createElement('script');
+      script.src = SCRIPT_URL + '?' + qs;
+      script.onerror = () => {
+        clearTimeout(timeout);
+        delete window[cbName];
+        console.error('apiCall script error', params);
+        resolve('');
+      };
+      document.head.appendChild(script);
+    });
   }
 
   function parseLines(text){
