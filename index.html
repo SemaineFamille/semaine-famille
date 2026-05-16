@@ -165,6 +165,32 @@
     .parent-mini-btn{border:none;background:transparent;font-size:1.15rem;font-weight:900;cursor:pointer;line-height:1;}
     .parent-mini-btn.on{transform:scale(1.08);}
     .parent-mini-btn.off{opacity:.65;}
+ 
+/* ===== FIX TUILES: mêmes tailles partout ===== */
+.login-grid{ grid-template-columns:repeat(3,1fr) !important; }
+@media (max-width:380px){ .login-grid{ grid-template-columns:repeat(2,1fr) !important; } }
+
+/* Annule l'ancienne règle qui faisait "Parents" plus grand */
+.login-btn.parent{ grid-column:auto !important; }
+
+/* ===== FIX placement total parents ===== */
+.pres-section-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin:10px 0 6px;
+}
+.pres-tot-inline{
+  font-size:0.78rem;
+  font-weight:900;
+  color:var(--violet);
+  background:white;
+  padding:6px 10px;
+  border-radius:999px;
+  white-space:nowrap;
+}
+``
+
   </style>
 
   <script>
@@ -655,6 +681,341 @@
     }
     showToast('⏳ Sync en cours…');
   }
+  
+/* ==========================/* ========================= PRESENCES (ANTI-EFFACEMENT)
+   À coller TOUT EN BAS du script
+   ========================== */
+
+(function () {
+  // 1) Purge service workers + caches (stoppe réponses "anciennes")
+  // Basé sur unregister + delete caches. [1](https://onedrive.live.com/?id=ae2bd4d8-7430-2078-801c-200c00000000&cid=1c787430ae2bd4d8&web=1)[2](https://onedrive.live.com/?id=ae2bd4d8-7430-2078-801c-290b00000000&cid=1c787430ae2bd4d8&web=1)
+  async function purgeSWandCaches() {
+    try {
+      if ("serviceWorker" in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(r => r.unregister()));
+      }
+      if ("caches" in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map(k => caches.delete(k)));
+      }
+    } catch (e) {
+      // non bloquant
+      console.log("purge SW/cache skip", e);
+    }
+  }
+  purgeSWandCaches();
+
+  // 2) Helpers
+  function delay(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+  function normalizeDateAny(raw){
+    const s = String(raw || '').trim();
+    // yyyy-mm-dd
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+    // dd/mm/yyyy
+    if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) {
+      const [dd, mm, yyyy] = s.split('/');
+      return `${yyyy}-${String(mm).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;
+    }
+    // fallback parse
+    const d = new Date(s);
+    if(!isNaN(d.getTime())){
+      const y = d.getFullYear();
+      const m = String(d.getMonth()+1).padStart(2,'0');
+      const da = String(d.getDate()).padStart(2,'0');
+      return `${y}-${m}-${da}`;
+    }
+    return s;
+  }
+
+  function normalizeRepas(raw){
+    const s = String(raw||'').trim().toLowerCase();
+    if (s.includes('mid')) return 'midi';
+    if (s.includes('soir') || s.includes('nuit') || s.includes('eve')) return 'soir';
+    return s;
+  }
+
+  // 3) apiCall : force réseau + anti-cache
+  // (On garde ta signature: retourne du texte)
+  const _oldApiCall = window.apiCall;
+  window.apiCall = async function(params){
+    try{
+      const qs = new URLSearchParams({ ...params, _ts: String(Date.now()) }).toString();
+      const url = SCRIPT_URL + '?' + qs;
+      const r = await fetch(url, { cache:'no-store' });
+      return await r.text();
+    }catch(e){
+      console.error(e);
+      return '';
+    }
+  };
+
+  // 4) On remplace loadPresences + toggle pour éviter le wipe
+  let _lastOptimistic = null; // {dateStr, repas, personId, next}
+
+  // Valeur robuste
+  window.getPresenceValue = function(dateStr, repas, personId){
+    const key = `${dateStr}_${repas}`;
+    const v = presencesData[key]?.[personId];
+    const s = String(v ?? '').trim().toUpperCase();
+    return (v === true) || (s === 'TRUE' || s === '1' || s === 'OUI' || s === 'YES');
+  };
+
+  window.setPresenceValueLocal = function(dateStr, repas, personId, boolVal){
+    const key = `${dateStr}_${repas}`;
+    if(!presencesData[key]) presencesData[key] = {};
+    presencesData[key][personId] = boolVal ? 'TRUE' : 'FALSE';
+  };
+
+  window.computeCount = function(dateStr, repas){
+    return PRES_MEMBRES.filter(p => getPresenceValue(dateStr, repas, p.id)).length;
+  };
+
+  // Parents: ✅ / —
+  window.renderParentMini = function(dateStr, repas){
+    return `<div class="parent-mini-grid">` +
+      PRES_MEMBRES.map(p=>{
+        const on = getPresenceValue(dateStr, repas, p.id);
+        const editable = (p.id === 'melanie' || p.id === 'yann');
+        const symbol = on ? '✅' : '—';
+        if(!editable){
+          return `<div class="parent-mini-item">
+            <span class="parent-mini-name">${p.label}</span>
+            <span class="parent-mini-ind">${symbol}</span>
+          </div>`;
+        }
+        return `<div class="parent-mini-item">
+          <span class="parent-mini-name">${p.label}</span>
+          <button class="parent-mini-btn ${on?'on':'off'}"
+            onclick="togglePresenceAs('${dateStr}','${repas}','${p.id}')">${symbol}</button>
+        </div>`;
+      }).join('') + `</div>`;
+  };
+
+  // UI (rebuild stable)
+  window.buildPresencesUI = function(){
+    const dates = rollingDates(7);
+    const me = userToId(currentUser);
+    let html = '';
+
+    html += `<div class="card">
+      <div class="card-title">👥 Présences — 7 jours glissants</div>
+      <div style="color:var(--text-light);font-weight:900;font-size:0.85rem">
+        ${isParent
+          ? "Récap famille + modification possible pour Mélanie & Yann"
+          : "Clique sur 🌞 / 🌙 pour indiquer ta présence (auto-save)."}
+      </div>
+    </div>`;
+
+    if(!isParent){ html += `<div class="kid-grid">`; }
+
+    dates.forEach(({date,label})=>{
+      const midiCount = computeCount(date,'midi');
+      const soirCount = computeCount(date,'soir');
+
+      html += `<div class="card"><div class="jour-header">${label}</div>`;
+
+      if(isParent){
+        html += `
+          <div class="pres-section-head">
+            <div class="pres-section-title">🌞 Midi</div>
+            <div class="pres-tot-inline">👥 ${midiCount}</div>
+          </div>
+          ${renderParentMini(date,'midi')}
+
+          <div class="pres-section-head" style="margin-top:10px">
+            <div class="pres-section-title">🌙 Soir</div>
+            <div class="pres-tot-inline">👥 ${soirCount}</div>
+          </div>
+          ${renderParentMini(date,'soir')}
+        `;
+      } else {
+        const onMidi = getPresenceValue(date,'midi',me);
+        const onSoir = getPresenceValue(date,'soir',me);
+
+        html += `
+          <div class="pres-section-title">🌞 Midi</div>
+          <div class="pres-row">
+            <div class="pres-date">${date}</div>
+            <div class="pres-btns">
+              <button class="pres-btn ${onMidi?'on midi':'off'}" id="btn_${date}_midi"
+                onclick="togglePresence('${date}','midi')">🌞</button>
+            </div>
+            <div class="pres-tot">👥 ${midiCount}</div>
+          </div>
+
+          <div class="pres-section-title">🌙 Soir</div>
+          <div class="pres-row">
+            <div class="pres-date">${date}</div>
+            <div class="pres-btns">
+              <button class="pres-btn ${onSoir?'on soir':'off'}" id="btn_${date}_soir"
+                onclick="togglePresence('${date}','soir')">🌙</button>
+            </div>
+            <div class="pres-tot">👥 ${soirCount}</div>
+          </div>
+        `;
+      }
+
+      html += `</div>`;
+    });
+
+    if(!isParent){ html += `</div>`; }
+
+    const el = document.getElementById('present-content');
+    if(el) el.innerHTML = html;
+  };
+
+  // Lecture PRESENCES + normalisation clés
+  async function fetchPresencesMap(){
+    const start = ymd(new Date());
+    const text = await apiCall({ action:'lire', sheet:'PRESENCES', start, days: 7 });
+
+    const map = {};
+    parseLines(text).forEach(line=>{
+      const c = line.split('|');
+      if(c.length >= 9){
+        const d = normalizeDateAny(c[0]);
+        const r = normalizeRepas(c[1]);
+        const key = `${d}_${r}`;
+        map[key] = {
+          alessia: c[2], antonin: c[3], clement: c[4], diego: c[5],
+          jeremie: c[6], melanie: c[7], yann: (c[8]||'').trim()
+        };
+      }
+    });
+    return map;
+  }
+
+  window.loadPresences = async function(){
+    const loading = document.getElementById('present-loading');
+    const content = document.getElementById('present-content');
+    if(loading) loading.style.display='block';
+    if(content) content.style.display='none';
+
+    try{
+      const map = await fetchPresencesMap();
+      presencesData = map;
+
+      // Empêche l'effacement: si le serveur n'a pas encore "vu" l'écriture,
+      // on réapplique l'état optimiste.
+      if(_lastOptimistic){
+        const {dateStr, repas, personId, next} = _lastOptimistic;
+        const v = (map[`${dateStr}_${repas}`]?.[personId] || '').toString().trim().toUpperCase();
+        const serverBool = (v === 'TRUE' || v === '1' || v === 'OUI' || v === 'YES');
+        if(serverBool !== next){
+          setPresenceValueLocal(dateStr, repas, personId, next);
+        } else {
+          _lastOptimistic = null;
+        }
+      }
+
+      if(content) content.style.display='block';
+      buildPresencesUI();
+    }catch(e){
+      console.error(e);
+      if(content){
+        content.style.display='block';
+        content.innerHTML = `<div class="card"><div class="card-title">Erreur Présences</div>
+          <div class="loading">${String(e?.message||e)}</div></div>`;
+      }
+    }finally{
+      if(loading) loading.style.display='none';
+    }
+  };
+
+  // Sauvegarde enfant: pas de reload immédiat destructeur
+  window.togglePresence = async function(dateStr, repas){
+    if(isParent) return;
+    const me = userToId(currentUser);
+    const current = getPresenceValue(dateStr, repas, me);
+    const next = !current;
+
+    _lastOptimistic = {dateStr, repas, personId:me, next};
+    setPresenceValueLocal(dateStr, repas, me, next);
+    buildPresencesUI();
+    showToast('💾 Sauvegarde...');
+
+    let res = await apiCall({ action:'set_presence', sheet:'PRESENCES', jour:dateStr, repas, person:me, value: next?'TRUE':'FALSE' });
+    if(String(res).trim() !== 'ok'){
+      res = await apiCall({ action:'enregistrer', sheet:'PRESENCES', jour:dateStr, repas, person:me, value: next?'TRUE':'FALSE' });
+    }
+    if(String(res).trim() !== 'ok'){
+      _lastOptimistic = null;
+      setPresenceValueLocal(dateStr, repas, me, current);
+      buildPresencesUI();
+      showToast('⚠️ Sauvegarde impossible');
+      return;
+    }
+
+    showToast('✅ Sauvé');
+
+    // Sync retry (sans effacer)
+    for(let i=0;i<4;i++){
+      await delay(300 + i*400);
+      const map = await fetchPresencesMap();
+      const key = `${dateStr}_${repas}`;
+      const v = (map[key]?.[me] || '').toString().trim().toUpperCase();
+      const ok = (v === (next?'TRUE':'FALSE'));
+      presencesData = map;
+      if(ok){
+        _lastOptimistic = null;
+        buildPresencesUI();
+        return;
+      }
+      setPresenceValueLocal(dateStr, repas, me, next);
+      buildPresencesUI();
+    }
+    showToast('⏳ Sync en cours…');
+  };
+
+  // Sauvegarde parents (seulement Mélanie/Yann)
+  window.togglePresenceAs = async function(dateStr, repas, personId){
+    if(!isParent) return;
+    if(!(personId==='melanie' || personId==='yann')) return;
+
+    const current = getPresenceValue(dateStr, repas, personId);
+    const next = !current;
+
+    _lastOptimistic = {dateStr, repas, personId, next};
+    setPresenceValueLocal(dateStr, repas, personId, next);
+    buildPresencesUI();
+    showToast('💾 Sauvegarde...');
+
+    let res = await apiCall({ action:'set_presence', sheet:'PRESENCES', jour:dateStr, repas, person:personId, value: next?'TRUE':'FALSE' });
+    if(String(res).trim() !== 'ok'){
+      res = await apiCall({ action:'enregistrer', sheet:'PRESENCES', jour:dateStr, repas, person:personId, value: next?'TRUE':'FALSE' });
+    }
+    if(String(res).trim() !== 'ok'){
+      _lastOptimistic = null;
+      setPresenceValueLocal(dateStr, repas, personId, current);
+      buildPresencesUI();
+      showToast('⚠️ Sauvegarde impossible');
+      return;
+    }
+
+    showToast('✅ Sauvé');
+
+    for(let i=0;i<4;i++){
+      await delay(300 + i*400);
+      const map = await fetchPresencesMap();
+      const key = `${dateStr}_${repas}`;
+      const v = (map[key]?.[personId] || '').toString().trim().toUpperCase();
+      const ok = (v === (next?'TRUE':'FALSE'));
+      presencesData = map;
+      if(ok){
+        _lastOptimistic = null;
+        buildPresencesUI();
+        return;
+      }
+      setPresenceValueLocal(dateStr, repas, personId, next);
+      buildPresencesUI();
+    }
+    showToast('⏳ Sync en cours…');
+  };
+
+})();
+
 </script>
 
 </body>
