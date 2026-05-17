@@ -50,7 +50,17 @@ input, select {
 </head>
 
 <body>
-
+<button onclick="retourApp()" style="
+  margin-bottom:15px;
+  padding:10px;
+  border:none;
+  border-radius:8px;
+  background:#555;
+  color:white;
+  font-size:14px;
+">
+  ⬅ Retour
+</button>
 <h2>🚆 Suivi CFF</h2>
 
 <div class="card">
@@ -187,7 +197,9 @@ function calculer() {
 
   document.getElementById("resultat").innerHTML = message;
 }
-
+function retourApp() {
+  location.href = "index.html";
+}
 charger();
 </script>
 
