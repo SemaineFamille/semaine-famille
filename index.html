@@ -879,7 +879,7 @@ async function loadPresences(){
   presencesData={};
   parseLines(text).forEach(line=>{
     const c=line.split('|');
-    if(c.length>=8) presencesData[`${c[0]}_${c[1]}`]={alessia:c[2],antonin:c[3],clement:c[4],jeremie:c[5],melanie:c[6],yann:c[7].trim()};
+   if(c.length>=9) presencesData[`${c[0]}_${c[1]}`]={alessia:c[2],antonin:c[3],clement:c[4],diego:c[5],jeremie:c[6],melanie:c[7],yann:c[8].trim()};
   });
   document.getElementById('present-loading').style.display='none';
   document.getElementById('present-content').style.display='block';
