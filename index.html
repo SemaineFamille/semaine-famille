@@ -401,10 +401,16 @@ if ("serviceWorker" in navigator) {
 <!-- PRÉSENCES -->
 
 <div class="page" id="page-present">
+  <div style="display:flex;gap:8px;margin-bottom:12px">
+    <button class="btn btn-primary" onclick="savePresences()" style="flex:1;margin:0">💾 Enregistrer</button>
+    <button class="btn btn-secondary" onclick="clearPresences()" style="flex:1;margin:0">🗑️ Effacer</button>
+  </div>
   <div id="present-loading" class="loading"><div class="spinner"></div>Chargement...</div>
   <div id="present-content" style="display:none"></div>
- <button class="btn btn-primary" onclick="savePresences()" style="margin-top:12px">💾 Enregistrer les présences</button>
-<button class="btn btn-secondary" onclick="clearPresences()">🗑️ Effacer</button>
+  <div style="display:flex;gap:8px;margin-top:12px">
+    <button class="btn btn-primary" onclick="savePresences()" style="flex:1;margin:0">💾 Enregistrer</button>
+    <button class="btn btn-secondary" onclick="clearPresences()" style="flex:1;margin:0">🗑️ Effacer</button>
+  </div>
 </div>
 
 
