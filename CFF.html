@@ -1,209 +1,49 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CFF</title>
-
-<style>
-body {
-  font-family: Arial;
-  background:#f4f6f8;
-  padding:20px;
-}
-
-.card {
-  background:white;
-  border-radius:12px;
-  padding:15px;
-  margin-bottom:15px;
-  box-shadow:0 2px 6px rgba(0,0,0,0.1);
-}
-
-h2 {
-  text-align:center;
-}
-
-button {
-  width:100%;
-  padding:12px;
-  border:none;
-  border-radius:8px;
-  background:#0077cc;
-  color:white;
-  font-size:16px;
-}
-
-input, select {
-  width:100%;
-  padding:10px;
-  margin:8px 0;
-  border-radius:8px;
-  border:1px solid #ccc;
-}
-
-.result {
-  font-size:18px;
-  font-weight:bold;
-  text-align:center;
-}
-</style>
-</head>
-
-<body>
-
-<button onclick="retourApp()" style="
-  margin-bottom:15px;
-  padding:12px;
-  border:none;
-  border-radius:12px;
-  background:linear-gradient(135deg,#666,#333);
-  color:white;
-  font-weight:bold;
-">
-  ⬅ Retour à l'application
-</button>
-
-<h2>🚆 Suivi CFF</h2>
-
-<div class="card">
-  <label>Personne</label>
-  <select id="pers">
-    <option value="jeremie">Jérémie</option>
-    <option value="antonin">Antonin</option>
-    <option value="yann">Yann</option>
-    <option value="melanie">Mélanie</option>
-  </select>
-
-  <label>Montant billet (CHF)</label>
-  <input type="number" id="montant" step="0.1">
-
-  <button onclick="ajouter()">Ajouter trajet</button>
-</div>
-
-<div class="card">
-  <h3>Abonnement demi-tarif</h3>
-
-  <label>Date de début</label>
-  <input type="date" id="dateDebut">
-
-  <label>Prix abonnement</label>
-  <input type="number" id="prix" step="1">
-
-  <button onclick="calculer()">Calculer</button>
-
-  <div class="result" id="resultat"></div>
-</div>
-
-<div class="card">
-  <h3>Total dépenses</h3>
-  <div id="total"></div>
-</div>
-
-<div class="card">
-  <h3>Historique</h3>
-  <div id="liste"></div>
-</div>
-
-<script>
-const URL = "https://script.google.com/macros/s/AKfycbxOJEus1Fev5I4YZsSbjpIXXlgGJBY7QmFkkqZtkXYD6eEPwqmgCl8r2hfrO1X9eyqxSA/exec";
-let dataCFF = [];
-
-function ajouter() {
-  const pers = document.getElementById("pers").value;
-  const montant = document.getElementById("montant").value;
-
-  fetch(URL, {
-    method: "POST",
-    body: new URLSearchParams({
-      sheet: "CFF",
-      action: "ajouter",
-      personne: pers,
-      montant
-    })
-  })
-  .then(() => {
-    document.getElementById("montant").value = "";
-    charger();
-  });
-}
-
-function charger() {
-  fetch(URL + "?sheet=CFF&action=lire")
-    .then(r => r.text())
-    .then(text => {
-
-      console.log("DATA:", text);
-
-      dataCFF = [];
-      const liste = document.getElementById("liste");
-      liste.innerHTML = "";
-
-      if (!text) return;
-
-      text.split("~~~~").forEach(l => {
-        const [date, pers, montant] = l.split("|");
-        const m = parseFloat(montant);
-
-        dataCFF.push({date, pers, montant:m});
-
-        liste.innerHTML += `<div>${date} - ${pers} - ${m.toFixed(2)} CHF</div>`;
-      });
-
-      afficherTotal();
-    });
-}
-
-function afficherTotal() {
-  let totaux = {};
-
-  dataCFF.forEach(d => {
-    if (!totaux[d.pers]) totaux[d.pers] = 0;
-    totaux[d.pers] += d.montant;
-  });
-
-  let html = "";
-  for (let p in totaux) {
-    html += `<div>${p} : ${totaux[p].toFixed(2)} CHF</div>`;
-  }
-
-  document.getElementById("total").innerHTML = html;
-}
-
-function calculer() {
-  const pers = document.getElementById("pers").value;
-  const prix = parseFloat(document.getElementById("prix").value || "0");
-  const dateDebut = document.getElementById("dateDebut").value;
-
-  if (!dateDebut) return;
-
-  let total = 0;
-
-  dataCFF.forEach(d => {
-    if (d.pers === pers && d.date >= dateDebut) {
-      total += d.montant;
+1220;  <meta name="viewport" content="width=device-width, initial-scale=1" />
+      --card:#111a2e;
+      --card2:#0f172a;
+      --txt:#eaf0ff;
+      --muted:#a8b3d6;
+      --accent:#00c2ff;
+      --accent2:#2dd4bf;
+      --danger:#ff5a7a;
+      --shadow: 0 10px 30px rgba(0,0,0,.25);
+      --radius:16px;
+      --btnradius:14px;
+      font-synthesis-weight:none;
     }
-  });
-
-  let diff = total - prix;
-
-  let message = `
-    Dépenses : ${total.toFixed(2)} CHF<br>
-    Abonnement : ${prix.toFixed(2)} CHF<br><br>
-  `;
-
-  if (diff > 0) {
-    message += `✅ RENTABLE (+${diff.toFixed(2)} CHF)`;
-  } else {
-    message += `❌ PAS RENTABLE (${diff.toFixed(2)} CHF)`;
-  }
-
-  document.getElementById("resultat").innerHTML = message;
-}
-function retourApp() {
-  location.href = "index.html";
-}
-charger();
-</script>
-
-</body>
-</html>
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 600px at 20% -10%, #1f2a55 0%, transparent 60%),
+                  radial-gradient(900px 500px at 100% 0%, #0ea5e9 0%, transparent 55%),
+                  linear-gradient(180deg, #070b16 0%, #0b1220 100%);
+      color:var(--txt);
+    }
+    .topbar{
+      position:sticky; top:0; z-index:10;
+      background: linear-gradient(135deg, rgba(0,194,255,.25), rgba(45,212,191,.15));
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      padding:14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .title{
+      font-weight:800;
+      letter-spacing:.2px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .title .badge{
+      width:34px;height:34px;border-radius:12px;
+      display:grid;place-items:center;
+      background: rgba(0,194,
+  <title>CFF</title>
+  <style>
+    :root{
