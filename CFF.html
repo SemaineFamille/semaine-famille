@@ -116,9 +116,11 @@ function ajouter() {
 }
 
 function charger() {
- fetch(URL + "?sheet=CFF&action=lire")
+  fetch(URL + "?sheet=CFF&action=lire")
     .then(r => r.text())
     .then(text => {
+
+      console.log("DATA:", text);
 
       dataCFF = [];
       const liste = document.getElementById("liste");
@@ -186,7 +188,6 @@ function calculer() {
   document.getElementById("resultat").innerHTML = message;
 }
 
-// charger au démarrage
 charger();
 </script>
 
