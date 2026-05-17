@@ -870,18 +870,27 @@ function getTodayJour(){
 }
  
 function showPage(name){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+
+  const el = document.getElementById('page-' + name);
+  if (el) {
+    el.classList.add('active');
+  } else {
+    console.log("Page inexistante:", name);
+    return; // ✅ évite le crash
+  }
+
   const order=['accueil','present','menu','courses','taches','job','admin'];
-  const idx=order.indexOf(name);
-  if(idx>=0) document.querySelectorAll('.nav-tab')[idx].classList.add('active');
-  if(name==='present') loadPresences();
-  if(name==='menu') loadMenu();
-  if(name==='courses') loadCourses(currentListe);
-  if(name==='taches') loadTaches();
-  if(name==='job') initCal();
-  if(name==='admin') loadAdminConfig();
+  const idx = order.indexOf(name);
+  if (idx >= 0) document.querySelectorAll('.nav-tab')[idx].classList.add('active');
+
+  if (name==='present') loadPresences();
+  if (name==='menu') loadMenu();
+  if (name==='courses') loadCourses(currentListe);
+  if (name==='taches') loadTaches();
+  if (name==='job') initCal();
+  if (name==='admin') loadAdminConfig();
 }
  
 function buildPresencesUI(){
