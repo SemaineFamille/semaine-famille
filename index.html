@@ -868,7 +868,17 @@ function getTodayJour(){
   const d=new Date().getDay();
   return JOURS[d===0?6:d-1];
 }
- 
+ function openCFF() {
+  // enlève active desTarget.classList.add('active');  // enlève active des autres boutons
+
+  // redirection vers la page CFF
+  location.href = 'CFF.html';
+}
+``
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+
+  // met le bouton actif visuellement
+
 function showPage(name){
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
