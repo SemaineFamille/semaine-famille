@@ -916,6 +916,9 @@ async function loadPresences(){
       jeremie:c[6], melanie:c[7], yann:c[8].trim()
     };
   });
+  console.log("texte brut reçu:", text);
+  console.log("presencesData:", JSON.stringify(presencesData));
+ 
   document.getElementById('present-loading').style.display='none';
   document.getElementById('present-content').style.display='block';
   buildPresencesUI();
