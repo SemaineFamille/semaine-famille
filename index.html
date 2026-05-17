@@ -546,6 +546,27 @@ if ("serviceWorker" in navigator) {
 <script>
 const SCRIPT_URL='https://script.google.com/macros/s/AKfycbxOJEus1Fev5I4YZsSbjpIXXlgGJBY7QmFkkqZtkXYD6eEPwqmgCl8r2hfrO1X9eyqxSA/exec';
 const ADMIN_CODE='2019';
+function rollingDates(days) {
+  const base = new Date(); base.setHours(0,0,0,0);
+  const result = [];
+  const joursNoms = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+  for (let i = 0; i < days; i++) {
+    const d = new Date(base);
+    d.setDate(base.getDate() + i);
+    const dd = String(d.getDate()).padStart(2,'0');
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    result.push({
+      date: `${d.getFullYear()}-${mm}-${dd}`,
+      label: `${joursNoms[d.getDay()]} ${dd}/${mm}`
+    });
+  }
+  return result;
+}
+
+function todayYMD() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
  
 function formatDateYYYYMMDD(date = new Date()) {
   const year = date.getFullYear();
@@ -854,24 +875,26 @@ function showPage(name){
 }
  
 function buildPresencesUI(){
-  let html='';
-  JOURS.forEach((jour,ji)=>{
-    html+=`<div class="jour-header">${JOURS_LABEL[ji]}</div>`;
-    ['midi','soir'].forEach(repas=>{
-      const key=`${jour}_${repas}`;
-      const data=presencesData[key]||{};
-      const count=MEMBRES.filter(m=>data[m]==='TRUE').length;
-      html+=`<div class="repas-label">${repas.toUpperCase()} <span class="total-badge" id="total_${key}">${count} présent${count>1?'s':''}</span></div><div class="checkboxes-grid">`;
-      MEMBRES.forEach((m,mi)=>{
-        html+=`<label class="checkbox-item">
+  const dates = rollingDates(7);
+  let html = '';
+  dates.forEach(({date, label}) => {
+    html += `<div class="jour-header">${label}</div>`;
+    ['midi','soir'].forEach(repas => {
+      const key = `${date}_${repas}`;
+      const data = presencesData[key] || {};
+      const count = MEMBRES.filter(m => data[m]==='TRUE').length;
+      html += `<div class="repas-label">${repas.toUpperCase()} <span class="total-badge" id="total_${key}">${count} présent${count>1?'s':''}</span></div>
+      <div class="checkboxes-grid">`;
+      MEMBRES.forEach((m, mi) => {
+        html += `<label class="checkbox-item">
           <input type="checkbox" id="cb_${key}_${m}" ${data[m]==='TRUE'?'checked':''} onchange="updateTotal('${key}')">
           <label for="cb_${key}_${m}">${MEMBRES_LABEL[mi]}</label>
         </label>`;
       });
-      html+=`</div><div class="divider"></div>`;
+      html += `</div><div class="divider"></div>`;
     });
   });
-  document.getElementById('present-content').innerHTML=html;
+  document.getElementById('present-content').innerHTML = html;
 }
  
 function updateTotal(key){
@@ -883,11 +906,15 @@ function updateTotal(key){
 async function loadPresences(){
   document.getElementById('present-loading').style.display='block';
   document.getElementById('present-content').style.display='none';
-  const text=await apiCall({action:'lire',sheet:'PRESENCES'});
-  presencesData={};
-  parseLines(text).forEach(line=>{
-    const c=line.split('|');
-   if(c.length>=9) presencesData[`${c[0]}_${c[1]}`]={alessia:c[2],antonin:c[3],clement:c[4],diego:c[5],jeremie:c[6],melanie:c[7],yann:c[8].trim()};
+  const start = todayYMD();
+  const text = await apiCall({action:'lire', sheet:'PRESENCES', start, days:7});
+  presencesData = {};
+  parseLines(text).forEach(line => {
+    const c = line.split('|');
+    if(c.length >= 9) presencesData[`${c[0]}_${c[1]}`] = {
+      alessia:c[2], antonin:c[3], clement:c[4], diego:c[5],
+      jeremie:c[6], melanie:c[7], yann:c[8].trim()
+    };
   });
   document.getElementById('present-loading').style.display='none';
   document.getElementById('present-content').style.display='block';
@@ -896,16 +923,20 @@ async function loadPresences(){
  
 async function savePresences(){
   showToast('Enregistrement...');
-  for(const jour of JOURS){
+  const dates = rollingDates(7);
+  for(const {date} of dates){
     for(const repas of ['midi','soir']){
-      const key=`${jour}_${repas}`;
-      const p={action:'enregistrer',sheet:'PRESENCES',jour,repas};
-      MEMBRES.forEach(m=>{p[m]=document.getElementById(`cb_${key}_${m}`)?.checked?'TRUE':'FALSE';});
+      const key = `${date}_${repas}`;
+      const p = {action:'enregistrer', sheet:'PRESENCES', jour:date, repas};
+      MEMBRES.forEach(m => {
+        p[m] = document.getElementById(`cb_${key}_${m}`)?.checked ? 'TRUE' : 'FALSE';
+      });
       await apiCall(p);
     }
   }
   showToast('✅ Présences enregistrées !');
 }
+
  
 async function clearPresences(){
   if(!confirm('Effacer toutes les présences ?')) return;
@@ -918,46 +949,52 @@ async function clearPresences(){
 async function loadMenu(){
   document.getElementById('menu-loading').style.display='block';
   document.getElementById('menu-content').style.display='none';
-  const [pText,mText]=await Promise.all([
-    apiCall({action:'lire',sheet:'PRESENCES'}),
-    apiCall({action:'lire',sheet:'MENU'})
+  const start = todayYMD();
+  const [pText, mText] = await Promise.all([
+    apiCall({action:'lire', sheet:'PRESENCES', start, days:7}),
+    apiCall({action:'lire', sheet:'MENU'})
   ]);
-  presencesData={};
-  parseLines(pText).forEach(line=>{
-    const c=line.split('|');
-    if(c.length>=8) presencesData[`${c[0]}_${c[1]}`]={alessia:c[2],antonin:c[3],clement:c[4],jeremie:c[5],melanie:c[6],yann:c[7].trim()};
+  presencesData = {};
+  parseLines(pText).forEach(line => {
+    const c = line.split('|');
+    if(c.length >= 9) presencesData[`${c[0]}_${c[1]}`] = {
+      alessia:c[2], antonin:c[3], clement:c[4], diego:c[5],
+      jeremie:c[6], melanie:c[7], yann:c[8].trim()
+    };
   });
-  menuData={};
-  parseLines(mText).forEach(line=>{
-    const c=line.split('|');
-    if(c.length>=3) menuData[`${c[0]}_${c[1]}`]=c.slice(2).join('|').trim();
+  menuData = {};
+  parseLines(mText).forEach(line => {
+    const c = line.split('|');
+    if(c.length >= 3) menuData[`${c[0]}_${c[1]}`] = c.slice(2).join('|').trim();
   });
-  let html='';
-  JOURS.forEach((jour,ji)=>{
-    html+=`<div class="menu-jour-card"><div class="jour-header" style="margin-bottom:12px">${JOURS_LABEL[ji]}</div>`;
-    ['midi','soir'].forEach(repas=>{
-      const key=`${jour}_${repas}`;
-      const count=MEMBRES.filter(m=>presencesData[key]?.[m]==='TRUE').length;
-      const val=(menuData[key]||'').replace(/"/g,'&quot;').replace(/^-$/,'').trim();
-      html+=`<div class="menu-repas-row">
+  const dates = rollingDates(7);
+  let html = '';
+  dates.forEach(({date, label}) => {
+    html += `<div class="menu-jour-card"><div class="jour-header" style="margin-bottom:12px">${label}</div>`;
+    ['midi','soir'].forEach(repas => {
+      const key = `${date}_${repas}`;
+      const count = MEMBRES.filter(m => presencesData[key]?.[m]==='TRUE').length;
+      const val = (menuData[key]||'').replace(/"/g,'&quot;').replace(/^-$/,'').trim();
+      html += `<div class="menu-repas-row">
         <span class="menu-repas-label">${repas}</span>
         <input type="text" class="menu-repas-input" id="menu_${key}" placeholder="Repas du ${repas}..." value="${val}">
         <span class="menu-presences">👥 ${count}</span>
       </div>`;
     });
-    html+=`</div>`;
+    html += `</div>`;
   });
-  document.getElementById('menu-content').innerHTML=html;
+  document.getElementById('menu-content').innerHTML = html;
   document.getElementById('menu-loading').style.display='none';
   document.getElementById('menu-content').style.display='block';
 }
  
 async function saveMenu(){
   showToast('Enregistrement...');
-  for(const jour of JOURS){
+  const dates = rollingDates(7);
+  for(const {date} of dates){
     for(const repas of ['midi','soir']){
-      const plat=document.getElementById(`menu_${jour}_${repas}`)?.value?.trim()||'';
-      await apiCall({action:'enregistrer',sheet:'MENU',jour,repas,plat:plat||'-'});
+      const plat = document.getElementById(`menu_${date}_${repas}`)?.value?.trim() || '';
+      await apiCall({action:'enregistrer', sheet:'MENU', jour:date, repas, plat: plat||'-'});
     }
   }
   showToast('✅ Menu enregistré !');
