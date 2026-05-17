@@ -1,7 +1,11 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-1220;  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CFF</title>
+  <style>
+    :root{
+      --bg:#0b1220;
       --card:#111a2e;
       --card2:#0f172a;
       --txt:#eaf0ff;
@@ -43,7 +47,393 @@
     .title .badge{
       width:34px;height:34px;border-radius:12px;
       display:grid;place-items:center;
-      background: rgba(0,194,
-  <title>CFF</title>
-  <style>
-    :root{
+      background: rgba(0,194,255,.2);
+      border:1px solid rgba(0,194,255,.35);
+      box-shadow: var(--shadow);
+    }
+    .btn{
+      border:none;
+      padding:10px 12px;
+      border-radius:12px;
+      background: rgba(255,255,255,.10);
+      color:var(--txt);
+      font-weight:700;
+      cursor:pointer;
+    }
+    .btn:hover{ background: rgba(255,255,255,.14); }
+    .wrap{
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin: 12px 0;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:12px;
+    }
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:end;
+    }
+    label{
+      display:block;
+      color:var(--muted);
+      font-size: 12px;
+      font-weight:700;
+      margin-bottom:6px;
+    }
+    select, input{
+      width:100%;
+      box-sizing:border-box;
+      padding:12px 12px;
+      border-radius: 12px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(17,26,46,.65);
+      color:var(--txt);
+      outline:none;
+    }
+    .col{
+      flex:1 1 160px;
+      min-width: 160px;
+    }
+    .primary{
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color:#00121a;
+      font-weight:900;
+    }
+    .primary:hover{ filter: brightness(1.05); }
+    .muted{
+      color:var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+    .kpi{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap:10px;
+      margin-top:10px;
+    }
+    .kpi > div{
+      background: rgba(0,0,0,.18);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius: 14px;
+      padding: 10px;
+    }
+    .kpi .v{ font-size:18px; font-weight:900; }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      font-weight:900;
+      font-size: 13px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      margin-top:10px;
+    }
+    .ok{ color:#8bffbf; border-color: rgba(139,255,191,.25); background: rgba(34,197,94,.10); }
+    .no{ color:#ff9ab0; border-color: rgba(255,154,176,.25); background: rgba(244,63,94,.10); }
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      margin-top:10px;
+    }
+    .item{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      padding:10px 12px;
+      border-radius:14px;
+      background: rgba(0,0,0,.18);
+      border:1px solid rgba(255,255,255,.08);
+      font-size: 14px;
+    }
+    .item .left{ display:flex; flex-direction:column; gap:2px; }
+    .item .date{ color:var(--muted); font-size:12px; font-weight:700; }
+    details summary{
+      cursor:pointer;
+      font-weight:900;
+      color:var(--txt);
+      list-style:none;
+    }
+    details summary::-webkit-details-marker{ display:none; }
+    .smallbtn{
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.08);
+      color:var(--txt);
+      font-weight:900;
+      cursor:pointer;
+      width:100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="title">
+      <div class="badge">🚆</div>
+      <div>
+        <div style="font-size:16px;">Suivi CFF</div>
+        <div class="muted" style="font-size:12px;">Billets + rentabilité demi-tarif</div>
+      </div>
+    </div>
+    <button class="btn" onclick="location.href='index.html'">⬅ Retour</button>
+  </div>
+
+  <div class="wrap">
+    <div class="card">
+      <div class="row">
+        <div class="col">
+          <label>Personne</label>
+          <select id="pers"></select>
+        </div>
+        <div class="col">
+          <label>Montant billet (CHF)</label>
+          <input type="number" id="montant" step="0.05" placeholder="ex: 12.50">
+        </div>
+        <div class="col">
+          <button class="smallbtn primary" onclick="ajouter()">Ajouter trajet</button>
+        </div>
+      </div>
+
+      <div class="kpi">
+        <div>
+          <div class="muted">Dépenses depuis début</div>
+          <div class="v" id="kpiTotal">—</div>
+        </div>
+        <div>
+          <div class="muted">Prix abonnement</div>
+          <div class="v" id="kpiPrix">—</div>
+        </div>
+        <div>
+          <div class="muted">Différence</div>
+          <div class="v" id="kpiDiff">—</div>
+        </div>
+      </div>
+
+      <div id="pill" class="pill" style="display:none;"></div>
+      <div class="muted" style="margin-top:10px;">
+        Début abonnement : <strong id="kpiDate">—</strong>
+      </div>
+    </div>
+
+    <div class="card">
+      <details>
+        <summary>⚙️ Config abonnement (définie une fois)</summary>
+        <div style="height:10px;"></div>
+        <div class="row">
+          <div class="col">
+            <label>Date de début (YYYY-MM-DD)</label>
+            <input type="date" id="dateDebut">
+          </div>
+          <div class="col">
+            <label>Prix abonnement (CHF)</label>
+            <input type="number" id="prix" step="1">
+          </div>
+          <div class="col">
+            <button class="smallbtn" onclick="saveConfig()">Enregistrer</button>
+          </div>
+        </div>
+        <div class="muted">Astuce : par défaut Yann/Mélanie = 170, Jérémie/Antonin = 120.</div>
+      </details>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:900;">Historique (personne sélectionnée)</div>
+      <div class="list" id="liste"></div>
+    </div>
+  </div>
+
+<script>
+  // ⚠️ Mets bien TON URL /exec
+  const API = "https://script.google.com/macros/s/AKfycbxOJEus1Fev5I4YZsSbjpIXXlgGJBY7QmFkkqZtkXYD6eEPwqmgCl8r2hfrO1X9eyqxSA/exec";
+
+  const DEFAULTS = {
+    jeremie: { prix: 120, date_debut: "2026-01-01" },
+    antonin: { prix: 120, date_debut: "2026-01-01" },
+    yann:    { prix: 170, date_debut: "2026-01-01" },
+    melanie: { prix: 170, date_debut: "2026-01-01" },
+  };
+
+  let config = {};
+  let trips = [];
+
+  function qs(obj){
+    return new URLSearchParams(obj).toString();
+  }
+
+  function setPersons() {
+    const sel = document.getElementById("pers");
+    const persons = ["jeremie","antonin","yann","melanie"];
+    sel.innerHTML = persons.map(p => `<option value="${p}">${p.charAt(0).toUpperCase()+p.slice(1)}</option>`).join("");
+
+    // Restaure dernier choix
+    const last = localStorage.getItem("cff_person") || "jeremie";
+    sel.value = persons.includes(last) ? last : "jeremie";
+
+    sel.addEventListener("change", () => {
+      localStorage.setItem("cff_person", sel.value);
+      applyConfigToUI();
+      loadTrips();
+    });
+  }
+
+  async function loadConfig() {
+    const url = API + "?" + qs({ sheet:"CFF_CONFIG", action:"lire" });
+    const text = await fetch(url).then(r => r.text());
+
+    config = {};
+    if (text) {
+      text.split("~~~~").forEach(line => {
+        const [pers, date_debut, prix] = line.split("|");
+        if (!pers) return;
+        config[pers] = {
+          date_debut: date_debut || DEFAULTS[pers]?.date_debut || "2026-01-01",
+          prix: parseFloat(prix || DEFAULTS[pers]?.prix || 0)
+        };
+      });
+    }
+
+    // Complète si manquant
+    ["jeremie","antonin","yann","melanie"].forEach(p => {
+      if (!config[p]) config[p] = {...DEFAULTS[p]};
+    });
+  }
+
+  function applyConfigToUI(){
+    const p = document.getElementById("pers").value;
+    const cfg = config[p] || DEFAULTS[p];
+
+    document.getElementById("dateDebut").value = cfg.date_debut;
+    document.getElementById("prix").value = cfg.prix;
+
+    document.getElementById("kpiPrix").textContent = (cfg.prix || 0).toFixed(0) + " CHF";
+    document.getElementById("kpiDate").textContent = cfg.date_debut || "—";
+
+    // recalcul dès qu’on applique
+    computeRentability();
+  }
+
+  async function saveConfig(){
+    const p = document.getElementById("pers").value;
+    const date_debut = document.getElementById("dateDebut").value;
+    const prix = document.getElementById("prix").value;
+
+    const body = new URLSearchParams({
+      sheet:"CFF_CONFIG",
+      action:"enregistrer",
+      personne:p,
+      date_debut,
+      prix
+    });
+
+    const res = await fetch(API, { method:"POST", body }).then(r => r.text());
+    if (res.trim() !== "ok") alert(res);
+
+    await loadConfig();
+    applyConfigToUI();
+  }
+
+  async function loadTrips(){
+    const p = document.getElementById("pers").value;
+    const from = (config[p]?.date_debut) || document.getElementById("dateDebut").value || "";
+
+    const url = API + "?" + qs({ sheet:"CFF", action:"lire", personne:p, from });
+    const text = await fetch(url).then(r => r.text());
+
+    trips = [];
+    const list = document.getElementById("liste");
+    list.innerHTML = "";
+
+    if (text) {
+      text.split("~~~~").forEach(line => {
+        const [date, pers, montant] = line.split("|");
+        const m = parseFloat(montant);
+        if (!date || !pers || !isFinite(m)) return;
+        trips.push({date, pers, montant:m});
+      });
+
+      // tri plus récent en haut
+      trips.sort((a,b) => (a.date < b.date ? 1 : -1));
+
+      trips.forEach(t => {
+        const div = document.createElement("div");
+        div.className = "item";
+        div.innerHTML = `
+          <div class="left">
+            <div style="font-weight:900;">${t.montant.toFixed(2)} CHF</div>
+            <div class="date">${t.date}</div>
+          </div>
+          <div style="font-weight:900;opacity:.9;">${t.pers}</div>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    computeRentability();
+  }
+
+  function computeRentability(){
+    const p = document.getElementById("pers").value;
+    const cfg = config[p] || DEFAULTS[p];
+    const prix = parseFloat(cfg.prix || 0);
+
+    let total = 0;
+    trips.forEach(t => total += t.montant);
+
+    const diff = total - prix;
+
+    document.getElementById("kpiTotal").textContent = total.toFixed(2) + " CHF";
+    document.getElementById("kpiDiff").textContent = (diff>=0?"+":"") + diff.toFixed(2) + " CHF";
+
+    const pill = document.getElementById("pill");
+    pill.style.display = "inline-flex";
+    pill.className = "pill " + (diff >= 0 ? "ok" : "no");
+    pill.innerHTML = (diff >= 0)
+      ? `✅ Demi-tarif rentable`
+      : `❌ Demi-tarif pas rentable`;
+  }
+
+  async function ajouter(){
+    const p = document.getElementById("pers").value;
+    const montant = document.getElementById("montant").value;
+
+    const body = new URLSearchParams({
+      sheet:"CFF",
+      action:"ajouter",
+      personne:p,
+      montant
+    });
+
+    const res = await fetch(API, { method:"POST", body }).then(r => r.text());
+    if (res.trim() !== "ok") {
+      alert(res);
+      return;
+    }
+    document.getElementById("montant").value = "";
+    await loadTrips();
+  }
+
+  // init
+  (async function init(){
+    setPersons();
+    await loadConfig();
+    applyConfigToUI();
+    await loadTrips();
+  })();
+</script>
+</body>
+</html>
