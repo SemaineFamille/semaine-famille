@@ -902,12 +902,13 @@ function updateTotal(key){
   const el=document.getElementById(`total_${key}`);
   if(el) el.textContent=`${count} présent${count>1?'s':''}`;
 }
- 
 async function loadPresences(){
   document.getElementById('present-loading').style.display='block';
   document.getElementById('present-content').style.display='none';
   const start = todayYMD();
+  console.log("start envoyé:", start);
   const text = await apiCall({action:'lire', sheet:'PRESENCES', start, days:7});
+  console.log("texte brut reçu:", text);
   presencesData = {};
   parseLines(text).forEach(line => {
     const c = line.split('|');
@@ -916,7 +917,6 @@ async function loadPresences(){
       jeremie:c[6], melanie:c[7], yann:c[8].trim()
     };
   });
-  console.log("texte brut reçu:", text);
   console.log("presencesData:", JSON.stringify(presencesData));
  
   document.getElementById('present-loading').style.display='none';
