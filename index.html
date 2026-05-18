@@ -931,45 +931,47 @@ function showPage(name){
 function buildPresencesUI(){
   const dates = rollingDates(7);
   let html = '';
-  dates.forEach(function(item) {dates;
-  var label = item.label;
+  dates.forEach(function(item) {
+    var label = item.label;
+    var date = item.date;  // ← manquait !
 
-  html += '<div class="jour-header">' + label + '</div>';
+    html += '<div class="jour-header">' + label + '</div>';
 
-  ['midi','soir'].forEach(function(repas) {
-    var key = date + '_' + repas;
-    var data = presencesData[key] || {};
-    var count = MEMBRES.filter(function(m) { return data[m] === 'TRUE'; }).length;
+    ['midi','soir'].forEach(function(repas) {
+      var key = date + '_' + repas;
+      var data = presencesData[key] || {};
+      var count = MEMBRES.filter(function(m) { return data[m] === 'TRUE'; }).length;
 
-    html += '<div class="repas-label">' + repas.toUpperCase() +
-        ' <span class="total-badge" id="total_' + key + '">' +
-        count + ' présent' + (count > 1 ? 's' : '') +
-        '</span></div><div class="checkboxes-grid">';
+      html += '<div class="repas-label">' + repas.toUpperCase() +
+          ' <span class="total-badge" id="total_' + key + '">' +
+          count + ' présent' + (count > 1 ? 's' : '') +
+          '</span></div><div class="checkboxes-grid">';
 
-MEMBRES.forEach(function(m, mi) {
-  html += '<label class="checkbox-item">' +
-          '<input type="checkbox" id="cb_' + key + '_' + m + '" ' +
-          'data-key="' + key + '" ' +
-          (data[m] === 'TRUE' ? 'checked ' : '') +
-          'onchange="updateTotal(this.dataset.key)">' +
-          '<span>' + MEMBRES_LABEL[mi] + '</span>' +
-          '</label>';
-});
+      MEMBRES.forEach(function(m, mi) {
+        html += '<label class="checkbox-item">' +
+                '<input type="checkbox" id="cb_' + key + '_' + m + '" ' +
+                'data-key="' + key + '" ' +
+                (data[m] === 'TRUE' ? 'checked ' : '') +
+                'onchange="updateTotal(this.dataset.key)">' +
+                '<span>' + MEMBRES_LABEL[mi] + '</span>' +
+                '</label>';
+      });
 
-html += '</div><div class="divider"></div>';
-
-});
+      html += '</div><div class="divider"></div>';
+    });
+  });  // ← accolade+parenthèse fermante du forEach
 
   document.getElementById('present-content').innerHTML = html;
+}  // ← accolade fermante de la fonction
 
  
 function updateTotal(key){
-  const count = MEMBRES.filter(function(m){const count = MEMBRES.filter(functionElementById('cb_' + key + '_' + m);
-  return el && el.checked;
-}).length;
-
-  const el=document.getElementById(`total_${key}`);
-  if(el) el.textContent=`${count} présent${count>1?'s':''}`;
+  const count = MEMBRES.filter(function(m){
+    const el = document.getElementById('cb_' + key + '_' + m);
+    return el && el.checked;
+  }).length;
+  const el = document.getElementById('total_' + key);
+  if(el) el.textContent = count + ' présent' + (count > 1 ? 's' : '');
 }
 
 async function loadPresences(){
@@ -1042,7 +1044,8 @@ async function loadMenu(){
   });
   const dates = rollingDates(7);
   let html = '';
-  dates.forEach(function(item) {dates.forEach(function  var label = item.label;
+  dates.forEach(function(item) {
+  var label = item.label;
   var date = item.date;
 
     html += `<div class="menu-jour-card"><div class="jour-header" style="margin-bottom:12px">${label}</div>`;
