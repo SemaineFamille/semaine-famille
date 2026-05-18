@@ -931,24 +931,34 @@ function showPage(name){
 function buildPresencesUI(){
   const dates = rollingDates(7);
   let html = '';
-  dates.forEach(function(item) {dates.forEach(function(item date = item.date;
-                                var label = item.label;
-    html += `<div class="jour-header">${label}</div>`;
-    ['midi','soir'].forEach(repas => {
-      const key = `${date}_${repas}`;
-      const data = presencesData[key] || {};
-      const count = MEMBRES.filter(m => data[m]==='TRUE').length;
-      html += `<div class="repas-label">${repas.toUpperCase()} <span class="total-badge" id="total_${key}">${count} présent${count>1?'s':''}</span></div>
-      <div class="checkboxes-grid">`;
-      MEMBRES.forEach((m, mi) => {
-        html += `<label class="checkbox-item">
-          <input type="checkbox" id="cb_${key}_${m}" ${data[m]==='TRUE'?'checked':''} onchange="updateTotal('${key}')">
-          <label for="cb_${key}_${m}">${MEMBRES_LABEL[mi]}</label>
-        </label>`;
-      });
-      html += `</div><div class="divider"></div>`;
+  dates.forEach(function(item) {dates;
+  var label = item.label;
+
+  html += '<div class="jour-header">' + label + '</div>';
+
+  ['midi','soir'].forEach(function(repas) {
+    var key = date + '_' + repas;
+    var data = presencesData[key] || {};
+    var count = MEMBRES.filter(function(m) { return data[m] === 'TRUE'; }).length;
+
+    html += '<div class="repas-label">' + repas.toUpperCase() +
+            ' <span class="total-badge" id="total_' + key + '">' +
+            count + ' présent' + (count > 1 ? 's' : '') +
+            '</span></div><div class="checkboxes-grid">';
+
+    MEMBRES.forEach(function(m, mi) {
+      html += '<label class="checkbox-item">' +
+              '<input type="checkbox" id="cb_' + key + '_' + m + '" ' +
+              (data[m] === 'TRUE' ? 'checked' : '') +
+              ' onchange="updateTotal(\\'' + key + '\\')">' +
+              '<label for="cb_' + key + '_' + m + '">' + MEMBRES_LABEL[mi] + '</label>' +
+              '</label>';
     });
+
+    html += '</div><div class="divider"></div>';
   });
+});
+
   document.getElementById('present-content').innerHTML = html;
 }
  
