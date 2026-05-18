@@ -942,27 +942,21 @@ function buildPresencesUI(){
     var count = MEMBRES.filter(function(m) { return data[m] === 'TRUE'; }).length;
 
     html += '<div class="repas-label">' + repas.toUpperCase() +
-            ' <span class="total-badge" id="total_' + key + '">' +
-            count + ' présent' + (count > 1 ? 's' : '') +
-            '</span></div><div class="checkboxes-grid">';
+        ' <span class="total-badge" id="total_' + key + '">' +
+        count + ' présent' + (count > 1 ? 's' : '') +
+        '</span></div><div class="checkboxes-grid">';
 
-    MEMBRES.forEach((m, mi) => {MEMBRES.forEach((m, html += `
-    <label class="checkbox-item">
-      <input
-        type="checkbox"
-        id="cb_${key}_${m}"
-        data-key="${key}"
-        ${data[m] === 'TRUE' ? 'checked' : ''}
-        onchange="updateTotal(this.dataset.key)"
-      >
-      <span>${MEMBRES_LABEL[mi]}</span>
-    </label>
-  `;
+MEMBRES.forEach(function(m, mi) {
+  html += '<label class="checkbox-item">' +
+          '<input type="checkbox" id="cb_' + key + '_' + m + '" ' +
+          'data-key="' + key + '" ' +
+          (data[m] === 'TRUE' ? 'checked ' : '') +
+          'onchange="updateTotal(this.dataset.key)">' +
+          '<span>' + MEMBRES_LABEL[mi] + '</span>' +
+          '</label>';
 });
 
-
-
-    html += '</div><div class="divider"></div>';
+html += '</div><div class="divider"></div>';
   });
 });
 
