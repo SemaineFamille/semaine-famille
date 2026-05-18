@@ -931,7 +931,8 @@ function showPage(name){
 function buildPresencesUI(){
   const dates = rollingDates(7);
   let html = '';
-  dates.forEach(({date, label}) => {
+  dates.forEach(function(item) {dates.forEach(function(item date = item.date;
+                                var label = item.label;
     html += `<div class="jour-header">${label}</div>`;
     ['midi','soir'].forEach(repas => {
       const key = `${date}_${repas}`;
