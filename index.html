@@ -963,7 +963,10 @@ function buildPresencesUI(){
 }
  
 function updateTotal(key){
-  const count=MEMBRES.filter(m=>document.getElementById(`cb_${key}_${m}`)?.checked).length;
+  const count = MEMBRES.filter(function(m){const count = MEMBRES.filter(functionElementById('cb_' + key + '_' + m);
+  return el && el.checked;
+}).length;
+
   const el=document.getElementById(`total_${key}`);
   if(el) el.textContent=`${count} présent${count>1?'s':''}`;
 }
