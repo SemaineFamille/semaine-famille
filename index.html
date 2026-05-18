@@ -946,14 +946,21 @@ function buildPresencesUI(){
             count + ' présent' + (count > 1 ? 's' : '') +
             '</span></div><div class="checkboxes-grid">';
 
-    MEMBRES.forEach(function(m, mi) {
-      html += '<label class="checkbox-item">' +
-              '<input type="checkbox" id="cb_' + key + '_' + m + '" ' +
-              (data[m] === 'TRUE' ? 'checked' : '') +
-              ' onchange="updateTotal(\\'' + key + '\\')">' +
-              '<label for="cb_' + key + '_' + m + '">' + MEMBRES_LABEL[mi] + '</label>' +
-              '</label>';
-    });
+    MEMBRES.forEach((m, mi) => {MEMBRES.forEach((m, html += `
+    <label class="checkbox-item">
+      <input
+        type="checkbox"
+        id="cb_${key}_${m}"
+        data-key="${key}"
+        ${data[m] === 'TRUE' ? 'checked' : ''}
+        onchange="updateTotal(this.dataset.key)"
+      >
+      <span>${MEMBRES_LABEL[mi]}</span>
+    </label>
+  `;
+});
+``
+
 
     html += '</div><div class="divider"></div>';
   });
