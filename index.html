@@ -933,12 +933,12 @@ function buildPresencesUI(){
   let html = '';
   dates.forEach(function(item) {
     var label = item.label;
-    var date = item.date;  // ← manquait !
+    var date = item.date;  // ✅ récupérer la date !
 
     html += '<div class="jour-header">' + label + '</div>';
 
     ['midi','soir'].forEach(function(repas) {
-      var key = date + '_' + repas;
+      var key = date + '_' + repas;  // ✅ maintenant "2026-05-18_midi"
       var data = presencesData[key] || {};
       var count = MEMBRES.filter(function(m) { return data[m] === 'TRUE'; }).length;
 
@@ -959,10 +959,10 @@ function buildPresencesUI(){
 
       html += '</div><div class="divider"></div>';
     });
-  });  // ← accolade+parenthèse fermante du forEach
+  });
 
   document.getElementById('present-content').innerHTML = html;
-}  // ← accolade fermante de la fonction
+}
 
  
 function updateTotal(key){
