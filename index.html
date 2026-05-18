@@ -873,6 +873,26 @@ function getTodayJour(){
   const d=new Date().getDay();
   return JOURS[d===0?6:d-1];
 }
+
+function chargerCFF() {
+  fetch(URL + "?sheet=CFF&action=lire")
+    .then(r => r.text())
+    .then(data => {
+      let lignes = data.split("~~~~");
+      let html = "";
+
+      lignes.forEach(ligne => {
+        let parts = ligne.split("|");
+        if (parts.length > 0) {
+          html += `<div>${ligne}</div>`;
+        }
+      });
+
+      document.getElementById("cffList").innerHTML = html;
+    });
+}
+
+ 
  function openCFF() {
   // enlève active desTarget.classList.add('active');  // enlève active des autres boutons
 
