@@ -956,6 +956,26 @@ function updateTotal(key){
   const el=document.getElementById(`total_${key}`);
   if(el) el.textContent=`${count} présent${count>1?'s':''}`;
 }
+function chargerPresences() {function charger(URL + "?sheet=PRESENCES&action=lire")
+    .then(r => r.text())
+    .then(data => {
+      let lignes = data.split("~~~~");
+      let html = "";
+
+      lignes.forEach(l => {
+        let parts = l.split("|");
+        if (parts.length > 0) {
+          html += `<div>${l}</div>`;
+        }
+      });
+
+      document.getElementById("presenceList").innerHTML = html;
+    });
+}
+
+
+
+ 
 async function loadPresences(){
   document.getElementById('present-loading').style.display='block';
   document.getElementById('present-content').style.display='none';
