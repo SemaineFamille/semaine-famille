@@ -993,11 +993,13 @@ async function loadPresences(){
         const d = String(parsed.getDate()).padStart(2,'0');
         dateKey = `${y}-${m}-${d}`;
       }
-      presencesData[`${dateKey}_${c[1].trim()}`] = {
-        alessia:c[2].trim(), antonin:c[3].trim(), clement:c[4].trim(),
-        diego:c[5].trim(), jeremie:c[6].trim(), melanie:c[7].trim(),
-        yann:c[8].trim()
-      };
+      const repasKey = c[1].trim().toLowerCase();
+presencesData[`${dateKey}_${repasKey}`] = {
+  alessia:c[2].trim(), antonin:c[3].trim(), clement:c[4].trim(),
+  diego:c[5].trim(), jeremie:c[6].trim(), melanie:c[7].trim(),
+  yann:c[8].trim()
+};
+
     }
   });
   document.getElementById('present-loading').style.display='none';
