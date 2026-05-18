@@ -1028,7 +1028,9 @@ async function loadMenu(){
   });
   const dates = rollingDates(7);
   let html = '';
-  dates.forEach(({date, label}) => {
+  dates.forEach(function(item) {dates.forEach(function  var label = item.label;
+  var date = item.date;
+
     html += `<div class="menu-jour-card"><div class="jour-header" style="margin-bottom:12px">${label}</div>`;
     ['midi','soir'].forEach(repas => {
       const key = `${date}_${repas}`;
