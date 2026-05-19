@@ -580,6 +580,19 @@ function formatDateYYYYMMDD(date = new Date()) {
   return `${year}-${month}-${day}`;
 }
  
+function dateMinusDays(ymd, days){
+  const d = new Date(ymd + 'T00:00:00');
+  d.setDate(d.getDate() - days);
+  return formatDateYYYYMMDD(d);
+}
+
+function getJourFromYMD(ymd){
+  const d = new Date(ymd + 'T00:00:00');
+  const idx = (d.getDay() === 0) ? 6 : d.getDay() - 1; // 0=dim -> 6
+  return { jour: JOURS[idx], jourIdx: idx };
+}
+
+ 
 const JOURS=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
 const JOURS_LABEL=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
 const JOURS_COURTS=['Lu','Ma','Me','Je','Ve','Sa','Di'];
@@ -1186,7 +1199,7 @@ async function loadTaches(){
   tachesConfig=[];
   parseLines(cText).forEach(line=>{
     const c=line.split('|');
-    if(c.length>=9) tachesConfig.push({tache:c[0],enfant:c[1],lundi:c[2],mardi:c[3],mercredi:c[4],jeudi:c[5],vendredi:c[6],samedi:c[7],dimanche:c[8],active:c[9]?.trim()});
+    if(c.length>=10) tachesConfig.push({tache:c[0],enfant:c[1],lundi:c[2],mardi:c[3],mercredi:c[4],jeudi:c[5],vendredi:c[6],samedi:c[7],dimanche:c[8],active:c[9]?.trim()});
   });
   tachesData=[];
   parseLines(tText).forEach(line=>{
@@ -1214,29 +1227,71 @@ async function loadTaches(){
  
 function getTacheIcon(label){return TACHES_FIXES.find(t=>t.label===label)?.icon||'📋';}
  
-function getToutesLesTachesEnfant(enfant, jour) {
-  const today=new Date();
-  const dow=today.getDay();
-  const dateStr=formatDateYYYYMMDD(today);
-  const taches=[];
-  tachesConfig.filter(t=>t.enfant===enfant&&t[jour]==='TRUE').forEach(t=>{
-    taches.push({tache:t.tache,icon:getTacheIcon(t.tache),source:'fixe',jourReel:jour});
-  });
-  if(dow===4||dow===5){
-    TACHES_RECURRENTES.filter(t=>t.personne===enfant).forEach(t=>{
-      if(isTacheRecurrenteActive(t,dateStr)){
-        if(!taches.find(x=>x.tache===t.tache)){
-          taches.push({tache:t.tache,icon:t.icon,source:'recurrente',jourReel:'vendredi',badge:dow===4?'⏰ Demain':''});
-        }
-      }
+
+function getToutesLesTachesEnfant(enfant, jour, dateYMD) {
+  const dateStr = dateYMD || formatDateYYYYMMDD(new Date());
+  const dateObj = new Date(dateStr + 'T00:00:00');
+  const dow = dateObj.getDay(); // 0=dim, 4=jeu, 5=ven
+  const taches = [];
+
+  // 1) Tâches fixes configurées (par jour de semaine)
+  tachesConfig
+    .filter(t => t.enfant === enfant && t[jour] === 'TRUE')
+    .forEach(t => {
+      taches.push({
+        tache: t.tache,
+        icon: getTacheIcon(t.tache),
+        source: 'fixe',
+        // ⚠️ ton historique TACHES stocke "jour" comme jour de semaine pour les fixes
+        jourReel: jour,
+        dueDate: dateStr
+      });
     });
+
+  // 2) Tâches récurrentes (jeudi/ vendredi) — on décide selon la date ciblée
+  if(dow === 4 || dow === 5){
+    TACHES_RECURRENTES
+      .filter(t => t.personne === enfant)
+      .forEach(t => {
+        if(isTacheRecurrenteActive(t, dateStr)){
+          if(!taches.find(x => x.tache === t.tache)){
+            const dueDate = (dow === 4) ? dateMinusDays(dateStr, -1) : dateStr; // jeudi -> vendredi
+            taches.push({
+              tache: t.tache,
+              icon: t.icon,
+              source: 'recurrente',
+              jourReel: 'vendredi',     // comme tu fais déjà
+              dueDate,
+              badge: (dow === 4) ? '⏰ Demain' : ''
+            });
+          }
+        }
+      });
   }
-  const enfantsPonct=enfant==='Mél & Yann'?['Mél & Yann']:[enfant];
-  tachesPonctuelles.filter(t=>enfantsPonct.includes(t.enfant)&&t.date===dateStr).forEach(t=>{
-    taches.push({tache:t.tache,icon:'📌',source:'ponctuelle',jourReel:jour,enfantReel:t.enfant});
-  });
+
+  // 3) Tâches ponctuelles EXACTEMENT pour la date ciblée (pas aujourd'hui par défaut)
+  // Parents: la sheet peut contenir "Mél & Yann" OU "Mélanie"/"Yann"
+  const enfantsPonct = (enfant === 'Mél & Yann')
+    ? ['Mél & Yann','Mélanie','Yann']
+    : [enfant];
+
+  tachesPonctuelles
+    .filter(t => enfantsPonct.includes(t.enfant) && t.date === dateStr)
+    .forEach(t => {
+      taches.push({
+        tache: t.tache,
+        icon: '📌',
+        source: 'ponctuelle',
+        // ✅ IMPORTANT : pour les ponctuelles, on enregistre l'état avec la DATE, pas "mardi"
+        jourReel: dateStr,
+        dueDate: dateStr,
+        enfantReel: t.enfant
+      });
+    });
+
   return taches;
 }
+
  
 function getTachesEnRetard(enfant) {
   const hier=new Date();
@@ -1551,7 +1606,7 @@ async function loadAdminConfig(){
   tachesConfig=[];
   parseLines(text).forEach(line=>{
     const c=line.split('|');
-    if(c.length>=9) tachesConfig.push({tache:c[0],enfant:c[1],lundi:c[2],mardi:c[3],mercredi:c[4],jeudi:c[5],vendredi:c[6],samedi:c[7],dimanche:c[8],active:c[9]?.trim()});
+    if(c.length>=10) tachesConfig.push({tache:c[0],enfant:c[1],lundi:c[2],mardi:c[3],mercredi:c[4],jeudi:c[5],vendredi:c[6],samedi:c[7],dimanche:c[8],active:c[9]?.trim()});
   });
   renderAdminForm();
   renderPreview(currentPreviewEnfant);
