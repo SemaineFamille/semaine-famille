@@ -1292,18 +1292,64 @@ function getToutesLesTachesEnfant(enfant, jour, dateYMD) {
   return taches;
 }
 
- 
+
 function getTachesEnRetard(enfant) {
-  const hier=new Date();
-  hier.setDate(hier.getDate()-1);
-  const hierIdx=hier.getDay()===0?6:hier.getDay()-1;
-  const jourHier=JOURS[hierIdx];
-  const toutesHier=getToutesLesTachesEnfant(enfant,jourHier);
-  return toutesHier.filter(t=>{
-    const etat=tachesData.find(td=>td.tache===t.tache&&td.enfant===enfant&&td.jour===jourHier);
-    return !etat||etat.etat?.trim()!=='Fait';
-  }).map(t=>({...t,jourReel:jourHier,enRetard:true}));
+  // On ne garde ici que le "retard hier" pour les tâches fixes/récurrentes (car elles ne sont pas datées)
+  const todayStr = formatDateYYYYMMDD(new Date());
+  const yesterdayStr = dateMinusDays(todayStr, 1);
+
+  const { jour: jourHier } = getJourFromYMD(yesterdayStr);
+
+  // 🔥 IMPORTANT : on passe la date d'hier pour éviter d'embarquer les ponctuelles d'aujourd'hui
+  const toutesHier = getToutesLesTachesEnfant(enfant, jourHier, yesterdayStr);
+
+  // Retard = non fait (selon ton modèle actuel : fixes stockées par jour de semaine)
+  return toutesHier.filter(t => {
+    const etat = tachesData.find(td =>
+      td.tache === t.tache &&
+      td.enfant === enfant &&
+      td.jour === t.jourReel
+    );
+    return !etat || (etat.etat || '').trim() !== 'Fait';
+  }).map(t => ({
+    ...t,
+    enRetard:true,
+    dueDate: yesterdayStr
+  }));
 }
+ 
+
+function getPonctuellesEnRetard(enfant){
+  const todayStr = formatDateYYYYMMDD(new Date());
+
+  const enfantsPonct = (enfant === 'Mél & Yann')
+    ? ['Mél & Yann','Mélanie','Yann']
+    : [enfant];
+
+  // Ponctuelles dont la date est passée
+  const overdue = tachesPonctuelles.filter(t =>
+    enfantsPonct.includes(t.enfant) && t.date < todayStr
+  );
+
+  // On garde uniquement celles non validées (etat "Fait" enregistré avec jour = date)
+  return overdue.filter(t => {
+    const done = tachesData.find(td =>
+      td.tache === t.tache &&
+      td.enfant === enfant &&
+      td.jour === t.date &&
+      (td.etat || '').trim() === 'Fait'
+    );
+    return !done;
+  }).map(t => ({
+    tache: t.tache,
+    icon: '📌',
+    source: 'ponctuelle',
+    jourReel: t.date,      // clé d'enregistrement
+    dueDate: t.date,       // affichage
+    enfantReel: t.enfant
+  }));
+}
+
  
 function renderTaches(){
   const today=new Date();
@@ -1316,7 +1362,10 @@ function renderTaches(){
   }
   const enfant=currentUser==='parent'?'Mél & Yann':currentUser;
   const toutesLesTaches=getToutesLesTachesEnfant(enfant,jour);
-  const enRetard=getTachesEnRetard(enfant);
+  const enRetardFixes = getTachesEnRetard(enfant);
+  const enRetardPonct = getPonctuellesEnRetard(enfant);
+  const enRetard = [...enRetardPonct, ...enRetardFixes];
+
   const nonFaites=toutesLesTaches.filter(t=>{
     const etat=tachesData.find(td=>td.tache===t.tache&&td.enfant===enfant&&td.jour===t.jourReel);
     return !etat||etat.etat?.trim()!=='Fait';
