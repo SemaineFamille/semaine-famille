@@ -41,11 +41,11 @@
   vertical-align: middle;
 }
 .cal-icon {
-  width: 36px;      /* tu peux mettre 14px, 16px, 20px selon ce que tu veux */
-  height: 36px;
+  width: 30px;      /* tu peux mettre 14px, 16px, 20px selon ce que tu veux */
+  height: 30px;
   object-fit: contain;
   display: block;
-  margin: 0px auto; /* centre l’image dans la case */
+  margin: 0; /* centre l’image dans la case */
   border-radius: 50%; /* arrondi joli */
   padding: 0px;       /* espace pour le contour */
 }
@@ -173,9 +173,9 @@ input[type="text"]:focus,select:focus{outline:none;border-color:var(--violet);}
 /* JOB */
 .cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .cal-month{font-size:1.1rem;font-weight:800;color:var(--violet);}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0, 1fr));gap:3px;width:100%;max-width:100%;box-sizing:border-box;}
 .cal-day-name{text-align:center;font-size:0.65rem;font-weight:700;color:var(--text-light);padding:4px 0;text-transform:uppercase;}
-.cal-day{border-radius:8px;background:var(--bg);display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:all 0.2s;border:2px solid transparent;min-height:56px;padding:4px 2px;}
+.cal-day{border-radius:8px;background:var(--bg);display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:all 0.2s;border:2px solid transparent;min-height:48px;padding:2px 1px;}
 .cal-day:hover{border-color:var(--violet);background:#e8d5f0;}
 .cal-day.empty{background:transparent;cursor:default;pointer-events:none;}
 .cal-day.has-data{background:#e8d5f0;}
@@ -261,12 +261,7 @@ input[type="text"]:focus,select:focus{outline:none;border-color:var(--violet);}
   font-size: 18px;
   cursor: pointer;
 }
-  #accueil-buttons {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
-  padding: 20px;
-}
+
 
 .login-btn {
   display: flex;
@@ -318,6 +313,8 @@ if ("serviceWorker" in navigator) {
   <button class="login-btn" style="background:linear-gradient(135deg,#FF5722,#E64A19);color:white" onclick="login('parent')">
     <span class="avatar">👩🏻‍🤝‍👨🏼🚑</span>Mélanie & Yann
   </button>
+  
+
 
   </div>
 </div>
@@ -384,6 +381,11 @@ if ("serviceWorker" in navigator) {
     <button class="nav-tab" onclick="showPage('taches')">✅ Tâches</button>
     <button class="nav-tab" id="jobTab" onclick="showPage('job')">📅 Job</button>
     <button class="nav-tab" id="adminTab" onclick="requestAdmin()">⚙️ Admin</button>
+    <button class="nav-tab" onclick="location.href='CFF.html'">🚆 CFF</button>
+  
+
+</div>
+
   </div>
 </div>
 
@@ -399,18 +401,26 @@ if ("serviceWorker" in navigator) {
     <button class="quick-btn" onclick="showPage('menu')"><span class="icon">🍽️</span>Menu</button>
     <button class="quick-btn" onclick="showPage('courses')"><span class="icon">🛒</span>Courses</button>
     <button class="quick-btn" onclick="showPage('taches')"><span class="icon">✅</span>Tâches</button>
+    <button class="quick-btn" onclick="location.href='CFF.html'"><span class="icon">🚆</span>CFF</button>
+
   </div>
 </div>
 
 <!-- PRÉSENCES -->
+
 <div class="page" id="page-present">
-  <button class="btn btn-primary" onclick="savePresences()">💾 Enregistrer</button>
-  <button class="btn btn-secondary" onclick="clearPresences()" style="margin-bottom:12px">🗑️ Tout effacer</button>
+  <div style="display:flex;gap:8px;margin-bottom:12px">
+    <button class="btn btn-primary" onclick="savePresences()" style="flex:1;margin:0">💾 Enregistrer</button>
+    <button class="btn btn-secondary" onclick="clearPresences()" style="flex:1;margin:0">🗑️ Effacer</button>
+  </div>
   <div id="present-loading" class="loading"><div class="spinner"></div>Chargement...</div>
   <div id="present-content" style="display:none"></div>
-  <button class="btn btn-primary" onclick="savePresences()">💾 Enregistrer</button>
-  <button class="btn btn-secondary" onclick="clearPresences()">🗑️ Tout effacer</button>
+  <div style="display:flex;gap:8px;margin-top:12px">
+    <button class="btn btn-primary" onclick="savePresences()" style="flex:1;margin:0">💾 Enregistrer</button>
+    <button class="btn btn-secondary" onclick="clearPresences()" style="flex:1;margin:0">🗑️ Effacer</button>
+  </div>
 </div>
+
 
 <!-- MENU -->
 <div class="page" id="page-menu">
@@ -526,10 +536,7 @@ if ("serviceWorker" in navigator) {
     <button class="btn btn-primary" onclick="saveTachePonctuelle()">📌 Ajouter cette tâche</button>
     <div id="ponct-list" style="margin-top:12px"></div>
   </div>
-  <div class="card">
-    <div class="card-title">Récapitulatif</div>
-    <div id="admin-list"><div class="loading">Chargement...</div></div>
-  </div>
+ 
   <div class="card">
     <div class="card-title">👁️ Vue enfant — Aujourd'hui</div>
     <div class="inner-tabs" id="preview-tabs">
@@ -547,90 +554,92 @@ if ("serviceWorker" in navigator) {
 <script>
 const SCRIPT_URL='https://script.google.com/macros/s/AKfycbxOJEus1Fev5I4YZsSbjpIXXlgGJBY7QmFkkqZtkXYD6eEPwqmgCl8r2hfrO1X9eyqxSA/exec';
 const ADMIN_CODE='2019';
-  
+function rollingDates(days) {
+  const base = new Date(); base.setHours(0,0,0,0);
+  const result = [];
+  const joursNoms = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+  for (let i = 0; i < days; i++) {
+    const d = new Date(base);
+    d.setDate(base.getDate() + i);
+    const dd = String(d.getDate()).padStart(2,'0');
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    result.push({
+      date: `${d.getFullYear()}-${mm}-${dd}`,
+      label: `${joursNoms[d.getDay()]} ${dd}/${mm}`
+    });
+  }
+  return result;
+}
+
+function todayYMD() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+ 
 function formatDateYYYYMMDD(date = new Date()) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
-
+ 
 const JOURS=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
 const JOURS_LABEL=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
 const JOURS_COURTS=['Lu','Ma','Me','Je','Ve','Sa','Di'];
-const MEMBRES=['alessia','antonin','clement','jeremie','melanie','yann'];
-const MEMBRES_LABEL=['Alessia','Antonin','Clément','Jérémie','Mélanie','Yann'];
+const MEMBRES=['alessia','antonin','clement','diego','jeremie','melanie','yann'];
+const MEMBRES_LABEL=['Alessia','Antonin','Clément','Diego','Jérémie','Mélanie','Yann'];
 const MOIS_NOMS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
-
+ 
 const TACHES_FIXES=[
-  {id:'lit',        label:'Défaire ton lit',         icon:'🛏️'},
   {id:'lessive',    label:'Monter ta lessive',       icon:'👕'},
   {id:'vaisselle',  label:'Vider le lave-vaisselle', icon:'🍽️'},
   {id:'aspirateur', label:"Passer l'aspirateur",     icon:'🧹'}
 ];
-
-// Tâches récurrentes du lit — visible jeudi ET vendredi
-// dateDebut = date du premier vendredi concerné
-// frequence = toutes les X semaines
+ 
 const TACHES_RECURRENTES = [
-  { personne:'Alessia', tache:'Défaire ton lit', icon:'🛏️', dateDebut:'2026-05-15', frequence:3 },
-  { personne:'Diego',   tache:'Défaire ton lit', icon:'🛏️', dateDebut:'2026-05-15', frequence:3 },
-  { personne:'Clément', tache:'Défaire ton lit', icon:'🛏️', dateDebut:'2026-05-29', frequence:3 },
-  { personne:'Antonin', tache:'Défaire ton lit', icon:'🛏️', dateDebut:'2026-05-29', frequence:3 },
-  { personne:'Jérémie', tache:'Défaire ton lit', icon:'🛏️', dateDebut:'2026-05-15', frequence:2 },
-  { personne:'Yann',    tache:'Défaire ton lit', icon:'🛏️', dateDebut:'2026-05-15', frequence:2 },
-  { personne:'Mélanie', tache:'Défaire ton lit', icon:'🛏️', dateDebut:'2026-05-15', frequence:2 },
+  { personne:'Alessia',    tache:'Défaire ton lit', icon:'🛏️', dateDebut:'2026-05-15', frequence:3 },
+  { personne:'Diego',      tache:'Défaire ton lit', icon:'🛏️', dateDebut:'2026-05-15', frequence:3 },
+  { personne:'Clément',    tache:'Défaire ton lit', icon:'🛏️', dateDebut:'2026-05-29', frequence:3 },
+  { personne:'Antonin',    tache:'Défaire ton lit', icon:'🛏️', dateDebut:'2026-05-29', frequence:3 },
+  { personne:'Jérémie',    tache:'Défaire ton lit', icon:'🛏️', dateDebut:'2026-05-15', frequence:2 },
+  { personne:'Mél & Yann', tache:'Défaire ton lit', icon:'🛏️', dateDebut:'2026-05-15', frequence:2 },
 ];
-
-// Vérifie si une tâche récurrente est active aujourd'hui (jeudi ou vendredi de la bonne semaine)
+ 
 function isTacheRecurrenteActive(tache, dateStr) {
   const today = new Date(dateStr || new Date().toISOString().split('T')[0]);
-  const dow = today.getDay(); // 0=dim, 4=jeu, 5=ven
-  
-  // Visible jeudi (4) et vendredi (5) uniquement
+  const dow = today.getDay();
   if(dow !== 4 && dow !== 5) return false;
-  
-  // Trouver le vendredi de cette semaine
   const vendredi = new Date(today);
-  if(dow === 4) vendredi.setDate(today.getDate() + 1); // jeudi → vendredi suivant
-  // si dow === 5, vendredi = today
-  
+  if(dow === 4) vendredi.setDate(today.getDate() + 1);
   const debut = new Date(tache.dateDebut);
-  
-  // Vendredi doit être >= dateDebut
   if(vendredi < debut) return false;
-  
-  // Calculer nombre de semaines écoulées depuis dateDebut
   const msParSemaine = 7 * 24 * 60 * 60 * 1000;
   const semaines = Math.round((vendredi - debut) / msParSemaine);
-  
   return semaines % tache.frequence === 0;
 }
-
-let tachesPonctuelles = []; // chargées depuis Google Sheets
-
-// Tâches récurrentes parents
+ 
+let tachesPonctuelles = [];
+ 
 const TACHES_PARENTS = [
   { label:'Laver tapis salle de bain', icon:'🛁', type:'premier_du_mois' },
   { label:'Laver linges et serviettes', icon:'🧺', type:'mercredi' },
 ];
-
+ 
 function isTacheParentActive(tache) {
   const today = new Date();
-  const dow = today.getDay(); // 3 = mercredi
+  const dow = today.getDay();
   const jour = today.getDate();
   if(tache.type === 'premier_du_mois') return jour === 1;
   if(tache.type === 'mercredi') return dow === 3;
   return false;
 }
-
+ 
 let currentUser=null, isParent=false;
 let presencesData={},menuData={},coursesData={},tachesData=[],tachesConfig=[],jobData={};
 let currentListe='generale',currentAdminEnfant='Alessia';
 let calYear,calMonth,selectedDay=null;
 let pinValue='';
-
-// ===================== ANNIVERSAIRES & FÊTES =====================
+ 
 const ANNIVERSAIRES = [
   { nom: 'Alessia',  jour: 1,  mois: 1  },
   { nom: 'Antonin',  jour: 15, mois: 5  },
@@ -640,15 +649,13 @@ const ANNIVERSAIRES = [
   { nom: 'Yann',     jour: 10, mois: 3  },
   { nom: 'Mélanie',  jour: 28, mois: 3  },
 ];
-
+ 
 function checkCelebrations() {
   const now = new Date();
   const jour = now.getDate();
   const mois = now.getMonth() + 1;
   const container = document.getElementById('celebration-banner');
   if (!container) return;
-
-  // Noël
   if (jour === 25 && mois === 12) {
     container.innerHTML = `
       <div class="celebration noel">
@@ -660,8 +667,6 @@ function checkCelebrations() {
     launchConfetti('noel');
     return;
   }
-
-  // Anniversaires
   const anniv = ANNIVERSAIRES.filter(a => a.jour === jour && a.mois === mois);
   if (anniv.length > 0) {
     const noms = anniv.map(a => a.nom);
@@ -677,19 +682,17 @@ function checkCelebrations() {
     launchConfetti('anniv');
   }
 }
-
+ 
 function launchConfetti(type) {
   const colors = type === 'noel'
     ? ['#c0392b','#27ae60','#f1c40f','#ffffff','#2980b9']
     : ['#9C27B0','#F50870','#FEEA3B','#00BCD4','#FF5722'];
-
   const canvas = document.getElementById('confetti-canvas');
   if (!canvas) return;
   canvas.style.display = 'block';
   const ctx = canvas.getContext('2d');
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
-
   const particles = Array.from({length: 120}, () => ({
     x: Math.random() * canvas.width,
     y: Math.random() * canvas.height - canvas.height,
@@ -700,9 +703,7 @@ function launchConfetti(type) {
     tiltAngle: 0,
     tiltAngleIncrement: Math.random() * 0.07 + 0.05
   }));
-
-  let angle = 0;
-  let count = 0;
+  let angle = 0, count = 0;
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     angle += 0.01;
@@ -716,10 +717,7 @@ function launchConfetti(type) {
       ctx.moveTo(p.x + p.tilt + p.r / 4, p.y);
       ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 4);
       ctx.stroke();
-      if (p.y > canvas.height) {
-        p.y = -10;
-        p.x = Math.random() * canvas.width;
-      }
+      if (p.y > canvas.height) { p.y = -10; p.x = Math.random() * canvas.width; }
     });
     count++;
     if (count < 300) requestAnimationFrame(draw);
@@ -727,22 +725,38 @@ function launchConfetti(type) {
   }
   draw();
 }
+ 
+let deferredPrompt;
+ 
+window.addEventListener('beforeinstallprompt',(e)=>{
+  e.preventDefault();
+  deferredPrompt=e;
+  const btn=document.getElementById('installBtn');
+  if(btn) btn.style.display='block';
+});
+ 
+window.addEventListener('appinstalled',()=>{
+  showToast('✅ App installée sur votre écran d\'accueil !');
+  deferredPrompt=null;
+});
+ 
+function installApp(){
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(()=>{deferredPrompt=null;});
+  }
+}
+ 
 function login(user){
   currentUser=user;
   isParent=(user==='parent');
   document.getElementById('loginScreen').classList.add('hidden');
   document.getElementById('mainNav').style.display='block';
-
-  // Adapter l'interface selon l'utilisateur
   const userName=isParent?'👨‍👩‍👧‍👦 Parents':user;
   document.getElementById('navUserName').textContent=userName;
   document.getElementById('accueil-title').textContent=`⭐ Bonjour ${isParent?'!':user+' !'} `;
-
-  // Onglet Admin visible seulement pour les parents, Job visible par tous
   document.getElementById('jobTab').style.display='';
   document.getElementById('adminTab').style.display=isParent?'':'none';
-
-  // Accueil adapté
   const qnav=document.getElementById('quick-nav-grid');
   if(isParent){
     qnav.innerHTML=`
@@ -751,6 +765,9 @@ function login(user){
       <button class="quick-btn" onclick="showPage('courses')"><span class="icon">🛒</span>Courses</button>
       <button class="quick-btn" onclick="showPage('taches')"><span class="icon">✅</span>Tâches</button>
       <button class="quick-btn" onclick="showPage('job')"><span class="icon">📅</span>Job</button>
+      <button class="quick-btn" onclick="location.href='CFF.html'"><span class="icon">🚆</span>CFF</button>
+
+      
       <button class="quick-btn" onclick="requestAdmin()" style="background:linear-gradient(135deg,#FF5722,#FF9800)"><span class="icon">⚙️</span>Admin</button>`;
   } else {
     qnav.innerHTML=`
@@ -758,43 +775,19 @@ function login(user){
       <button class="quick-btn" onclick="showPage('present')"><span class="icon">👥</span>Présences</button>
       <button class="quick-btn" onclick="showPage('menu')"><span class="icon">🍽️</span>Menu</button>
       <button class="quick-btn" onclick="showPage('courses')"><span class="icon">🛒</span>Courses</button>
-      <button class="quick-btn" onclick="showPage('job')"><span class="icon">📅</span>Job</button>`;
+      <button class="quick-btn" onclick="showPage('job')"><span class="icon">📅</span>Job</button>
+      <button class="quick-btn" onclick="location.href='CFF.html'"><span class="icon">🚆</span>CFF</button>
+
+ `;
   }
-
-  function installApp(){
-  if(deferredPrompt){
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(()=>{deferredPrompt=null;});
+  if(CSS.supports('padding-top: env(safe-area-inset-top)')){
+    document.querySelector('.nav').style.paddingTop='env(safe-area-inset-top)';
   }
-}
-
-// Vérifier anniversaires et fêtes au chargement
-checkCelebrations();
-showPage('accueil');
-
-// PWA — Installation
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt',(e)=>{
-  e.preventDefault();
-  deferredPrompt=e;
-  // Afficher bouton d'installation si disponible
-  const btn=document.getElementById('installBtn');
-  if(btn) btn.style.display='block';
-});
-
-window.addEventListener('appinstalled',()=>{
-  showToast('✅ App installée sur votre écran d\'accueil !');
-  deferredPrompt=null;
-});
-
-// Ajuster padding pour iPhone (encoche)
-if(CSS.supports('padding-top: env(safe-area-inset-top)')){
-  document.querySelector('.nav').style.paddingTop='env(safe-area-inset-top)';
-}
-  // Pré-charger les tâches si enfant
+  checkCelebrations();
+  showPage('accueil');
   if(!isParent) loadTaches();
 }
-
+ 
 function logout(){
   currentUser=null;
   isParent=false;
@@ -803,8 +796,7 @@ function logout(){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-accueil').classList.add('active');
 }
-
-// ===================== CODE ADMIN =====================
+ 
 function requestAdmin(){
   if(document.getElementById('page-admin').classList.contains('unlocked')){
     showPage('admin');
@@ -815,30 +807,30 @@ function requestAdmin(){
   document.getElementById('pinError').textContent='';
   document.getElementById('adminModal').classList.add('show');
 }
-
+ 
 function pinPress(digit){
   if(pinValue.length>=4) return;
   pinValue+=digit;
   updatePinDisplay();
   if(pinValue.length===4) checkPin();
 }
-
+ 
 function pinDelete(){
   pinValue=pinValue.slice(0,-1);
   updatePinDisplay();
 }
-
+ 
 function pinClear(){
   pinValue='';
   updatePinDisplay();
 }
-
+ 
 function updatePinDisplay(){
   for(let i=0;i<4;i++){
     document.getElementById(`dot${i}`).classList.toggle('filled',i<pinValue.length);
   }
 }
-
+ 
 function checkPin(){
   if(pinValue===ADMIN_CODE){
     document.getElementById('adminModal').classList.remove('show');
@@ -851,109 +843,186 @@ function checkPin(){
     setTimeout(()=>{document.getElementById('pinError').textContent='';},2000);
   }
 }
-
+ 
 function closeAdminModal(){
   document.getElementById('adminModal').classList.remove('show');
   pinValue='';
   updatePinDisplay();
 }
-
-// ===================== UTILS =====================
+ 
 function showToast(msg){
   const t=document.getElementById('toast');
   t.textContent=msg;t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2500);
 }
-
+ 
 async function apiCall(params){
   try{
     const r=await fetch(SCRIPT_URL+'?'+new URLSearchParams(params).toString());
     return await r.text();
   }catch(e){console.error(e);return '';}
 }
-
+ 
 function parseLines(text){
   if(!text||text.trim()==='ok'||text.trim()==='') return [];
   return text.split('~~~~').map(l=>l.trim()).filter(l=>l.length>0);
 }
-
+ 
 function getTodayJour(){
   const d=new Date().getDay();
   return JOURS[d===0?6:d-1];
 }
 
-// ===================== NAVIGATION =====================
-function showPage(name){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('page-'+name).classList.add('active');
-  const order=['accueil','present','menu','courses','taches','job','admin'];
-  const idx=order.indexOf(name);
-  if(idx>=0) document.querySelectorAll('.nav-tab')[idx].classList.add('active');
-  if(name==='present') loadPresences();
-  if(name==='menu') loadMenu();
-  if(name==='courses') loadCourses(currentListe);
-  if(name==='taches') loadTaches();
-  if(name==='job') initCal();
-  if(name==='admin') loadAdminConfig();
+function chargerCFF() {
+  fetch(URL + "?sheet=CFF&action=lire")
+    .then(r => r.text())
+    .then(data => {
+      let lignes = data.split("~~~~");
+      let html = "";
+
+      lignes.forEach(ligne => {
+        let parts = ligne.split("|");
+        if (parts.length > 0) {
+          html += `<div>${ligne}</div>`;
+        }
+      });
+
+      document.getElementById("cffList").innerHTML = html;
+    });
 }
 
-// ===================== PRÉSENCES =====================
+ 
+ function openCFF() {
+  // enlève active desTarget.classList.add('active');  // enlève active des autres boutons
+
+  // redirection vers la page CFF
+  location.href = 'CFF.html';
+}
+
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+
+  // met le bouton actif visuellement
+
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+
+  const el = document.getElementById('page-' + name);
+  if (el) {
+    el.classList.add('active');
+  } else {
+    console.log("Page inexistante:", name);
+    return; // ✅ évite le crash
+  }
+
+  const order=['accueil','present','menu','courses','taches','job','admin'];
+  const idx = order.indexOf(name);
+  if (idx >= 0) document.querySelectorAll('.nav-tab')[idx].classList.add('active');
+
+  if (name==='present') loadPresences();
+  if (name==='menu') loadMenu();
+  if (name==='courses') loadCourses(currentListe);
+  if (name==='taches') loadTaches();
+  if (name==='job') initCal();
+  if (name==='admin') loadAdminConfig();
+}
+ 
 function buildPresencesUI(){
-  let html='';
-  JOURS.forEach((jour,ji)=>{
-    html+=`<div class="jour-header">${JOURS_LABEL[ji]}</div>`;
-    ['midi','soir'].forEach(repas=>{
-      const key=`${jour}_${repas}`;
-      const data=presencesData[key]||{};
-      const count=MEMBRES.filter(m=>data[m]==='TRUE').length;
-      html+=`<div class="repas-label">${repas.toUpperCase()} <span class="total-badge" id="total_${key}">${count} présent${count>1?'s':''}</span></div>
-      <div class="checkboxes-grid">`;
-      MEMBRES.forEach((m,mi)=>{
-        html+=`<label class="checkbox-item">
-          <input type="checkbox" id="cb_${key}_${m}" ${data[m]==='TRUE'?'checked':''} onchange="updateTotal('${key}')">
-          <label for="cb_${key}_${m}">${MEMBRES_LABEL[mi]}</label>
-        </label>`;
+  const dates = rollingDates(7);
+  let html = '';
+  dates.forEach(function(item) {
+    var label = item.label;
+    var date = item.date;  // ✅ récupérer la date !
+
+    html += '<div class="jour-header">' + label + '</div>';
+
+    ['midi','soir'].forEach(function(repas) {
+      var key = date + '_' + repas;  // ✅ maintenant "2026-05-18_midi"
+      var data = presencesData[key] || {};
+      var count = MEMBRES.filter(function(m) { return data[m] === 'TRUE'; }).length;
+
+      html += '<div class="repas-label">' + repas.toUpperCase() +
+          ' <span class="total-badge" id="total_' + key + '">' +
+          count + ' présent' + (count > 1 ? 's' : '') +
+          '</span></div><div class="checkboxes-grid">';
+
+      MEMBRES.forEach(function(m, mi) {
+        html += '<label class="checkbox-item">' +
+                '<input type="checkbox" id="cb_' + key + '_' + m + '" ' +
+                'data-key="' + key + '" ' +
+                (data[m] === 'TRUE' ? 'checked ' : '') +
+                'onchange="updateTotal(this.dataset.key)">' +
+                '<span>' + MEMBRES_LABEL[mi] + '</span>' +
+                '</label>';
       });
-      html+=`</div><div class="divider"></div>`;
+
+      html += '</div><div class="divider"></div>';
     });
   });
-  document.getElementById('present-content').innerHTML=html;
+
+  document.getElementById('present-content').innerHTML = html;
 }
 
+ 
 function updateTotal(key){
-  const count=MEMBRES.filter(m=>document.getElementById(`cb_${key}_${m}`)?.checked).length;
-  const el=document.getElementById(`total_${key}`);
-  if(el) el.textContent=`${count} présent${count>1?'s':''}`;
+  const count = MEMBRES.filter(function(m){
+    const el = document.getElementById('cb_' + key + '_' + m);
+    return el && el.checked;
+  }).length;
+  const el = document.getElementById('total_' + key);
+  if(el) el.textContent = count + ' présent' + (count > 1 ? 's' : '');
 }
 
 async function loadPresences(){
   document.getElementById('present-loading').style.display='block';
   document.getElementById('present-content').style.display='none';
-  const text=await apiCall({action:'lire',sheet:'PRESENCES'});
-  presencesData={};
-  parseLines(text).forEach(line=>{
-    const c=line.split('|');
-    if(c.length>=8) presencesData[`${c[0]}_${c[1]}`]={alessia:c[2],antonin:c[3],clement:c[4],jeremie:c[5],melanie:c[6],yann:c[7].trim()};
+  const start = todayYMD();
+  const text = await apiCall({action:'lire', sheet:'PRESENCES', start, days:7});
+  presencesData = {};
+  parseLines(text).forEach(line => {
+    const c = line.split('|');
+    if(c.length >= 9) {
+      // ✅ Convertit la date peu importe son format
+      let rawDate = c[0].trim();
+      let dateKey = rawDate;
+      const parsed = new Date(rawDate);
+      if(!isNaN(parsed.getTime())) {
+        const y = parsed.getFullYear();
+        const m = String(parsed.getMonth()+1).padStart(2,'0');
+        const d = String(parsed.getDate()).padStart(2,'0');
+        dateKey = `${y}-${m}-${d}`;
+      }
+      const repasKey = c[1].trim().toLowerCase();
+presencesData[`${dateKey}_${repasKey}`] = {
+  alessia:c[2].trim(), antonin:c[3].trim(), clement:c[4].trim(),
+  diego:c[5].trim(), jeremie:c[6].trim(), melanie:c[7].trim(),
+  yann:c[8].trim()
+};
+
+    }
   });
   document.getElementById('present-loading').style.display='none';
   document.getElementById('present-content').style.display='block';
   buildPresencesUI();
 }
-
+ 
 async function savePresences(){
   showToast('Enregistrement...');
-  for(const jour of JOURS){
+  const dates = rollingDates(7);
+  for(const {date} of dates){
     for(const repas of ['midi','soir']){
-      const key=`${jour}_${repas}`;
-      const p={action:'enregistrer',sheet:'PRESENCES',jour,repas};
-      MEMBRES.forEach(m=>{p[m]=document.getElementById(`cb_${key}_${m}`)?.checked?'TRUE':'FALSE';});
+      const key = `${date}_${repas}`;
+      const p = {action:'enregistrer', sheet:'PRESENCES', jour:date, repas};
+      MEMBRES.forEach(m => {
+        p[m] = document.getElementById(`cb_${key}_${m}`)?.checked ? 'TRUE' : 'FALSE';
+      });
       await apiCall(p);
     }
   }
   showToast('✅ Présences enregistrées !');
 }
 
+ 
 async function clearPresences(){
   if(!confirm('Effacer toutes les présences ?')) return;
   await apiCall({action:'effacer',sheet:'PRESENCES'});
@@ -961,71 +1030,101 @@ async function clearPresences(){
   buildPresencesUI();
   showToast('🗑️ Présences effacées');
 }
-
-// ===================== MENU =====================
+ 
 async function loadMenu(){
   document.getElementById('menu-loading').style.display='block';
   document.getElementById('menu-content').style.display='none';
-  const [pText,mText]=await Promise.all([
-    apiCall({action:'lire',sheet:'PRESENCES'}),
-    apiCall({action:'lire',sheet:'MENU'})
+  const start = todayYMD();
+  const [pText, mText] = await Promise.all([
+    apiCall({action:'lire', sheet:'PRESENCES', start, days:7}),
+    apiCall({action:'lire', sheet:'MENU'})
   ]);
-  presencesData={};
-  parseLines(pText).forEach(line=>{
-    const c=line.split('|');
-    if(c.length>=8) presencesData[`${c[0]}_${c[1]}`]={alessia:c[2],antonin:c[3],clement:c[4],jeremie:c[5],melanie:c[6],yann:c[7].trim()};
-  });
-  menuData={};
-  parseLines(mText).forEach(line=>{
-    const c=line.split('|');
-    if(c.length>=3) menuData[`${c[0]}_${c[1]}`]=c.slice(2).join('|').trim();
-  });
-  let html='';
-  JOURS.forEach((jour,ji)=>{
-    html+=`<div class="menu-jour-card"><div class="jour-header" style="margin-bottom:12px">${JOURS_LABEL[ji]}</div>`;
-    ['midi','soir'].forEach(repas=>{
-      const key=`${jour}_${repas}`;
-      const count=MEMBRES.filter(m=>presencesData[key]?.[m]==='TRUE').length;
-      const val=(menuData[key]||'').replace(/"/g,'&quot;').replace(/^-$/,'').trim();
-      html+=`<div class="menu-repas-row">
+  presencesData = {};
+  parseLines(pText).forEach(line => {
+  const c = line.split('|');
+  if(c.length >= 9) {
+    let rawDate = c[0].trim();
+    let dateKey = rawDate;
+    const parsed = new Date(rawDate);
+    if(!isNaN(parsed.getTime())) {
+      const y = parsed.getFullYear();
+      const m = String(parsed.getMonth()+1).padStart(2,'0');
+      const d = String(parsed.getDate()).padStart(2,'0');
+      dateKey = `${y}-${m}-${d}`;
+    }
+    presencesData[`${dateKey}_${c[1].trim()}`] = {
+      alessia:c[2].trim(), antonin:c[3].trim(), clement:c[4].trim(),
+      diego:c[5].trim(), jeremie:c[6].trim(), melanie:c[7].trim(),
+      yann:c[8].trim()
+    };
+  }
+});
+  menuData = {};
+parseLines(mText).forEach(line => {
+  const c = line.split('|');
+  if(c.length >= 3) {
+    let rawDate = c[0].trim();
+    let dateKey = rawDate;
+    const parsed = new Date(rawDate);
+    if(!isNaN(parsed.getTime())) {
+      const y = parsed.getFullYear();
+      const m = String(parsed.getMonth()+1).padStart(2,'0');
+      const d = String(parsed.getDate()).padStart(2,'0');
+      dateKey = `${y}-${m}-${d}`;
+    }
+    menuData[`${dateKey}_${c[1].trim()}`] = c.slice(2).join('|').trim();
+  }
+});
+  const dates = rollingDates(7);
+  let html = '';
+  dates.forEach(function(item) {
+  var label = item.label;
+  var date = item.date;
+
+    html += `<div class="menu-jour-card"><div class="jour-header" style="margin-bottom:12px">${label}</div>`;
+    ['midi','soir'].forEach(repas => {
+      const key = `${date}_${repas}`;
+      const count = MEMBRES.filter(m => presencesData[key]?.[m]==='TRUE').length;
+      const val = (menuData[key]||'').replace(/"/g,'&quot;').replace(/^-$/,'').trim();
+      html += `<div class="menu-repas-row">
         <span class="menu-repas-label">${repas}</span>
         <input type="text" class="menu-repas-input" id="menu_${key}" placeholder="Repas du ${repas}..." value="${val}">
         <span class="menu-presences">👥 ${count}</span>
       </div>`;
     });
-    html+=`</div>`;
+    html += `</div>`;
   });
-  document.getElementById('menu-content').innerHTML=html;
+  document.getElementById('menu-content').innerHTML = html;
   document.getElementById('menu-loading').style.display='none';
   document.getElementById('menu-content').style.display='block';
 }
-
+ 
 async function saveMenu(){
   showToast('Enregistrement...');
-  for(const jour of JOURS){
+  const dates = rollingDates(7);
+  for(const {date} of dates){
     for(const repas of ['midi','soir']){
-      const plat=document.getElementById(`menu_${jour}_${repas}`)?.value?.trim()||'';
-      await apiCall({action:'enregistrer',sheet:'MENU',jour,repas,plat:plat||'-'});
+      const plat = document.getElementById(`menu_${date}_${repas}`)?.value?.trim() || '';
+      await apiCall({action:'enregistrer', sheet:'MENU', jour:date, repas, plat: plat||'-'});
     }
   }
   showToast('✅ Menu enregistré !');
 }
-
+ 
 async function clearMenu(){
   if(!confirm('Effacer tout le menu ?')) return;
   await apiCall({action:'effacer',sheet:'MENU'});
   loadMenu();
   showToast('🗑️ Menu effacé');
 }
-
-// ===================== COURSES =====================
+ 
 function showListe(liste,btn){
   currentListe=liste;
   document.querySelectorAll('#page-courses .inner-tab').forEach(t=>t.classList.remove('active'));
   btn.classList.add('active');
   loadCourses(liste);
 }
-
+ 
 async function loadCourses(liste){
   document.getElementById('courses-list').innerHTML='<div class="loading">Chargement...</div>';
   const text=await apiCall({action:'lire',sheet:'COURSES',liste});
@@ -1037,7 +1136,7 @@ async function loadCourses(liste){
   });
   renderCourses(liste);
 }
-
+ 
 function renderCourses(liste){
   const container=document.getElementById('courses-list');
   if(!coursesData[liste]?.length){container.innerHTML='<div class="loading">Liste vide</div>';return;}
@@ -1048,7 +1147,7 @@ function renderCourses(liste){
     </div>`
   ).join('');
 }
-
+ 
 async function addCourse(){
   const input=document.getElementById('input-course');
   const ingredient=input.value.trim();
@@ -1058,14 +1157,14 @@ async function addCourse(){
   showToast('✅ Ajouté !');
   loadCourses(currentListe);
 }
-
+ 
 async function deleteCourse(idx,ingredient){
   await apiCall({action:'supprimer',sheet:'COURSES',ingredient,liste:currentListe});
   coursesData[currentListe].splice(idx,1);
   renderCourses(currentListe);
   showToast('🗑️ Supprimé');
 }
-
+ 
 async function clearListe(){
   if(!confirm('Vider toute cette liste ?')) return;
   await apiCall({action:'effacer_liste',sheet:'COURSES',liste:currentListe});
@@ -1073,8 +1172,7 @@ async function clearListe(){
   renderCourses(currentListe);
   showToast('🗑️ Liste vidée');
 }
-
-// ===================== TÂCHES =====================
+ 
 async function loadTaches(){
   document.getElementById('taches-content').innerHTML='<div class="loading"><div class="spinner"></div>Chargement...</div>';
   const [cText,tText,pText]=await Promise.all([
@@ -1092,207 +1190,180 @@ async function loadTaches(){
     const c=line.split('|');
     if(c.length>=4) tachesData.push({tache:c[0],enfant:c[1],jour:c[2],etat:c[3]?.trim()});
   });
- tachesPonctuelles=[];
-parseLines(pText).forEach(line=>{
-  const c=line.split('|');
-  if(c.length>=3){
-    const rawDate = c[2].trim();
-    // Extraire yyyy-mm-dd depuis n'importe quel format
-    let date = rawDate;
-    const parsed = new Date(rawDate);
-    if(!isNaN(parsed.getTime())){
-      const y = parsed.getFullYear();
-      const m = String(parsed.getMonth()+1).padStart(2,'0');
-      const d = String(parsed.getDate()).padStart(2,'0');
-      date = `${y}-${m}-${d}`;
+  tachesPonctuelles=[];
+  parseLines(pText).forEach(line=>{
+    const c=line.split('|');
+    if(c.length>=3){
+      const rawDate=c[2].trim();
+      let date=rawDate;
+      const parsed=new Date(rawDate);
+      if(!isNaN(parsed.getTime())){
+        const y=parsed.getFullYear();
+        const m=String(parsed.getMonth()+1).padStart(2,'0');
+        const d=String(parsed.getDate()).padStart(2,'0');
+        date=`${y}-${m}-${d}`;
+      }
+      tachesPonctuelles.push({tache:c[0],enfant:c[1],date:date,icon:'📌'});
     }
-    tachesPonctuelles.push({tache:c[0], enfant:c[1], date:date, icon:'📌'});
-  }
-});
-
+  });
   renderTaches();
 }
-
+ 
 function getTacheIcon(label){return TACHES_FIXES.find(t=>t.label===label)?.icon||'📋';}
-
+ 
 function getToutesLesTachesEnfant(enfant, jour) {
-  const today = new Date();
-  const dow = today.getDay();
-  const dateStr = formatDateYYYYMMDD(today);
-  const taches = [];
-
-  // 1 — Tâches fixes configurées dans Admin
+  const today=new Date();
+  const dow=today.getDay();
+  const dateStr=formatDateYYYYMMDD(today);
+  const taches=[];
   tachesConfig.filter(t=>t.enfant===enfant&&t[jour]==='TRUE').forEach(t=>{
-    taches.push({tache:t.tache, icon:getTacheIcon(t.tache), source:'fixe', jourReel:jour});
+    taches.push({tache:t.tache,icon:getTacheIcon(t.tache),source:'fixe',jourReel:jour});
   });
-
-  // 2 — Tâches récurrentes (visible jeudi ET vendredi)
   if(dow===4||dow===5){
     TACHES_RECURRENTES.filter(t=>t.personne===enfant).forEach(t=>{
-      if(isTacheRecurrenteActive(t, dateStr)){
+      if(isTacheRecurrenteActive(t,dateStr)){
         if(!taches.find(x=>x.tache===t.tache)){
-          taches.push({
-            tache:t.tache, icon:t.icon, source:'recurrente',
-            jourReel:'vendredi',
-            badge: dow===4 ? '⏰ Demain' : ''
-          });
+          taches.push({tache:t.tache,icon:t.icon,source:'recurrente',jourReel:'vendredi',badge:dow===4?'⏰ Demain':''});
         }
       }
     });
   }
-
-  // 3 — Tâches ponctuelles du jour (fonctionne pour tous y compris parents)
-  const enfantsPonct = enfant === 'Mél & Yann' ? ['Mélanie','Yann'] : [enfant];
-console.log('Recherche ponct pour:', enfant, '→ liste:', JSON.stringify(enfantsPonct));
-console.log('Toutes ponctuelles:', JSON.stringify(tachesPonctuelles));
-console.log('dateStr:', dateStr);
-tachesPonctuelles.filter(t=>enfantsPonct.includes(t.enfant)&&t.date===dateStr).forEach(t=>{
-  console.log('Tâche ponctuelle trouvée:', t.tache);
-  taches.push({tache:t.tache, icon:'📌', source:'ponctuelle', jourReel:jour, enfantReel:t.enfant});
-});
-
+  const enfantsPonct=enfant==='Mél & Yann'?['Mél & Yann']:[enfant];
+  tachesPonctuelles.filter(t=>enfantsPonct.includes(t.enfant)&&t.date===dateStr).forEach(t=>{
+    taches.push({tache:t.tache,icon:'📌',source:'ponctuelle',jourReel:jour,enfantReel:t.enfant});
+  });
   return taches;
 }
-
+ 
+function getTachesEnRetard(enfant) {
+  const hier=new Date();
+  hier.setDate(hier.getDate()-1);
+  const hierIdx=hier.getDay()===0?6:hier.getDay()-1;
+  const jourHier=JOURS[hierIdx];
+  const toutesHier=getToutesLesTachesEnfant(enfant,jourHier);
+  return toutesHier.filter(t=>{
+    const etat=tachesData.find(td=>td.tache===t.tache&&td.enfant===enfant&&td.jour===jourHier);
+    return !etat||etat.etat?.trim()!=='Fait';
+  }).map(t=>({...t,jourReel:jourHier,enRetard:true}));
+}
+ 
 function renderTaches(){
-  const today = new Date();
-  const dow = today.getDay();
-  const jourIdx = dow===0?6:dow-1;
-  const jour = JOURS[jourIdx];
-
+  const today=new Date();
+  const dow=today.getDay();
+  const jourIdx=dow===0?6:dow-1;
+  const jour=JOURS[jourIdx];
   if(isParent){
-    renderTachesParentSelf(jour, jourIdx);
+    renderTachesParentSelf(jour,jourIdx);
     return;
   }
-
-  // Pour les enfants ET les parents connectés
-  const enfant = currentUser === 'parent' ? 'Mél & Yann' : currentUser;
-  const toutesLesTaches = getToutesLesTachesEnfant(enfant, jour);
-
-  if(!toutesLesTaches.length){
-    document.getElementById('taches-content').innerHTML=
-      `<div class="card"><div class="all-done"><span class="big-icon">🎉</span><p>Aucune tâche pour aujourd'hui !</p></div></div>`;
-    return;
-  }
-
-  const nonFaites = toutesLesTaches.filter(t=>{
+  const enfant=currentUser==='parent'?'Mél & Yann':currentUser;
+  const toutesLesTaches=getToutesLesTachesEnfant(enfant,jour);
+  const enRetard=getTachesEnRetard(enfant);
+  const nonFaites=toutesLesTaches.filter(t=>{
     const etat=tachesData.find(td=>td.tache===t.tache&&td.enfant===enfant&&td.jour===t.jourReel);
     return !etat||etat.etat?.trim()!=='Fait';
   });
-
-  if(!nonFaites.length){
-    document.getElementById('taches-content').innerHTML=
-      `<div class="card"><div class="all-done"><span class="big-icon">🌟</span><p>Bravo ${enfant} !<br>Toutes tes tâches sont faites !</p></div></div>`;
+  if(!toutesLesTaches.length&&!enRetard.length){
+    document.getElementById('taches-content').innerHTML=`<div class="card"><div class="all-done"><span class="big-icon">🎉</span><p>Aucune tâche pour aujourd'hui !</p></div></div>`;
     return;
   }
-
-  let html=`<div class="card"><div class="card-title">✅ Mes tâches — ${JOURS_LABEL[jourIdx]}</div>
-    <p style="font-size:0.85rem;color:var(--text-light);font-weight:600;margin-bottom:12px">${nonFaites.length} tâche${nonFaites.length>1?'s':''} à faire</p>`;
-
-  nonFaites.forEach(t=>{
-    const idSafe=t.tache.replace(/[^a-z]/gi,'_');
-    const badge=t.badge?`<span style="font-size:0.7rem;background:var(--orange);color:white;padding:2px 7px;border-radius:20px;margin-left:6px">${t.badge}</span>`:'';
-    html+=`<div class="tache-item" id="tache_${idSafe}">
-      <div class="tache-info">
-        <span class="tache-icon">${t.icon}</span>
-        <div><span class="tache-name">${t.tache}</span>${badge}</div>
-      </div>
-      <button class="tache-toggle non-fait" onclick="toggleTache('${t.tache.replace(/'/g,"\\'")}','${t.jourReel}',false,'${enfant}')">
-        ⬜ À faire
-      </button>
-    </div>`;
-  });
-  html+='</div>';
-  document.getElementById('taches-content').innerHTML=html;
-}
-
-function renderTachesParentSelf(jour, jourIdx){
-  const dateStr = formatDateYYYYMMDD(new Date());
-  const tachesActives = TACHES_PARENTS.filter(t => isTacheParentActive(t));
-  const ponctParents = tachesPonctuelles.filter(t =>
-    (t.enfant === 'Mél & Yann' || ['Mélanie','Yann'].includes(t.enfant)) && t.date === dateStr
-  );
-  
-
-  if(!tachesActives.length && !ponctParents.length){
-    document.getElementById('taches-content').innerHTML =
-      `<div class="card"><div class="all-done"><span class="big-icon">🎉</span><p>Aucune tâche pour vous aujourd'hui !</p></div></div>`;
+  if(!nonFaites.length&&!enRetard.length){
+    document.getElementById('taches-content').innerHTML=`<div class="card"><div class="all-done"><span class="big-icon">🌟</span><p>Bravo ${enfant} !<br>Toutes tes tâches sont faites !</p></div></div>`;
     return;
   }
-
-  const toutesLesTaches = [
-    ...tachesActives.map(t => ({ tache: t.label, icon: t.icon, jourReel: jour, source: 'fixe' })),
-    ...ponctParents.map(t => ({ tache: t.tache, icon: '📌', jourReel: jour, source: 'ponctuelle', enfantReel: t.enfant }))
-  ];
-
-  const nonFaites = toutesLesTaches.filter(t => {
-    const etat = tachesData.find(td =>
-      td.tache === t.tache && td.enfant === 'Mél & Yann' && td.jour === t.jourReel
-    );
-    return !etat || etat.etat?.trim() !== 'Fait';
-  });
-
-  if(!nonFaites.length){
-    document.getElementById('taches-content').innerHTML =
-      `<div class="card"><div class="all-done"><span class="big-icon">🌟</span><p>Bravo !<br>Toutes vos tâches sont faites !</p></div></div>`;
-    return;
-  }
-
-  let html = `<div class="card">
-    <div class="card-title">✅ Nos tâches — ${JOURS_LABEL[jourIdx]}</div>
-    <p style="font-size:0.85rem;color:var(--text-light);font-weight:600;margin-bottom:12px">
-      ${nonFaites.length} tâche${nonFaites.length > 1 ? 's' : ''} à faire
-    </p>`;
-
-  nonFaites.forEach(t => {
-    const idSafe = t.tache.replace(/[^a-z]/gi, '_');
-    const sous = t.enfantReel
-      ? `<span style="display:block;font-size:0.78rem;color:var(--text-light)">${t.enfantReel}</span>`
-      : '';
-    html += `<div class="tache-item" id="tache_${idSafe}">
-      <div class="tache-info">
-        <span class="tache-icon">${t.icon}</span>
-        <div><span class="tache-name">${t.tache}</span>${sous}</div>
-      </div>
-      <button class="tache-toggle non-fait"
-        onclick="toggleTache('${t.tache.replace(/'/g,"\\'")}','${t.jourReel}',false,'Mél & Yann')">
-        ⬜ À faire
-      </button>
-    </div>`;
-  });
-
-  html += '</div>';
-  document.getElementById('taches-content').innerHTML = html;
-}
-function renderTachesParent(jour,ji){
   let html='';
-
-  // Tâches communes Mél & Yann
-  const tachesParentsActives=TACHES_PARENTS.filter(t=>isTacheParentActive(t));
-  // + tâches ponctuelles parents
-  const dateStr=new Date().toISOString().split('T')[0];
-  const ponctParents = tachesPonctuelles.filter(t =>
-  (t.enfant === 'Mél & Yann' || ['Mélanie','Yann'].includes(t.enfant)) && t.date === dateStr
-);
-
-  if(tachesParentsActives.length||ponctParents.length){
-    html+=`<div class="card"><div class="card-title">🏠 Mélanie & Yann — ${JOURS_LABEL[ji]}</div>`;
-    tachesParentsActives.forEach(t=>{
-      html+=`<div class="tache-item">
-        <div class="tache-info"><span class="tache-icon">${t.icon}</span><span class="tache-name">${t.label}</span></div>
-        <span class="tache-toggle non-fait" style="cursor:default">⬜ À faire</span>
-      </div>`;
-    });
-    ponctParents.forEach(t=>{
-      html+=`<div class="tache-item">
-        <div class="tache-info"><span class="tache-icon">📌</span><span class="tache-name">${t.tache} <span style="font-size:0.75rem;color:var(--text-light)">(${t.enfant})</span></span></div>
-        <span class="tache-toggle non-fait" style="cursor:default">⬜ À faire</span>
+  if(enRetard.length){
+    html+=`<div class="card" style="border-left:4px solid var(--orange)">
+      <div class="card-title" style="color:var(--orange)">⚠️ En retard — Hier</div>
+      <p style="font-size:0.85rem;color:var(--text-light);font-weight:600;margin-bottom:12px">${enRetard.length} tâche${enRetard.length>1?'s':''} non faite${enRetard.length>1?'s':''} hier</p>`;
+    enRetard.forEach(t=>{
+      const idSafe='retard_'+t.tache.replace(/[^a-z]/gi,'_');
+      html+=`<div class="tache-item" id="${idSafe}">
+        <div class="tache-info"><span class="tache-icon">${t.icon}</span><span class="tache-name">${t.tache}</span></div>
+        <button class="tache-toggle non-fait" onclick="toggleTache('${t.tache.replace(/'/g,"\\'")}','${t.jourReel}',false,'${enfant}')">⬜ À faire</button>
       </div>`;
     });
     html+=`</div>`;
   }
-
-  // Tâches enfants
+  if(nonFaites.length){
+    html+=`<div class="card">
+      <div class="card-title">✅ Mes tâches — ${JOURS_LABEL[jourIdx]}</div>
+      <p style="font-size:0.85rem;color:var(--text-light);font-weight:600;margin-bottom:12px">${nonFaites.length} tâche${nonFaites.length>1?'s':''} à faire</p>`;
+    nonFaites.forEach(t=>{
+      const idSafe=t.tache.replace(/[^a-z]/gi,'_');
+      const badge=t.badge?`<span style="font-size:0.7rem;background:var(--orange);color:white;padding:2px 7px;border-radius:20px;margin-left:6px">${t.badge}</span>`:'';
+      html+=`<div class="tache-item" id="tache_${idSafe}">
+        <div class="tache-info"><span class="tache-icon">${t.icon}</span><div><span class="tache-name">${t.tache}</span>${badge}</div></div>
+        <button class="tache-toggle non-fait" onclick="toggleTache('${t.tache.replace(/'/g,"\\'")}','${t.jourReel}',false,'${enfant}')">⬜ À faire</button>
+      </div>`;
+    });
+    html+=`</div>`;
+  }
+  document.getElementById('taches-content').innerHTML=html;
+}
+ 
+function renderTachesParentSelf(jour,jourIdx){
+  const enfant='Mél & Yann';
+  const toutesLesTaches=getToutesLesTachesEnfant(enfant,jour);
+  const enRetard=getTachesEnRetard(enfant);
+  const nonFaites=toutesLesTaches.filter(t=>{
+    const etat=tachesData.find(td=>td.tache===t.tache&&td.enfant===enfant&&td.jour===t.jourReel);
+    return !etat||etat.etat?.trim()!=='Fait';
+  });
+  if(!toutesLesTaches.length&&!enRetard.length){
+    document.getElementById('taches-content').innerHTML=`<div class="card"><div class="all-done"><span class="big-icon">🎉</span><p>Aucune tâche pour vous aujourd'hui !</p></div></div>`;
+    return;
+  }
+  if(!nonFaites.length&&!enRetard.length){
+    document.getElementById('taches-content').innerHTML=`<div class="card"><div class="all-done"><span class="big-icon">🌟</span><p>Bravo !<br>Toutes vos tâches sont faites !</p></div></div>`;
+    return;
+  }
+  let html='';
+  if(enRetard.length){
+    html+=`<div class="card" style="border-left:4px solid var(--orange)">
+      <div class="card-title" style="color:var(--orange)">⚠️ En retard — Hier</div>
+      <p style="font-size:0.85rem;color:var(--text-light);font-weight:600;margin-bottom:12px">${enRetard.length} tâche${enRetard.length>1?'s':''} non faite${enRetard.length>1?'s':''} hier</p>`;
+    enRetard.forEach(t=>{
+      const idSafe='retard_'+t.tache.replace(/[^a-z]/gi,'_');
+      html+=`<div class="tache-item" id="${idSafe}">
+        <div class="tache-info"><span class="tache-icon">${t.icon}</span><span class="tache-name">${t.tache}</span></div>
+        <button class="tache-toggle non-fait" onclick="toggleTache('${t.tache.replace(/'/g,"\\'")}','${t.jourReel}',false,'${enfant}')">⬜ À faire</button>
+      </div>`;
+    });
+    html+=`</div>`;
+  }
+  if(nonFaites.length){
+    html+=`<div class="card">
+      <div class="card-title">✅ Nos tâches — ${JOURS_LABEL[jourIdx]}</div>
+      <p style="font-size:0.85rem;color:var(--text-light);font-weight:600;margin-bottom:12px">${nonFaites.length} tâche${nonFaites.length>1?'s':''} à faire</p>`;
+    nonFaites.forEach(t=>{
+      const idSafe=t.tache.replace(/[^a-z]/gi,'_');
+      const sous=t.enfantReel?`<span style="display:block;font-size:0.78rem;color:var(--text-light)">${t.enfantReel}</span>`:'';
+      html+=`<div class="tache-item" id="tache_${idSafe}">
+        <div class="tache-info"><span class="tache-icon">${t.icon}</span><div><span class="tache-name">${t.tache}</span>${sous}</div></div>
+        <button class="tache-toggle non-fait" onclick="toggleTache('${t.tache.replace(/'/g,"\\'")}','${t.jourReel}',false,'${enfant}')">⬜ À faire</button>
+      </div>`;
+    });
+    html+=`</div>`;
+  }
+  document.getElementById('taches-content').innerHTML=html;
+}
+ 
+function renderTachesParent(jour,ji){
+  let html='';
+  const tachesParentsActives=TACHES_PARENTS.filter(t=>isTacheParentActive(t));
+  const dateStr=new Date().toISOString().split('T')[0];
+  const ponctParents=tachesPonctuelles.filter(t=>(t.enfant==='Mél & Yann'||['Mélanie','Yann'].includes(t.enfant))&&t.date===dateStr);
+  if(tachesParentsActives.length||ponctParents.length){
+    html+=`<div class="card"><div class="card-title">🏠 Mélanie & Yann — ${JOURS_LABEL[ji]}</div>`;
+    tachesParentsActives.forEach(t=>{
+      html+=`<div class="tache-item"><div class="tache-info"><span class="tache-icon">${t.icon}</span><span class="tache-name">${t.label}</span></div><span class="tache-toggle non-fait" style="cursor:default">⬜ À faire</span></div>`;
+    });
+    ponctParents.forEach(t=>{
+      html+=`<div class="tache-item"><div class="tache-info"><span class="tache-icon">📌</span><span class="tache-name">${t.tache} <span style="font-size:0.75rem;color:var(--text-light)">(${t.enfant})</span></span></div><span class="tache-toggle non-fait" style="cursor:default">⬜ À faire</span></div>`;
+    });
+    html+=`</div>`;
+  }
   const enfants=['Alessia','Antonin','Clément','Diego','Jérémie'];
   enfants.forEach(enfant=>{
     const toutesLesTaches=getToutesLesTachesEnfant(enfant,jour);
@@ -1306,42 +1377,30 @@ function renderTachesParent(jour,ji){
       const etat=tachesData.find(td=>td.tache===t.tache&&td.enfant===enfant&&td.jour===t.jourReel);
       const fait=etat?.etat?.trim()==='Fait';
       const badge=t.badge?`<span style="font-size:0.7rem;background:var(--orange);color:white;padding:2px 7px;border-radius:20px;margin-left:6px">${t.badge}</span>`:'';
-      html+=`<div class="tache-item">
-        <div class="tache-info">
-          <span class="tache-icon">${t.icon}</span>
-          <div><span class="tache-name">${t.tache}</span>${badge}</div>
-        </div>
-        <span class="tache-toggle ${fait?'fait':'non-fait'}" style="cursor:default">${fait?'✅ Fait':'⬜ À faire'}</span>
-      </div>`;
+      html+=`<div class="tache-item"><div class="tache-info"><span class="tache-icon">${t.icon}</span><div><span class="tache-name">${t.tache}</span>${badge}</div></div><span class="tache-toggle ${fait?'fait':'non-fait'}" style="cursor:default">${fait?'✅ Fait':'⬜ À faire'}</span></div>`;
     });
     html+=`</div>`;
   });
-
   if(!html) html='<div class="card"><div class="loading">Aucune tâche aujourd\'hui</div></div>';
   document.getElementById('taches-content').innerHTML=html;
 }
-
+ 
 async function toggleTache(tache,jour,estFait,enfant){
-  // Animer la disparition
   const id='tache_'+tache.replace(/[^a-z]/gi,'_');
   const el=document.getElementById(id);
   if(el) el.classList.add('done');
-
   await apiCall({action:'enregistrer',sheet:'TACHES',tache,enfant,jour,etat:'Fait'});
   showToast('✅ Bien joué !');
-
-  // Recharger après animation
   setTimeout(()=>loadTaches(),400);
 }
-
-// ===================== JOB =====================
+ 
 function initCal(){
   const now=new Date();
   calYear=now.getFullYear();
   calMonth=now.getMonth();
   loadJob();
 }
-
+ 
 async function loadJob(){
   const text=await apiCall({action:'lire',sheet:'JOB',mois:MOIS_NOMS[calMonth],annee:String(calYear)});
   jobData={};
@@ -1357,50 +1416,73 @@ async function loadJob(){
   });
   renderCal();
 }
+ 
 
-function renderCal(){
-  document.getElementById('cal-month-title').textContent=`${MOIS_NOMS[calMonth]} ${calYear}`;
-  const grid=document.getElementById('cal-grid');
-  let html=JOURS_COURTS.map(j=>`<div class="cal-day-name">${j}</div>`).join('');
-  let dow=new Date(calYear,calMonth,1).getDay();
-  dow=dow===0?6:dow-1;
-  for(let i=0;i<dow;i++) html+=`<div class="cal-day empty"></div>`;
-  const days=new Date(calYear,calMonth+1,0).getDate();
-  const today=new Date();
-  const isNow=today.getFullYear()===calYear&&today.getMonth()===calMonth;
-  for(let d=1;d<=days;d++){
-    const dd=jobData[String(d)]||{};
-    const icons=[];
-    if(dd['Jeremie'])
-    icons.push('<img src="image/Jeremie.png" class="cal-icon cal-jour">');
-    if(dd['Melanie']==='jour')
-    icons.push('<img src="image/Melanie.png" class="cal-icon cal-jour">');
+function renderCal() {
+  document.getElementById('cal-month-title').textContent = `${MOIS_NOMS[calMonth]} ${calYear}`;
+  const grid = document.getElementById('cal-grid');
 
-if(dd['Melanie']==='nuit')
-    icons.push('<img src="image/Melanie.png" class="cal-icon cal-nuit">');
+  let html = JOURS_COURTS.map(j => `<div class="cal-day-name">${j}</div>`).join('');
 
-   if(dd['Yann']==='jour')
-    icons.push('<img src="image/Yann.png" class="cal-icon cal-jour">');
+  let dow = new Date(calYear, calMonth, 1).getDay();
+  dow = dow === 0 ? 6 : dow - 1;
+  for (let i = 0; i < dow; i++) html += `<div class="cal-day empty"></div>`;
 
-if(dd['Yann']==='nuit')
-    icons.push('<img src="image/Yann.png" class="cal-icon cal-nuit">');
-    
-    const isToday=isNow&&d===today.getDate();
-    html+=`<div class="cal-day ${icons.length?'has-data':''} ${isToday?'today':''}" onclick="openJobModal(${d})">
-      <span class="day-num ${isToday?'today-num':''}">${d}</span>
-      <span class="day-icons">${icons.join('<br>')}</span>
-    </div>`;
+  const days = new Date(calYear, calMonth + 1, 0).getDate();
+  const today = new Date();
+  const isNow = today.getFullYear() === calYear && today.getMonth() === calMonth;
+
+  const emptySlot = `<span style="display:inline-block;width:30px;height:30px"></span>`;
+
+  for (let d = 1; d <= days; d++) {
+    const dd = jobData[String(d)] || {};
+    const isToday = isNow && d === today.getDate();
+    const hasData = Object.keys(dd).length > 0;
+
+    const iconJeremie = dd['Jeremie']
+      ? `<img src="image/Jeremie.png" class="cal-icon cal-jour" alt="Jérémie">`
+      : emptySlot;
+
+    const iconMelanie = dd['Melanie'] === 'jour'
+      ? `<img src="image/Melanie.png" class="cal-icon cal-jour" alt="Mélanie">`
+      : dd['Melanie'] === 'nuit'
+      ? `<img src="image/Melanie.png" class="cal-icon cal-nuit" alt="Mélanie">`
+      : emptySlot;
+
+    const iconYann = dd['Yann'] === 'jour'
+      ? `<img src="image/Yann.png" class="cal-icon cal-jour" alt="Yann">`
+      : dd['Yann'] === 'nuit'
+      ? `<img src="image/Yann.png" class="cal-icon cal-nuit" alt="Yann">`
+      : emptySlot;
+
+   const iconsHtml = `
+  <div class="day-icons">
+    <div class="slot slot-jeremie">${iconJeremie}</div>
+    <div class="slot slot-melanie">${iconMelanie}</div>
+    <div class="slot slot-yann">${iconYann}</div>
+  </div>
+`;
+
+    html += `
+      <div class="cal-day ${hasData ? 'has-data' : ''} ${isToday ? 'today' : ''}"
+           onclick="openJobModal(${d})">
+        <span class="day-num ${isToday ? 'today-num' : ''}">${d}</span>
+        ${iconsHtml}
+      </div>
+    `;
   }
-  grid.innerHTML=html;
+
+  grid.innerHTML = html;
 }
 
+ 
 function changeMonth(dir){
   calMonth+=dir;
   if(calMonth<0){calMonth=11;calYear--;}
   if(calMonth>11){calMonth=0;calYear++;}
   loadJob();
 }
-
+ 
 function openJobModal(day){
   selectedDay=day;
   const dd=jobData[String(day)]||{};
@@ -1408,35 +1490,17 @@ function openJobModal(day){
   document.getElementById('modalSub').textContent='Qui travaille ce jour ?';
   const isA=(p,t)=>dd[p]===t;
   document.getElementById('modalBtns').innerHTML=`
-   
-<button class="modal-btn" style="background:#4CAF50;color:white" onclick="saveJob('Jeremie','travaille')">
-  <img src="image/Jeremie.png" class="modal-icon"> Jérémie - travaille ${isA('Jeremie','travaille')?'✓':''}
-</button>
-
-<button class="modal-btn" style="background:#E91E93;color:white" onclick="saveJob('Melanie','jour')">
-  <img src="image/Melanie.png" class="modal-icon"> Mélanie — Jour ${isA('Melanie','jour')?'✓':''}
-</button>
-
-<button class="modal-btn" style="background:#9C27B0;color:white" onclick="saveJob('Melanie','nuit')">
-  <img src="image/Melanie.png" class="modal-icon"> Mélanie — Nuit ${isA('Melanie','nuit')?'✓':''}
-</button>
-
-<button class="modal-btn" style="background:#F9A825;color:#333" onclick="saveJob('Yann','jour')">
-  <img src="image/Yann.png" class="modal-icon"> Yann — Jour ${isA('Yann','jour')?'✓':''}
-</button>
-
-<button class="modal-btn" style="background:#FF8F00;color:white" onclick="saveJob('Yann','nuit')">
-  <img src="image/Yann.png" class="modal-icon"> Yann — Nuit ${isA('Yann','nuit')?'✓':''}
-</button>
-
-
+    <button class="modal-btn" style="background:#4CAF50;color:white" onclick="saveJob('Jeremie','travaille')"><img src="image/Jeremie.png" class="modal-icon"> Jérémie - travaille ${isA('Jeremie','travaille')?'✓':''}</button>
+    <button class="modal-btn" style="background:#E91E93;color:white" onclick="saveJob('Melanie','jour')"><img src="image/Melanie.png" class="modal-icon"> Mélanie — Jour ${isA('Melanie','jour')?'✓':''}</button>
+    <button class="modal-btn" style="background:#9C27B0;color:white" onclick="saveJob('Melanie','nuit')"><img src="image/Melanie.png" class="modal-icon"> Mélanie — Nuit ${isA('Melanie','nuit')?'✓':''}</button>
+    <button class="modal-btn" style="background:#F9A825;color:#333" onclick="saveJob('Yann','jour')"><img src="image/Yann.png" class="modal-icon"> Yann — Jour ${isA('Yann','jour')?'✓':''}</button>
+    <button class="modal-btn" style="background:#FF8F00;color:white" onclick="saveJob('Yann','nuit')"><img src="image/Yann.png" class="modal-icon"> Yann — Nuit ${isA('Yann','nuit')?'✓':''}</button>
     <div class="modal-section"></div>
     <button class="modal-btn" style="background:#f44336;color:white" onclick="clearJobDay()">❌ Effacer ce jour</button>
-    <button class="modal-btn" style="background:#eee;color:#333" onclick="closeModal()">Annuler</button>
-`;
-document.getElementById('jobModal').classList.add('show');
+    <button class="modal-btn" style="background:#eee;color:#333" onclick="closeModal()">Annuler</button>`;
+  document.getElementById('jobModal').classList.add('show');
 }
-
+ 
 async function saveJob(personne,type){
   closeModal();
   await apiCall({action:'enregistrer',sheet:'JOB',mois:MOIS_NOMS[calMonth],annee:String(calYear),jour:String(selectedDay),personne,type});
@@ -1445,7 +1509,7 @@ async function saveJob(personne,type){
   renderCal();
   showToast('✅ Enregistré !');
 }
-
+ 
 async function clearJobDay(){
   closeModal();
   for(const p of ['Jeremie','Melanie','Yann']){
@@ -1455,36 +1519,30 @@ async function clearJobDay(){
   renderCal();
   showToast('🗑️ Jour effacé');
 }
-
+ 
 function closeModal(){document.getElementById('jobModal').classList.remove('show');}
-
-// ===================== ADMIN =====================
+ 
 function showAdminEnfant(enfant,btn){
   currentAdminEnfant=enfant;
   document.querySelectorAll('#admin-tabs .inner-tab').forEach(t=>t.classList.remove('active'));
   btn.classList.add('active');
   renderAdminForm();
 }
-
+ 
 function renderAdminForm(){
   let html='';
   TACHES_FIXES.forEach(tache=>{
     const ex=tachesConfig.find(t=>t.tache===tache.label&&t.enfant===currentAdminEnfant);
-    html+=`<div class="admin-tache-block">
-      <div class="admin-tache-header"><span>${tache.icon}</span>${tache.label}</div>
-      <div class="admin-days-grid">`;
+    html+=`<div class="admin-tache-block"><div class="admin-tache-header"><span>${tache.icon}</span>${tache.label}</div><div class="admin-days-grid">`;
     JOURS.forEach((jour,ji)=>{
       const checked=ex&&ex[jour]==='TRUE'?'checked':'';
-      html+=`<div class="day-check">
-        <label for="a_${tache.id}_${jour}">${JOURS_COURTS[ji]}</label>
-        <input type="checkbox" id="a_${tache.id}_${jour}" ${checked}>
-      </div>`;
+      html+=`<div class="day-check"><label for="a_${tache.id}_${jour}">${JOURS_COURTS[ji]}</label><input type="checkbox" id="a_${tache.id}_${jour}" ${checked}></div>`;
     });
     html+=`</div></div>`;
   });
   document.getElementById('admin-taches-form').innerHTML=html;
 }
-
+ 
 async function loadAdminConfig(){
   const text=await apiCall({action:'lire',sheet:'TACHES_CONFIG'});
   tachesConfig=[];
@@ -1493,44 +1551,16 @@ async function loadAdminConfig(){
     if(c.length>=9) tachesConfig.push({tache:c[0],enfant:c[1],lundi:c[2],mardi:c[3],mercredi:c[4],jeudi:c[5],vendredi:c[6],samedi:c[7],dimanche:c[8],active:c[9]?.trim()});
   });
   renderAdminForm();
-  renderAdminSummary();
   renderPreview(currentPreviewEnfant);
- 
   loadPonctuelles();
-  // Initialiser la date du champ ponctuel à aujourd'hui
-  const today = formatDateYYYYMMDD();
-if (document.getElementById('ponct-date')) {
-  document.getElementById('ponct-date').value = today;
+  const today=formatDateYYYYMMDD();
+  if(document.getElementById('ponct-date')) document.getElementById('ponct-date').value=today;
 }
- } 
-
-function renderAdminSummary(){
-  if(!tachesConfig.length){
-    document.getElementById('admin-list').innerHTML='<div class="loading">Aucune configuration</div>';
-    return;
-  }
-  const byEnfant={};
-  tachesConfig.forEach(t=>{if(!byEnfant[t.enfant])byEnfant[t.enfant]=[];byEnfant[t.enfant].push(t);});
-  let html='';
-  Object.entries(byEnfant).forEach(([enfant,taches])=>{
-    html+=`<div class="enfant-section"><div class="enfant-title">👤 ${enfant}</div>`;
-    taches.forEach(t=>{
-      const icon=TACHES_FIXES.find(tf=>tf.label===t.tache)?.icon||'📋';
-      const jours=JOURS.filter(j=>t[j]==='TRUE').map(j=>JOURS_COURTS[JOURS.indexOf(j)]).join(' ');
-      html+=`<div class="tache-item" style="margin-bottom:4px">
-        <div class="tache-info"><span class="tache-icon">${icon}</span><span class="tache-name">${t.tache}</span></div>
-        <span style="font-size:0.8rem;color:var(--text-light);font-weight:700">${jours||'—'}</span>
-      </div>`;
-    });
-    html+='</div>';
-  });
-  document.getElementById('admin-list').innerHTML=html;
-}
-
+ 
 async function saveTachePonctuelle(){
   const tache=document.getElementById('ponct-tache').value.trim();
   const enfant=document.getElementById('ponct-enfant').value;
-const date = document.getElementById('ponct-date').value;
+  const date=document.getElementById('ponct-date').value;
   if(!tache||!date){showToast('⚠️ Remplis tous les champs');return;}
   await apiCall({action:'enregistrer',sheet:'TACHES_PONCTUELLES',tache,enfant,date});
   document.getElementById('ponct-tache').value='';
@@ -1538,7 +1568,7 @@ const date = document.getElementById('ponct-date').value;
   showToast('📌 Tâche ponctuelle ajoutée !');
   loadPonctuelles();
 }
-
+ 
 async function loadPonctuelles(){
   const text=await apiCall({action:'lire',sheet:'TACHES_PONCTUELLES'});
   const items=[];
@@ -1546,8 +1576,7 @@ async function loadPonctuelles(){
     const c=line.split('|');
     if(c.length>=3) items.push({tache:c[0],enfant:c[1],date:c[2].trim()});
   });
-  // Afficher seulement les futures et aujourd'hui
-  const today= formatDateYYYYMMDD();
+  const today=formatDateYYYYMMDD();
   const futures=items.filter(i=>i.date>=today).sort((a,b)=>a.date.localeCompare(b.date));
   const container=document.getElementById('ponct-list');
   if(!futures.length){container.innerHTML='<div class="loading" style="padding:8px">Aucune tâche ponctuelle à venir</div>';return;}
@@ -1555,21 +1584,18 @@ async function loadPonctuelles(){
     <div class="tache-item" style="margin-bottom:4px">
       <div class="tache-info">
         <span class="tache-icon">📌</span>
-        <div>
-          <span class="tache-name">${i.tache}</span>
-          <span style="display:block;font-size:0.78rem;color:var(--text-light)">${i.enfant} — ${i.date}</span>
-        </div>
+        <div><span class="tache-name">${i.tache}</span><span style="display:block;font-size:0.78rem;color:var(--text-light)">${i.enfant} — ${i.date}</span></div>
       </div>
       <button class="btn-delete" onclick="deletePonctuelle('${i.tache.replace(/'/g,"\\'")}','${i.enfant}','${i.date}')">✕</button>
     </div>`).join('');
 }
-
+ 
 async function deletePonctuelle(tache,enfant,date){
   await apiCall({action:'supprimer',sheet:'TACHES_PONCTUELLES',tache,enfant,date});
   showToast('🗑️ Tâche supprimée');
   loadPonctuelles();
 }
-
+ 
 async function saveAdminConfig(){
   showToast('Enregistrement...');
   for(const tache of TACHES_FIXES){
@@ -1580,9 +1606,9 @@ async function saveAdminConfig(){
   showToast('✅ Configuration enregistrée !');
   loadAdminConfig();
 }
-
+ 
 let currentPreviewEnfant='Alessia';
-
+ 
 function showPreviewEnfant(enfant,btn){
   currentPreviewEnfant=enfant;
   document.querySelectorAll('#preview-tabs .inner-tab').forEach(t=>t.classList.remove('active'));
@@ -1590,95 +1616,61 @@ function showPreviewEnfant(enfant,btn){
   if(enfant==='Mél & Yann') renderPreviewParents();
   else renderPreview(enfant);
 }
-
+ 
 function renderPreviewParents(){
-  const today = new Date();
-  const dow = today.getDay();
-  const jourIdx = dow===0?6:dow-1;
-  const jour = JOURS[jourIdx];
-  const dateStr = formatDateYYYYMMDD(today);
-
-  const tachesActives = TACHES_PARENTS.filter(t => isTacheParentActive(t));
-  const ponctParents = tachesPonctuelles.filter(t =>
-    ['Mélanie','Yann'].includes(t.enfant) && t.date === dateStr
-  );
-
-  if(!tachesActives.length && !ponctParents.length){
-    document.getElementById('preview-content').innerHTML=
-      `<div class="all-done"><span class="big-icon">😊</span><p>Aucune tâche pour Mélanie & Yann aujourd'hui !</p></div>`;
+  const today=new Date();
+  const dow=today.getDay();
+  const jourIdx=dow===0?6:dow-1;
+  const jour=JOURS[jourIdx];
+  const dateStr=formatDateYYYYMMDD(today);
+  const tachesActives=TACHES_PARENTS.filter(t=>isTacheParentActive(t));
+  const ponctParents=tachesPonctuelles.filter(t=>(t.enfant==='Mél & Yann'||['Mélanie','Yann'].includes(t.enfant))&&t.date===dateStr);
+  if(!tachesActives.length&&!ponctParents.length){
+    document.getElementById('preview-content').innerHTML=`<div class="all-done"><span class="big-icon">😊</span><p>Aucune tâche pour Mélanie & Yann aujourd'hui !</p></div>`;
     return;
   }
-
-  const toutesLesTaches = [
-    ...tachesActives.map(t => ({ tache: t.label, icon: t.icon, jourReel: jour })),
-    ...ponctParents.map(t => ({ tache: t.tache, icon: '📌', jourReel: jour, sous: t.enfant }))
+  const toutesLesTaches=[
+    ...tachesActives.map(t=>({tache:t.label,icon:t.icon,jourReel:jour})),
+    ...ponctParents.map(t=>({tache:t.tache,icon:'📌',jourReel:jour,sous:t.enfant}))
   ];
-
-  const faites = toutesLesTaches.filter(t => {
-    const etat = tachesData.find(td =>
-      td.tache === t.tache && td.enfant === 'Mél & Yann' && td.jour === t.jourReel
-    );
-    return etat && etat.etat?.trim() === 'Fait';
+  const faites=toutesLesTaches.filter(t=>{
+    const etat=tachesData.find(td=>td.tache===t.tache&&td.enfant==='Mél & Yann'&&td.jour===t.jourReel);
+    return etat&&etat.etat?.trim()==='Fait';
   });
-
-  const nonFaites = toutesLesTaches.filter(t => {
-    const etat = tachesData.find(td =>
-      td.tache === t.tache && td.enfant === 'Mél & Yann' && td.jour === t.jourReel
-    );
-    return !etat || etat.etat?.trim() !== 'Fait';
+  const nonFaites=toutesLesTaches.filter(t=>{
+    const etat=tachesData.find(td=>td.tache===t.tache&&td.enfant==='Mél & Yann'&&td.jour===t.jourReel);
+    return !etat||etat.etat?.trim()!=='Fait';
   });
-
-  let html = `<p style="font-size:0.85rem;color:var(--text-light);font-weight:600;margin-bottom:12px">
-    ${JOURS_LABEL[jourIdx]} — ${faites.length}/${toutesLesTaches.length} faite${faites.length > 1 ? 's' : ''}</p>`;
-
+  let html=`<p style="font-size:0.85rem;color:var(--text-light);font-weight:600;margin-bottom:12px">${JOURS_LABEL[jourIdx]} — ${faites.length}/${toutesLesTaches.length} faite${faites.length>1?'s':''}</p>`;
   if(!nonFaites.length){
-    html += `<div class="all-done"><span class="big-icon">🌟</span><p>Tout est fait !</p></div>`;
+    html+=`<div class="all-done"><span class="big-icon">🌟</span><p>Tout est fait !</p></div>`;
   } else {
-    html += `<p style="font-size:0.8rem;font-weight:700;color:var(--rose);margin-bottom:8px">⬜ À faire :</p>`;
-    nonFaites.forEach(t => {
-      const sous = t.sous ? `<span style="font-size:0.75rem;color:var(--text-light)">(${t.sous})</span>` : '';
-      html += `<div class="tache-item">
-        <div class="tache-info">
-          <span class="tache-icon">${t.icon}</span>
-          <span class="tache-name">${t.tache} ${sous}</span>
-        </div>
-        <span class="tache-toggle non-fait" style="cursor:default">⬜ À faire</span>
-      </div>`;
+    html+=`<p style="font-size:0.8rem;font-weight:700;color:var(--rose);margin-bottom:8px">⬜ À faire :</p>`;
+    nonFaites.forEach(t=>{
+      const sous=t.sous?`<span style="font-size:0.75rem;color:var(--text-light)">(${t.sous})</span>`:'';
+      html+=`<div class="tache-item"><div class="tache-info"><span class="tache-icon">${t.icon}</span><span class="tache-name">${t.tache} ${sous}</span></div><span class="tache-toggle non-fait" style="cursor:default">⬜ À faire</span></div>`;
     });
   }
-
   if(faites.length){
-    html += `<p style="font-size:0.8rem;font-weight:700;color:#4CAF50;margin:12px 0 8px">✅ Déjà fait :</p>`;
-    faites.forEach(t => {
-      const sous = t.sous ? `<span style="font-size:0.75rem;color:var(--text-light)">(${t.sous})</span>` : '';
-      html += `<div class="tache-item" style="opacity:0.6">
-        <div class="tache-info">
-          <span class="tache-icon">${t.icon}</span>
-          <span class="tache-name" style="text-decoration:line-through">${t.tache} ${sous}</span>
-        </div>
-        <span class="tache-toggle fait" style="cursor:default">✅ Fait</span>
-      </div>`;
+    html+=`<p style="font-size:0.8rem;font-weight:700;color:#4CAF50;margin:12px 0 8px">✅ Déjà fait :</p>`;
+    faites.forEach(t=>{
+      const sous=t.sous?`<span style="font-size:0.75rem;color:var(--text-light)">(${t.sous})</span>`:'';
+      html+=`<div class="tache-item" style="opacity:0.6"><div class="tache-info"><span class="tache-icon">${t.icon}</span><span class="tache-name" style="text-decoration:line-through">${t.tache} ${sous}</span></div><span class="tache-toggle fait" style="cursor:default">✅ Fait</span></div>`;
     });
   }
-
-  document.getElementById('preview-content').innerHTML = html;
+  document.getElementById('preview-content').innerHTML=html;
 }
-
+ 
 function renderPreview(enfant){
-  const today = new Date();
-  const dow = today.getDay();
-  const jourIdx = dow===0?6:dow-1;
-  const jour = JOURS[jourIdx];
-  const dateStr = formatDateYYYYMMDD(today);
-
-  const toutesLesTaches = getToutesLesTachesEnfant(enfant, jour);
-
+  const today=new Date();
+  const dow=today.getDay();
+  const jourIdx=dow===0?6:dow-1;
+  const jour=JOURS[jourIdx];
+  const toutesLesTaches=getToutesLesTachesEnfant(enfant,jour);
   if(!toutesLesTaches.length){
-    document.getElementById('preview-content').innerHTML=
-      `<div class="all-done"><span class="big-icon">😴</span><p>Aucune tâche pour ${enfant} aujourd'hui</p></div>`;
+    document.getElementById('preview-content').innerHTML=`<div class="all-done"><span class="big-icon">😴</span><p>Aucune tâche pour ${enfant} aujourd'hui</p></div>`;
     return;
   }
-
   const faites=toutesLesTaches.filter(t=>{
     const etat=tachesData.find(td=>td.tache===t.tache&&td.enfant===enfant&&td.jour===t.jourReel);
     return etat&&etat.etat?.trim()==='Fait';
@@ -1687,42 +1679,26 @@ function renderPreview(enfant){
     const etat=tachesData.find(td=>td.tache===t.tache&&td.enfant===enfant&&td.jour===t.jourReel);
     return !etat||etat.etat?.trim()!=='Fait';
   });
-
-  let html=`<p style="font-size:0.85rem;color:var(--text-light);font-weight:600;margin-bottom:12px">
-    ${JOURS_LABEL[jourIdx]} — ${faites.length}/${toutesLesTaches.length} faite${faites.length>1?'s':''}</p>`;
-
+  let html=`<p style="font-size:0.85rem;color:var(--text-light);font-weight:600;margin-bottom:12px">${JOURS_LABEL[jourIdx]} — ${faites.length}/${toutesLesTaches.length} faite${faites.length>1?'s':''}</p>`;
   if(!nonFaites.length){
     html+=`<div class="all-done"><span class="big-icon">🌟</span><p>Tout est fait !</p></div>`;
   } else {
     html+=`<p style="font-size:0.8rem;font-weight:700;color:var(--rose);margin-bottom:8px">⬜ À faire :</p>`;
     nonFaites.forEach(t=>{
       const badge=t.badge?`<span style="font-size:0.7rem;background:var(--orange);color:white;padding:2px 7px;border-radius:20px;margin-left:6px">${t.badge}</span>`:'';
-      html+=`<div class="tache-item">
-        <div class="tache-info">
-          <span class="tache-icon">${t.icon}</span>
-          <div><span class="tache-name">${t.tache}</span>${badge}</div>
-        </div>
-        <span class="tache-toggle non-fait" style="cursor:default">⬜ À faire</span>
-      </div>`;
+      html+=`<div class="tache-item"><div class="tache-info"><span class="tache-icon">${t.icon}</span><div><span class="tache-name">${t.tache}</span>${badge}</div></div><span class="tache-toggle non-fait" style="cursor:default">⬜ À faire</span></div>`;
     });
   }
-
   if(faites.length){
     html+=`<p style="font-size:0.8rem;font-weight:700;color:#4CAF50;margin:12px 0 8px">✅ Déjà fait :</p>`;
     faites.forEach(t=>{
-      html+=`<div class="tache-item" style="opacity:0.6">
-        <div class="tache-info">
-          <span class="tache-icon">${t.icon}</span>
-          <span class="tache-name" style="text-decoration:line-through">${t.tache}</span>
-        </div>
-        <span class="tache-toggle fait" style="cursor:default">✅ Fait</span>
-      </div>`;
+      html+=`<div class="tache-item" style="opacity:0.6"><div class="tache-info"><span class="tache-icon">${t.icon}</span><span class="tache-name" style="text-decoration:line-through">${t.tache}</span></div><span class="tache-toggle fait" style="cursor:default">✅ Fait</span></div>`;
     });
   }
-
   document.getElementById('preview-content').innerHTML=html;
 }
 </script>
+
 
 </body>
 </html>
