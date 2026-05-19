@@ -874,7 +874,7 @@ function getTodayJour(){
 }
 
 function chargerCFF() {
-  fetch(URL + "?sheet=CFF&action=lire")
+  fetch(SCRIPT_URL + "?sheet=CFF&action=lire")
     .then(r => r.text())
     .then(data => {
       let lignes = data.split("~~~~");
@@ -1606,7 +1606,34 @@ async function saveAdminConfig(){
   showToast('✅ Configuration enregistrée !');
   loadAdminConfig();
 }
- 
+
+async function ajouter(){
+  const p = document.getElementById("pers").value;
+  const montant = parseFloat(document.getElementById("montant").value);
+
+  if (!isFinite(montant) || montant <= 0) {
+    alert("⚠️ Montant invalide");
+    return;
+  }
+
+  const body = new URLSearchParams({
+    sheet:"CFF",
+    action:"ajouter",
+    personne:p,
+    montant
+  });
+
+  const res = await fetch(API, { method:"POST", body }).then(r => r.text());
+
+  if (res.trim() !== "ok") {
+    alert(res);
+    return;
+  }
+
+  document.getElementById("montant").value = "";
+  await loadTrips();
+}
+
 let currentPreviewEnfant='Alessia';
  
 function showPreviewEnfant(enfant,btn){
