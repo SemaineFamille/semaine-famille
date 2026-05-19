@@ -383,9 +383,6 @@ if ("serviceWorker" in navigator) {
     <button class="nav-tab" id="adminTab" onclick="requestAdmin()">⚙️ Admin</button>
     <button class="nav-tab" onclick="location.href='CFF.html'">🚆 CFF</button>
   
-
-</div>
-
   </div>
 </div>
 
@@ -795,6 +792,7 @@ function logout(){
   document.getElementById('mainNav').style.display='none';
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-accueil').classList.add('active');
+
 }
  
 function requestAdmin(){
@@ -873,6 +871,7 @@ function getTodayJour(){
   return JOURS[d===0?6:d-1];
 }
 
+
 function chargerCFF() {
   fetch(SCRIPT_URL + "?sheet=CFF&action=lire")
     .then(r => r.text())
@@ -891,13 +890,17 @@ function chargerCFF() {
     });
 }
 
- 
- function openCFF() {
-  // enlève active desTarget.classList.add('active');  // enlève active des autres boutons
-
-  // redirection vers la page CFF
+function openCFF() {
   location.href = 'CFF.html';
 }
+
+
+ 
+
+function openCFF() {
+  location.href = 'CFF.html';
+}
+
 
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
 
