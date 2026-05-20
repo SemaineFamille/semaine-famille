@@ -980,44 +980,43 @@ function buildPresencesUI(){
           '</span></div><div class="checkboxes-grid">';
 
       
+
 MEMBRES.forEach((m, mi) => {
 
-  // ✅ gestion affichage utilisateur
   let isVisible = false;
   let isEditable = false;
 
   if (isParent) {
-    // 👨‍👩‍👧‍👦 Parents voient tout
     isVisible = true;
 
-    // MAIS ne modifient que Mélanie + Yann
     if (m === "melanie" || m === "yann") {
       isEditable = true;
     }
 
   } else {
-    // 👧 enfant → uniquement lui-même
     if (m === currentUser.toLowerCase()) {
       isVisible = true;
       isEditable = true;
     }
   }
 
-  if (!isVisible) return;
-  html += `
-    <label class="checkbox-item" style="${!isEditable ? 'opacity:0.6;' : ''}">
-      <input type="checkbox"
-        id="cb_${key}_${m}"
-        data-key="${key}"
-        ${data[m] === 'TRUE' ? 'checked' : ''}
-        ${!isEditable ? 'disabled' : ''}
-        onchange="updateTotal(this.dataset.key)">
-      <span>${MEMBRES_LABEL[mi]}</span>
-    </label>
-  `;
+  // ✅ AU LIEU DE return → on encadre le HTML
+  if (isVisible) {
+    html += `
+      <label class="checkbox-item" style="${!isEditable ? 'opacity:0.6;' : ''}">
+        <input type="checkbox"
+          id="cb_${key}_${m}"
+          data-key="${key}"
+          ${data[m] === 'TRUE' ? 'checked' : ''}
+          ${!isEditable ? 'disabled' : ''}
+          onchange="updateTotal(this.dataset.key)">
+        <span>${MEMBRES_LABEL[mi]}</span>
+      </label>
+    `;
+  }
+
 });
 
-  });
 
   document.getElementById('present-content').innerHTML = html;
 }
