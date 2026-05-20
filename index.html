@@ -991,41 +991,59 @@ function showPage(name){
   if (name==='admin') loadAdminConfig();
 }
  
+
 function buildPresencesUI(){
+  const { visible, editable } = getPresenceAccess();
   const dates = rollingDates(7);
+
   let html = '';
-  dates.forEach(function(item) {
-    var label = item.label;
-    var date = item.date;  // ✅ récupérer la date !
+  dates.forEach(({label, date}) => {
+    html += `<div class="jour-header">${label}</div>`;
 
-    html += '<div class="jour-header">' + label + '</div>';
+    ['midi','soir'].forEach((repas) => {
+      const key = `${date}_${repas}`;
+      const data = presencesData[key] || {};
 
-    ['midi','soir'].forEach(function(repas) {
-      var key = date + '_' + repas;  // ✅ maintenant "2026-05-18_midi"
-      var data = presencesData[key] || {};
-      var count = MEMBRES.filter(function(m) { return data[m] === 'TRUE'; }).length;
+      // Total = toujours sur tous les membres (même si l'enfant ne voit que lui)
+      const count = MEMBRES.filter(m => getPresenceValue(key, m) === 'TRUE').length;
 
-      html += '<div class="repas-label">' + repas.toUpperCase() +
-          ' <span class="total-badge" id="total_' + key + '">' +
-          count + ' présent' + (count > 1 ? 's' : '') +
-          '</span></div><div class="checkboxes-grid">';
+      html += `<div class="repas-label">${repas.toUpperCase()}
+        <span class="total-badge" id="total_${key}">${count} présent${count>1?'s':''}</span>
+      </div>
+      <div class="checkboxes-grid">`;
 
-      MEMBRES.forEach(function(m, mi) {
-        html += '<label class="checkbox-item">' +
-                '<input type="checkbox" id="cb_' + key + '_' + m + '" ' +
-                'data-key="' + key + '" ' +
-                (data[m] === 'TRUE' ? 'checked ' : '') +
-                'onchange="updateTotal(this.dataset.key)">' +
-                '<span>' + MEMBRES_LABEL[mi] + '</span>' +
-                '</label>';
+      // Affichage selon droits
+      MEMBRES.forEach((m, mi) => {
+        if(!visible.includes(m)) return;
+
+        const canEdit = editable.includes(m);
+        const checked = (data[m] === 'TRUE');
+
+        html += `
+          <label class="checkbox-item" style="${canEdit ? '' : 'opacity:0.55;'}">
+            <input type="checkbox"
+              id="cb_${key}_${m}"
+              data-key="${key}"
+              ${checked ? 'checked' : ''}
+              ${canEdit ? '' : 'disabled'}
+              onchange="updateTotal(this.dataset.key)">
+            <span>${MEMBRES_LABEL[mi]}</span>
+          </label>
+        `;
       });
 
-      html += '</div><div class="divider"></div>';
+      html += `</div><div class="divider"></div>`;
     });
   });
 
   document.getElementById('present-content').innerHTML = html;
+
+  // 🔒 Bonus sécurité : un enfant ne doit pas pouvoir "Tout effacer"
+  document.querySelectorAll('#page-present .btn-secondary').forEach(btn=>{
+    btn.style.display = isParent ? '' : 'none';
+  });
 }
+
 
  
 function updateTotal(key){
