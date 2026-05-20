@@ -1087,21 +1087,35 @@ presencesData[`${dateKey}_${repasKey}`] = {
   buildPresencesUI();
 }
  
+
 async function savePresences(){
   showToast('Enregistrement...');
+  const { editable } = getPresenceAccess();
+  const editableSet = new Set(editable);
+
   const dates = rollingDates(7);
   for(const {date} of dates){
     for(const repas of ['midi','soir']){
       const key = `${date}_${repas}`;
       const p = {action:'enregistrer', sheet:'PRESENCES', jour:date, repas};
+
+      // Pour chaque membre :
+      // - si modifiable -> on lit la checkbox
+      // - sinon -> on garde la valeur déjà en mémoire (presencesData)
       MEMBRES.forEach(m => {
-        p[m] = document.getElementById(`cb_${key}_${m}`)?.checked ? 'TRUE' : 'FALSE';
+        if(editableSet.has(m)){
+          p[m] = getPresenceValue(key, m);   // checkbox -> TRUE/FALSE
+        } else {
+          p[m] = presencesData?.[key]?.[m] || 'FALSE'; // on ne change pas les autres
+        }
       });
+
       await apiCall(p);
     }
   }
   showToast('✅ Présences enregistrées !');
 }
+
 
  
 async function clearPresences(){
