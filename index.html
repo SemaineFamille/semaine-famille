@@ -616,12 +616,43 @@ const JOURS_COURTS=['Lu','Ma','Me','Je','Ve','Sa','Di'];
 const MEMBRES=['alessia','antonin','clement','diego','jeremie','melanie','yann'];
 const MEMBRES_LABEL=['Alessia','Antonin','Clément','Diego','Jérémie','Mélanie','Yann'];
 const MOIS_NOMS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
- 
+
 const TACHES_FIXES=[
   {id:'lessive',    label:'Monter ta lessive',       icon:'👕'},
   {id:'vaisselle',  label:'Vider le lave-vaisselle', icon:'🍽️'},
   {id:'aspirateur', label:"Passer l'aspirateur",     icon:'🧹'}
 ];
+
+function normalizeMemberKey(name){
+  return String(name || '')
+    .toLowerCase()
+    .normalize('NFD')                 // sépare lettres + accents
+    .replace(/[\u0300-\u036f]/g,'')   // enlève accents
+    .replace(/[^a-z]/g,'');           // enlève espaces & autres
+}
+
+// Qui voit quoi / qui peut modifier quoi ?
+function getPresenceAccess(){
+  if(isParent){
+    return {
+      visible: [...MEMBRES],          // voit tout
+      editable: ['melanie','yann']    // modifie seulement Mélanie & Yann
+    };
+  }
+  const me = normalizeMemberKey(currentUser); // Alessia -> alessia, Jérémie -> jeremie
+  return {
+    visible: [me],                    // voit seulement soi
+    editable: [me]                    // modifie seulement soi
+  };
+}
+
+// Lire la valeur actuelle d'un membre (depuis checkbox si visible, sinon depuis presencesData)
+function getPresenceValue(key, member){
+  const cb = document.getElementById(`cb_${key}_${member}`);
+  if(cb) return cb.checked ? 'TRUE' : 'FALSE';
+  return presencesData?.[key]?.[member] || 'FALSE';
+}
+
  
 const TACHES_RECURRENTES = [
   { personne:'Alessia',    tache:'Défaire ton lit', icon:'🛏️', dateDebut:'2026-05-15', frequence:3 },
