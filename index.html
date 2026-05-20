@@ -1266,25 +1266,32 @@ function getToutesLesTachesEnfant(enfant, jour, dateYMD) {
     });
 
   // 2) Tâches récurrentes (jeudi/ vendredi) — on décide selon la date ciblée
-  if(dow === 4 || dow === 5){
-    TACHES_RECURRENTES
-      .filter(t => t.personne === enfant)
-      .forEach(t => {
-        if(isTacheRecurrenteActive(t, dateStr)){
-          if(!taches.find(x => x.tache === t.tache)){
-            const dueDate = (dow === 4) ? dateMinusDays(dateStr, -1) : dateStr; // jeudi -> vendredi
-            taches.push({
-              tache: t.tache,
-              icon: t.icon,
-              source: 'recurrente',
-              jourReel: 'vendredi',     // comme tu fais déjà
-              dueDate,
-              badge: (dow === 4) ? '⏰ Demain' : ''
-            });
-          }
+ 
+if(dow === 4 || dow === 5){
+  TACHES_RECURRENTES
+    .filter(t => t.personne === enfant)
+    .forEach(t => {
+      if(isTacheRecurrenteActive(t, dateStr)){
+
+        const vendredi = new Date(dateStr + "T00:00:00");
+        if(dow === 4) vendredi.setDate(vendredi.getDate() + 1);
+
+        const dueDate = formatDateYYYYMMDD(vendredi);
+
+        if(!taches.find(x => x.tache === t.tache)){
+          taches.push({
+            tache: t.tache,
+            icon: t.icon,
+            source: 'recurrente',
+            jourReel: dueDate,   // ✅ PLUS DE BUG ici
+            dueDate: dueDate,
+            badge: dow === 4 ? '⏰ Demain' : ''
+          });
         }
-      });
-  }
+      }
+    });
+}
+
 
   // 3) Tâches ponctuelles EXACTEMENT pour la date ciblée (pas aujourd'hui par défaut)
   // Parents: la sheet peut contenir "Mél & Yann" OU "Mélanie"/"Yann"
