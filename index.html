@@ -709,15 +709,6 @@ function checkCelebrations() {
     launchConfetti('anniv');
   }
 }
-
-function normalizeName(str){
-  return str
-    .toLowerCase()
-    .normalize("NFD")               // enlève accents
-    .replace(/[\u0300-\u036f]/g,"") // supprime accents
-    .replace(/\s/g,"");             // enlève espaces
-}
-
  
 function launchConfetti(type) {
   const colors = type === 'noel'
@@ -988,47 +979,19 @@ function buildPresencesUI(){
           count + ' présent' + (count > 1 ? 's' : '') +
           '</span></div><div class="checkboxes-grid">';
 
-      
+      MEMBRES.forEach(function(m, mi) {
+        html += '<label class="checkbox-item">' +
+                '<input type="checkbox" id="cb_' + key + '_' + m + '" ' +
+                'data-key="' + key + '" ' +
+                (data[m] === 'TRUE' ? 'checked ' : '') +
+                'onchange="updateTotal(this.dataset.key)">' +
+                '<span>' + MEMBRES_LABEL[mi] + '</span>' +
+                '</label>';
+      });
 
-
-MEMBRES.forEach((m, mi) => {
-
-  let isVisible = false;
-  let isEditable = false;
-
-  const current = normalizeName(currentUser);
-
-  if (isParent) {
-    isVisible = true;
-
-    if (m === "melanie" || m === "yann") {
-      isEditable = true;
-    }
-
-  } else {
-    if (m === current) {
-      isVisible = true;
-      isEditable = true;
-    }
-  }
-
-  if (isVisible) {
-    html += `
-      <label class="checkbox-item" style="${!isEditable ? 'opacity:0.6;' : ''}">
-        <input type="checkbox"
-          id="cb_${key}_${m}"
-          data-key="${key}"
-          ${data[m] === 'TRUE' ? 'checked' : ''}
-          ${!isEditable ? 'disabled' : ''}
-          onchange="updateTotal(this.dataset.key)">
-        <span>${MEMBRES_LABEL[mi]}</span>
-      </label>
-    `;
-  }
-
-});
-
-
+      html += '</div><div class="divider"></div>';
+    });
+  });
 
   document.getElementById('present-content').innerHTML = html;
 }
