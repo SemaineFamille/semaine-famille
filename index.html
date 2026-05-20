@@ -1046,14 +1046,13 @@ function buildPresencesUI(){
 
 
  
+
 function updateTotal(key){
-  const count = MEMBRES.filter(function(m){
-    const el = document.getElementById('cb_' + key + '_' + m);
-    return el && el.checked;
-  }).length;
-  const el = document.getElementById('total_' + key);
-  if(el) el.textContent = count + ' présent' + (count > 1 ? 's' : '');
+  const count = MEMBRES.filter(m => getPresenceValue(key, m) === 'TRUE').length;
+  const el = document.getElementById(`total_${key}`);
+  if(el) el.textContent = `${count} présent${count>1?'s':''}`;
 }
+
 
 async function loadPresences(){
   document.getElementById('present-loading').style.display='block';
