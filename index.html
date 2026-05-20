@@ -1329,11 +1329,13 @@ function getTachesEnRetard(enfant) {
 
   // Retard = non fait (selon ton modèle actuel : fixes stockées par jour de semaine)
   return toutesHier.filter(t => {
-    const etat = tachesData.find(td =>
-      td.tache === t.tache &&
-      td.enfant === enfant &&
-      td.jour === t.jourReel
-    );
+    
+const etat = tachesData.find(td =>
+  td.tache === t.tache &&
+  td.enfant === enfant &&
+  td.jour === t.jourReel   // ✅ uniquement date
+);
+
     return !etat || (etat.etat || '').trim() !== 'Fait';
   }).map(t => ({
     ...t,
