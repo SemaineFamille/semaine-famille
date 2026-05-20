@@ -709,6 +709,15 @@ function checkCelebrations() {
     launchConfetti('anniv');
   }
 }
+
+function normalizeName(str){
+  return str
+    .toLowerCase()
+    .normalize("NFD")               // enlève accents
+    .replace(/[\u0300-\u036f]/g,"") // supprime accents
+    .replace(/\s/g,"");             // enlève espaces
+}
+
  
 function launchConfetti(type) {
   const colors = type === 'noel'
@@ -981,10 +990,13 @@ function buildPresencesUI(){
 
       
 
+
 MEMBRES.forEach((m, mi) => {
 
   let isVisible = false;
   let isEditable = false;
+
+  const current = normalizeName(currentUser);
 
   if (isParent) {
     isVisible = true;
@@ -994,13 +1006,12 @@ MEMBRES.forEach((m, mi) => {
     }
 
   } else {
-    if (m === currentUser.toLowerCase()) {
+    if (m === current) {
       isVisible = true;
       isEditable = true;
     }
   }
 
-  // ✅ AU LIEU DE return → on encadre le HTML
   if (isVisible) {
     html += `
       <label class="checkbox-item" style="${!isEditable ? 'opacity:0.6;' : ''}">
@@ -1016,6 +1027,7 @@ MEMBRES.forEach((m, mi) => {
   }
 
 });
+
 
 
   document.getElementById('present-content').innerHTML = html;
