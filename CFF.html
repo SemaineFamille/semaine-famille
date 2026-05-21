@@ -9,15 +9,15 @@
 :root{
   --accent:#F50870;
   --accent2:#9C27B0;
-  --accentViolet:#7B1FA2;
+  --violet:#7B1FA2;
   --txt:#fff;
   --muted:rgba(255,255,255,.7);
 }
 
-/* 🌈 BACKGROUND */
+/* 🌈 FOND */
 body{
   margin:0;
-  font-family:sans-serif;
+  font-family:system-ui,sans-serif;
   color:var(--txt);
 
   background:
@@ -33,11 +33,10 @@ body{
   width:100%;
   display:flex;
   justify-content:flex-end;
-  padding:12px 16px;   /* ✅ espace à droite ajouté */
-  box-sizing:border-box; /* ✅ très important */
+  padding:12px 18px;
+  box-sizing:border-box;
   z-index:10;
 }
-
 
 /* BOUTONS */
 .btn{
@@ -50,39 +49,27 @@ body{
 }
 
 .primary{
+  width:100%;
+  margin-top:10px;
   background:linear-gradient(135deg,var(--accent),var(--accent2));
   box-shadow:0 8px 24px rgba(245,8,112,.35);
   color:white;
 }
 
-.primary:hover{
-  transform:translateY(-2px);
-}
+.primary:hover{transform:translateY(-2px);}
+.primary:active{transform:scale(.96);}
 
-.primary:active{
-  transform:scale(.96);
-}
-
-/* bouton retour */
 .backbtn{
-  background:linear-gradient(135deg,#7B1FA2,#9C27B0);
+  background:linear-gradient(135deg,var(--violet),#9C27B0);
   box-shadow:0 6px 18px rgba(156,39,176,.35);
   color:white;
 }
 
-.backbtn:hover{
-  transform:translateY(-2px);
-}
-
-.backbtn:active{
-  transform:scale(.96);
-}
-
 /* LAYOUT */
 .wrap{
-  max-width:700px;
+  max-width:720px;
   margin:auto;
-  padding:70px 16px 16px; /* espace pour header */
+  padding:70px 16px 16px;
 }
 
 .card{
@@ -93,10 +80,23 @@ body{
   backdrop-filter:blur(10px);
 }
 
+/* ALIGNEMENT CHAMPS */
+.row{
+  display:flex;
+  gap:12px;
+  align-items:stretch;
+}
+
+.col{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+}
+
 /* INPUT */
 select,input{
-  width:100%;
-  padding:12px;
+  height:42px;
+  padding:10px;
   border-radius:12px;
   border:1px solid rgba(255,255,255,.2);
   background:rgba(20,6,34,.8);
@@ -108,10 +108,9 @@ select,input{
   display:grid;
   grid-template-columns:repeat(3,1fr);
   gap:10px;
-  margin-top:12px;
+  margin-top:14px;
 }
 
-.kpi div{font-size:13px;}
 .kpi b{font-size:18px;}
 
 /* PROGRESS */
@@ -129,7 +128,15 @@ select,input{
   background:linear-gradient(135deg,#F50870,#9C27B0);
 }
 
-/* LIST */
+/* DATE ABO */
+.datebox{
+  margin-top:8px;
+  font-size:13px;
+  color:var(--muted);
+  text-align:right;
+}
+
+/* LISTE */
 .item{
   display:flex;
   justify-content:space-between;
@@ -139,7 +146,7 @@ select,input{
   margin-top:6px;
 }
 
-/* bouton suppression */
+/* DELETE */
 .del{
   background:linear-gradient(135deg,#ff4d6d,#F50870);
   border:none;
@@ -153,6 +160,7 @@ select,input{
 
 <body>
 
+<!-- HEADER -->
 <div class="topbar">
   <button class="btn backbtn" onclick="location.href='index.html'">
     ⬅ Retour
@@ -161,22 +169,37 @@ select,input{
 
 <div class="wrap">
 
+<!-- FORM -->
 <div class="card">
-  <label>Personne</label>
-  <select id="pers"></select>
 
-  <label>Montant billet</label>
-  <input type="number" id="montant">
+  <div class="row">
+    <div class="col">
+      <label>Personne</label>
+      <select id="pers"></select>
+    </div>
+
+    <div class="col">
+      <label>Montant</label>
+      <input type="number" id="montant">
+    </div>
+  </div>
 
   <button class="btn primary" onclick="add()">➕ Ajouter trajet</button>
 
+  <!-- ✅ DATE -->
+  <div class="datebox">
+    Abonnement depuis : <b id="dateDebutText">—</b>
+  </div>
+
+  <!-- KPI -->
   <div class="kpi">
     <div>Total<br><b id="total">0</b></div>
     <div>Reste<br><b id="reste">0</b></div>
-    <div>Abonnement<br><b id="prix">0</b></div>
+    <div>Prix<br><b id="prix">0</b></div>
   </div>
 
   <div class="progress"><div id="bar"></div></div>
+
 </div>
 
 <div class="card">
@@ -190,15 +213,15 @@ select,input{
 const API="https://script.google.com/macros/s/AKfycbxOJEus1Fev5I4YZsSbjpIXXlgGJBY7QmFkkqZtkXYD6eEPwqmgCl8r2hfrO1X9eyqxSA/exec";
 
 const USERS={
-  jeremie:{label:"Jérémie",prix:120},
-  antonin:{label:"Antonin",prix:120},
-  yann:{label:"Yann",prix:170},
-  melanie:{label:"Mélanie",prix:170}
+  jeremie:{label:"Jérémie",prix:120,date:"2026-01-01"},
+  antonin:{label:"Antonin",prix:120,date:"2026-01-01"},
+  yann:{label:"Yann",prix:170,date:"2026-01-01"},
+  melanie:{label:"Mélanie",prix:170,date:"2026-01-01"}
 };
 
 let trips=[];
 
-/* ✅ init users */
+/* INIT */
 function init(){
   const sel=document.getElementById("pers");
 
@@ -206,8 +229,8 @@ function init(){
     .map(([k,v])=>`<option value="${k}">${v.label}</option>`)
     .join("");
 
-  const last=localStorage.getItem("cff_person") || "jeremie";
-  sel.value=USERS[last] ? last : "jeremie";
+  const last=localStorage.getItem("cff_person")||"jeremie";
+  sel.value=USERS[last]?last:"jeremie";
 
   sel.onchange=()=>{
     localStorage.setItem("cff_person",sel.value);
@@ -217,11 +240,15 @@ function init(){
   load();
 }
 
-/* ✅ load */
+/* LOAD */
 async function load(){
   const p=document.getElementById("pers").value;
 
-  const text=await fetch(API+"?sheet=CFF&action=lire&personne="+p).then(r=>r.text());
+  document.getElementById("dateDebutText").textContent=
+    USERS[p].date;
+
+  const text=await fetch(API+"?sheet=CFF&action=lire&personne="+p)
+    .then(r=>r.text());
 
   trips=[];
   const list=document.getElementById("list");
@@ -232,7 +259,7 @@ async function load(){
       const [date,pers,m,row]=l.split("|");
       const montant=parseFloat(m);
 
-      if(!date || !montant) return;
+      if(!date||!montant)return;
 
       trips.push({date,pers,montant,row});
 
@@ -243,7 +270,7 @@ async function load(){
           <small>${date}</small>
         </div>
         <div>
-          ${USERS[pers]?.label || pers}
+          ${USERS[pers]?.label}
           <button class="del" onclick="del(${row})">🗑️</button>
         </div>
       </div>`;
@@ -253,7 +280,7 @@ async function load(){
   compute();
 }
 
-/* ✅ compute */
+/* CALCUL */
 function compute(){
   const p=document.getElementById("pers").value;
   const prix=USERS[p].prix;
@@ -267,18 +294,18 @@ function compute(){
   document.getElementById("prix").textContent=prix+" CHF";
 
   document.getElementById("reste").textContent=
-    reste>0 ? reste.toFixed(2)+" CHF" : "✅ Rentabilisé";
+    reste>0?reste.toFixed(2)+" CHF":"✅ OK";
 
   const percent=Math.min(100,(total/prix)*100);
   document.getElementById("bar").style.width=percent+"%";
 }
 
-/* ✅ add */
+/* ADD */
 async function add(){
   const p=document.getElementById("pers").value;
   const montant=document.getElementById("montant").value;
 
-  if(!montant) return;
+  if(!montant)return;
 
   await fetch(API,{
     method:"POST",
@@ -294,7 +321,7 @@ async function add(){
   load();
 }
 
-/* ✅ delete */
+/* DELETE */
 async function del(row){
   await fetch(API,{
     method:"POST",
