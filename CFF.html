@@ -1,24 +1,30 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>CFF</title>
 
 <style>
 :root{
+  --bg:#f3e5f5;
   --accent:#F50870;
   --accent2:#9C27B0;
-  --txt:#fff;
+  --danger:#ff4d6d;
+  --txt:#fff7fb;
+  --muted:rgba(255,255,255,.75);
+  --shadow:0 10px 30px rgba(0,0,0,.25);
+  --radius:16px;
 }
 
 body{
   margin:0;
-  font-family:sans-serif;
-  color:white;
+  font-family: system-ui, sans-serif;
   background:linear-gradient(180deg,#120516,#1b0830);
+  color:var(--txt);
 }
 
-.wrap{max-width:700px;margin:auto;padding:16px;}
+.wrap{max-width:720px;margin:auto;padding:16px;}
 
 .card{
   background:rgba(255,255,255,.08);
@@ -27,24 +33,12 @@ body{
   margin:12px 0;
 }
 
-input,select{
+select, input{
   width:100%;
-  padding:10px;
-  border-radius:10px;
-  border:none;
-  margin-top:6px;
-}
-
-.btn{
   padding:12px;
   border-radius:12px;
-  border:none;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-.primary{
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border:1px solid rgba(255,255,255,.2);
+  background:rgba(20,6,34,.85); /* ✅ corrigé */
   color:white;
 }
 
@@ -53,23 +47,6 @@ input,select{
   grid-template-columns:repeat(3,1fr);
   gap:10px;
   margin-top:10px;
-}
-
-.kpi div{font-size:14px;}
-.kpi b{font-size:18px;}
-
-.progress{
-  height:10px;
-  background:rgba(255,255,255,.1);
-  border-radius:20px;
-  margin-top:10px;
-  overflow:hidden;
-}
-
-#progressBar{
-  height:100%;
-  width:0%;
-  background:linear-gradient(135deg,#F50870,#9C27B0);
 }
 
 .item{
@@ -82,9 +59,9 @@ input,select{
 }
 
 .delbtn{
-  background:#ff4d6d;
-  color:white;
+  background:linear-gradient(135deg,#ff4d6d,#F50870);
   border:none;
+  color:white;
   padding:6px 10px;
   border-radius:10px;
   cursor:pointer;
@@ -103,16 +80,13 @@ input,select{
   <label>Montant</label>
   <input type="number" id="montant">
 
-  <button class="btn primary" onclick="ajouter()">Ajouter</button>
+  <button onclick="ajouter()">Ajouter</button>
 
   <div class="kpi">
     <div>Total<br><b id="kpiTotal">0</b></div>
-    <div>Reste<br><b id="kpiReste">0</b></div>
-    <div>Abonnement<br><b id="kpiPrix">0</b></div>
+    <div>Prix<br><b id="kpiPrix">0</b></div>
+    <div>Diff<br><b id="kpiDiff">0</b></div>
   </div>
-
-  <div class="progress"><div id="progressBar"></div></div>
-
 </div>
 
 <div class="card">
@@ -123,69 +97,98 @@ input,select{
 </div>
 
 <script>
-const API="TON_URL_APPS_SCRIPT";
+const API="https://script.google.com/macros/s/AKfycbxOJEus1Fev5I4YZsSbjpIXXlgGJBY7QmFkkqZtkXYD6eEPwqmgCl8r2hfrO1X9eyqxSA/exec";
+
+const NAMES={
+  jeremie:"Jérémie",
+  antonin:"Antonin",
+  yann:"Yann",
+  melanie:"Mélanie"
+};
+
+const DEFAULTS={
+  jeremie:{prix:120},
+  antonin:{prix:120},
+  yann:{prix:170},
+  melanie:{prix:170}
+};
 
 let trips=[];
-let prix=0;
+let config={};
 
-// ✅ Dropdown
+// ✅ dropdown avec accents
 function setPersons(){
   const sel=document.getElementById("pers");
-  const people=["jeremie","antonin","yann","melanie"];
 
-  sel.innerHTML=people.map(p=>`<option value="${p}">${p}</option>`).join("");
+  sel.innerHTML=Object.entries(NAMES)
+    .map(([k,v])=>`<option value="${k}">${v}</option>`)
+    .join("");
 
-  sel.addEventListener("change",loadTrips);
+  sel.addEventListener("change",()=>{
+    loadConfig().then(loadTrips);
+  });
 }
 
-// ✅ Charger trajets
+// ✅ config simple
+async function loadConfig(){
+  const p=document.getElementById("pers").value;
+  const cfg=DEFAULTS[p] || {prix:0};
+  document.getElementById("kpiPrix").textContent=cfg.prix+" CHF";
+}
+
+// ✅ historique
 async function loadTrips(){
   const p=document.getElementById("pers").value;
 
-  const txt=await fetch(API+"?sheet=CFF&action=lire&personne="+p).then(r=>r.text());
+  const txt=await fetch(API+"?sheet=CFF&action=lire&personne="+p)
+    .then(r=>r.text());
 
   trips=[];
   const list=document.getElementById("liste");
   list.innerHTML="";
 
-  if(txt){
+  if(txt && txt.trim()){
     txt.split("~~~~").forEach(l=>{
       const [date,pers,m,row]=l.split("|");
       const montant=parseFloat(m);
 
-      if(!date||!montant)return;
+      if(!date || !montant) return;
 
       trips.push({date,pers,montant,row});
 
       list.innerHTML+=`
         <div class="item">
-          <div>${montant} CHF<br><small>${date}</small></div>
-          <button class="delbtn" onclick="supprimer(${row})">🗑️</button>
-        </div>`;
+          <div>
+            ${montant.toFixed(2)} CHF<br>
+            <small>${date}</small>
+          </div>
+          <div>
+            ${NAMES[pers] || pers}
+            <button class="delbtn" onclick="supprimer(${row})">🗑️</button>
+          </div>
+        </div>
+      `;
     });
   }
 
   compute();
 }
 
-// ✅ Calcul KPI
+// ✅ calcul
 function compute(){
   let total=0;
   trips.forEach(t=>total+=t.montant);
 
-  document.getElementById("kpiTotal").textContent=total.toFixed(2);
+  const p=document.getElementById("pers").value;
+  const prix=DEFAULTS[p]?.prix || 0;
 
-  const reste=prix-total;
-  document.getElementById("kpiReste").textContent=
-    reste>0 ? reste.toFixed(2)+" CHF" : "OK";
+  const diff=total-prix;
 
-  document.getElementById("kpiPrix").textContent=prix;
-
-  const percent=prix>0 ? Math.min(100,total/prix*100):0;
-  document.getElementById("progressBar").style.width=percent+"%";
+  document.getElementById("kpiTotal").textContent=total.toFixed(2)+" CHF";
+  document.getElementById("kpiDiff").textContent=(diff>=0?"+":"")+diff.toFixed(2)+" CHF";
 }
 
-// ✅ Ajouter
+// ✅ ajouter
 async function ajouter(){
   const p=document.getElementById("pers").value;
   const montant=document.getElementById("montant").value;
@@ -203,7 +206,7 @@ async function ajouter(){
   loadTrips();
 }
 
-// ✅ Supprimer
+// ✅ supprimer
 async function supprimer(row){
   await fetch(API,{
     method:"POST",
@@ -219,7 +222,7 @@ async function supprimer(row){
 
 // INIT
 setPersons();
-prix=150; // 👉 mets ton prix ici ou via config
+loadConfig();
 loadTrips();
 </script>
 
