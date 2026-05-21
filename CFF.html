@@ -251,6 +251,22 @@
       cursor:pointer;
       width:100%;
     }
+    
+    .progress{
+      height:10px;
+      background:rgba(255,255,255,.1);
+      border-radius:20px;
+      overflow:hidden;
+      margin-top:10px;
+    }
+    
+    #progressBar{
+      height:100%;
+      width:0%;
+      background:linear-gradient(135deg,#F50870,#9C27B0);
+      transition:width .3s;
+    }
+
 
     .toast{
       position: fixed;
@@ -304,6 +320,14 @@
           <div class="muted">Dépenses depuis début</div>
           <div class="v" id="kpiTotal">—</div>
         </div>
+        
+        <div>
+          <div class="muted">À rentabiliser</div>
+          <div class="v" id="kpiReste">—</div>
+        </div>
+          <div class="progress">
+            <div id="progressBar"></div>
+          </div>
         <div>
           <div class="muted">Prix abonnement</div>
           <div class="v" id="kpiPrix">—</div>
@@ -417,6 +441,13 @@
 
     document.getElementById("kpiPrix").textContent = (cfg.prix || 0).toFixed(0) + " CHF";
     document.getElementById("kpiDate").textContent = cfg.date_debut || "—";
+
+    
+    const reste = prix - total;
+
+    document.getElementById("kpiReste").textContent =
+    (reste > 0 ? reste.toFixed(2)+" CHF à amortir" : "✅ Rentabilisé !");
+
 
     computeRentability();
   }
