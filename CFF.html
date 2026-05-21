@@ -182,6 +182,7 @@ const USERS={
 let trips=[];
 
 // ✅ dropdown propre
+
 function initUsers(){
   const sel=document.getElementById("pers");
 
@@ -189,7 +190,15 @@ function initUsers(){
     .map(([k,v])=>`<option value="${k}">${v.label}</option>`)
     .join("");
 
-  sel.onchange=load;
+  // ✅ récupère la dernière personne
+  const last = localStorage.getItem("cff_person") || "jeremie";
+  sel.value = USERS[last] ? last : "jeremie";
+
+  sel.onchange = () => {
+    // ✅ sauvegarde
+    localStorage.setItem("cff_person", sel.value);
+    load();
+  };
 }
 
 // ✅ charger historique
