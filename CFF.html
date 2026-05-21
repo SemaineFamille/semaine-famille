@@ -189,7 +189,7 @@ select, input{
 
 </div>
 
-<script>
+
 const API="https://script.google.com/macros/s/AKfycbxOJEus1Fev5I4YZsSbjpIXXlgGJBY7QmFkkqZtkXYD6eEPwqmgCl8r2hfrO1X9eyqxSA/exec";
 
 const USERS={
@@ -201,6 +201,71 @@ const USERS={
 
 let trips=[];
 let config={};
+
+function formatDateFR(dateStr){
+  if(!dateStr) return "—";
+  const d = new Date(dateStr);
+  if(isNaN(d)) return dateStr;
+  return d.toLocaleDateString("fr-FR", { day:"2-digit", month:"long", year:"numeric" });
+}
+
+function todayYMD(){
+  const d=new Date();
+  return d.toISOString().split('T')[0];
+}
+
+/* ✅ AJOUT : ajoute 1 an */
+function addOneYear(dateStr){
+  const d=new Date(dateStr);
+  d.setFullYear(d.getFullYear()+1);
+  return d;
+}
+
+/* ✅ AJOUT : check abonnement */
+async function checkAbonnement(p){
+  const cfg=config[p];
+  if(!cfg) return;
+
+  const debut=new Date(cfg.date);
+  const fin=addOneYear(cfg.date);
+  const today=new Date();
+
+  const diffDays=Math.floor((fin - today)/(1000*60*60*24));
+
+  // ✅ affichage message
+  if(diffDays <= 30 && diffDays > 0){
+    document.getElementById("dateDebut").textContent =
+      formatDateFR(cfg.date) + " ⚠ expire dans " + diffDays + " jours";
+  }
+
+  // ✅ expiré → reset logique
+  if(today > fin){
+    const newDate = todayYMD();
+
+    await fetch(API,{
+      method:"POST",
+      body:new URLSearchParams({
+        sheet:"CFF_CONFIG",
+        action:"enregistrer",
+        personne:p,
+        date_debut:newDate,
+        prix:cfg.prix
+      })
+    });
+
+    config[p].date=newDate;
+
+    document.getElementById("dateDebut").textContent =
+      formatDateFR(newDate) + " 🆕 nouveau cycle";
+
+    // ✅ recharge propre
+    return true;
+  }
+
+  return false;
+}
+
+/* ========================== */
 
 function init(){
   const sel=document.getElementById("pers");
@@ -220,7 +285,7 @@ function init(){
   load();
 }
 
-/* ✅ charge config google sheet */
+/* CONFIG */
 async function loadConfig(){
   const txt=await fetch(API+"?sheet=CFF_CONFIG&action=lire").then(r=>r.text());
 
@@ -234,33 +299,24 @@ async function loadConfig(){
   }
 }
 
-
-function formatDateFR(dateStr){
-  if(!dateStr) return "—";
-
-  const d = new Date(dateStr);
-  if(isNaN(d)) return dateStr;
-
-  return d.toLocaleDateString("fr-FR", {
-    day:"2-digit",
-    month:"long",
-    year:"numeric"
-  });
-}
-
-
+/* LOAD */
 async function load(){
   await loadConfig();
 
   const p=document.getElementById("pers").value;
 
+  const reset = await checkAbonnement(p); // ✅ crucial
+
   const cfg=config[p];
 
-document.getElementById("dateDebut").textContent =
-  formatDateFR(cfg?.date);
+  if(!reset){
+    document.getElementById("dateDebut").textContent =
+      formatDateFR(cfg?.date);
+  }
 
-
-  const text=await fetch(API+"?sheet=CFF&action=lire&personne="+p).then(r=>r.text());
+  // ✅ filtre automatique
+  const text=await fetch(API+"?sheet=CFF&action=lire&personne="+p+"&from="+cfg.date)
+    .then(r=>r.text());
 
   trips=[];
   const list=document.getElementById("list");
@@ -289,7 +345,7 @@ document.getElementById("dateDebut").textContent =
   compute();
 }
 
-/* ✅ calcul corrigé */
+/* CALCUL */
 function compute(){
   const p=document.getElementById("pers").value;
   const prix=config[p]?.prix || 0;
@@ -336,6 +392,7 @@ async function del(row){
 
 init();
 </script>
+
 
 </body>
 </html>
