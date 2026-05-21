@@ -33,9 +33,11 @@ body{
   width:100%;
   display:flex;
   justify-content:flex-end;
-  padding:12px;
+  padding:12px 16px;   /* ✅ espace à droite ajouté */
+  box-sizing:border-box; /* ✅ très important */
   z-index:10;
 }
+
 
 /* BOUTONS */
 .btn{
