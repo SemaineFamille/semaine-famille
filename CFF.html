@@ -193,7 +193,7 @@ function compute(){
   document.getElementById("prix").textContent=prix+" CHF";
 
   document.getElementById("reste").textContent=
-    reste>0 ? reste.toFixed(2)+" CHF" : "✅ OK";
+    reste>0 ? reste.toFixed(2)+" CHF" : "✅ Abonnement rentable";
 
   const percent=Math.min(100,(total/prix)*100);
   document.getElementById("bar").style.width=percent+"%";
