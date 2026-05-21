@@ -1,606 +1,227 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CFF</title>
-  <style>
-    :root{
-      --bg:#f3e5f5;
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CFF</title>
 
-      /* 🌸 Palette rose/violet */
-      --accent:#F50870;     /* rose */
-      --accent2:#9C27B0;    /* violet */
-      --accent3:#FF7AB6;    /* rose clair */
-      --danger:#ff4d6d;
+<style>
+:root{
+  --accent:#F50870;
+  --accent2:#9C27B0;
+  --txt:#fff;
+}
 
-      /* glass / texte */
-      --txt:#fff7fb;
-      --muted:rgba(255,255,255,.75);
-      --shadow: 0 10px 30px rgba(0,0,0,.25);
-      --radius:16px;
-      --btnradius:14px;
+body{
+  margin:0;
+  font-family:sans-serif;
+  color:white;
+  background:linear-gradient(180deg,#120516,#1b0830);
+}
 
-      font-synthesis-weight:none;
-    }
+.wrap{max-width:700px;margin:auto;padding:16px;}
 
-    body{
-      margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+.card{
+  background:rgba(255,255,255,.08);
+  border-radius:16px;
+  padding:14px;
+  margin:12px 0;
+}
 
-      /* 🌈 Dégradés roses/violets */
-      background:
-        radial-gradient(1100px 650px at 12% -8%, rgba(245,8,112,.45) 0%, transparent 60%),
-        radial-gradient(900px 520px at 100% 0%, rgba(156,39,176,.40) 0%, transparent 55%),
-        radial-gradient(900px 600px at 15% 105%, rgba(255,122,182,.22) 0%, transparent 55%),
-        linear-gradient(180deg, #120516 0%, #1b0830 55%, #0b0616 100%);
+input,select{
+  width:100%;
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  margin-top:6px;
+}
 
-      color:var(--txt);
-    }
+.btn{
+  padding:12px;
+  border-radius:12px;
+  border:none;
+  font-weight:bold;
+  cursor:pointer;
+}
 
-    .topbar{
-      position:sticky; top:0; z-index:10;
-      background: linear-gradient(135deg, rgba(245,8,112,.25), rgba(156,39,176,.18));
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(255,255,255,.10);
-      padding:14px 16px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-    }
+.primary{
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:white;
+}
 
-    .item{
-      transition:transform .15s, box-shadow .15s;
-    }
-    
-    .item:hover{
-      transform:translateY(-2px);
-      box-shadow:0 6px 18px rgba(245,8,112,.3);
-    }
+.kpi{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-top:10px;
+}
 
-    .title{
-      font-weight:900;
-      letter-spacing:.2px;
-      display:flex;
-      align-items:center;
-      gap:10px;
-    }
+.kpi div{font-size:14px;}
+.kpi b{font-size:18px;}
 
-    .title .badge{
-      width:34px;height:34px;border-radius:12px;
-      display:grid;place-items:center;
-      background: linear-gradient(135deg, rgba(245,8,112,.35), rgba(156,39,176,.25));
-      border:1px solid rgba(255,255,255,.18);
-      box-shadow: var(--shadow);
-    }
+.progress{
+  height:10px;
+  background:rgba(255,255,255,.1);
+  border-radius:20px;
+  margin-top:10px;
+  overflow:hidden;
+}
 
-    .btn{
-      border:none;
-      padding:10px 12px;
-      border-radius:12px;
-      background: rgba(255,255,255,.12);
-      color:var(--txt);
-      font-weight:800;
-      cursor:pointer;
-      transition: transform .08s ease, background .15s ease;
-    }
-    .btn:hover{ background: rgba(255,255,255,.16); }
-    .btn:active{ transform: scale(.98); }
+#progressBar{
+  height:100%;
+  width:0%;
+  background:linear-gradient(135deg,#F50870,#9C27B0);
+}
 
-    .wrap{
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 16px;
-    }
+.item{
+  display:flex;
+  justify-content:space-between;
+  padding:10px;
+  border-radius:12px;
+  background:rgba(0,0,0,.2);
+  margin-top:6px;
+}
 
-    .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.04));
-      border:1px solid rgba(255,255,255,.12);
-      box-shadow: var(--shadow);
-      border-radius: var(--radius);
-      padding: 14px;
-      margin: 12px 0;
-    }
-
-    .row{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:end;
-    }
-
-    label{
-      display:block;
-      color:var(--muted);
-      font-size: 12px;
-      font-weight:800;
-      margin-bottom:6px;
-    }
-
-    select, input{
-      width:100%;
-      box-sizing:border-box;
-      padding:12px 12px;
-      border-radius: 12px;
-      border:1px solid rgba(255,255,255,.16);
-      background: rgba(20, 6, 34, .55);
-      color:var(--txt);
-      outline:none;
-    }
-
-    .col{
-      flex:1 1 160px;
-      min-width: 160px;
-    }
-
-    .primary{
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color:#fff;
-      font-weight:900;
-      border: 1px solid rgba(255,255,255,.14);
-      box-shadow: 0 10px 24px rgba(245,8,112,.18);
-    }
-    .primary:hover{ filter: brightness(1.06); }
-
-    .muted{
-      color:var(--muted);
-      font-size: 13px;
-      line-height: 1.35;
-    }
-
-    .kpi{
-      display:grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
-      gap:10px;
-      margin-top:10px;
-    }
-
-    .kpi > div{
-      background: rgba(0,0,0,.18);
-      border:1px solid rgba(255,255,255,.10);
-      border-radius: 14px;
-      padding: 10px;
-    }
-
-    .kpi .v{ font-size:18px; font-weight:900; }
-
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:8px 10px;
-      border-radius:999px;
-      font-weight:900;
-      font-size: 13px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.18);
-      margin-top:10px;
-    }
-
-    .ok{
-      color:#b7ffe0;
-      border-color: rgba(34,197,94,.35);
-      background: rgba(34,197,94,.12);
-    }
-
-    .no{
-      color:#ffd0dc;
-      border-color: rgba(245,8,112,.35);
-      background: rgba(245,8,112,.12);
-    }
-
-    .list{
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      margin-top:10px;
-    }
-
-    .item{
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      padding:10px 12px;
-      border-radius:14px;
-      background: rgba(0,0,0,.18);
-      border:1px solid rgba(255,255,255,.10);
-      font-size: 14px;
-      align-items:center;
-    }
-
-    .item .left{
-      display:flex;
-      flex-direction:column;
-      gap:2px;
-      min-width: 160px;
-    }
-    .item .date{
-      color:var(--muted);
-      font-size:12px;
-      font-weight:800;
-    }
-
-    .item .right{
-      display:flex;
-      align-items:center;
-      gap:10px;
-    }
-
-    .delbtn{
-      border:none;
-      border-radius:12px;
-      padding:10px 12px;
-      cursor:pointer;
-      font-weight:900;
-      color:#fff;
-      background: linear-gradient(135deg, rgba(255,77,109,.95), rgba(245,8,112,.85));
-      border:1px solid rgba(255,255,255,.14);
-      transition: transform .08s ease, filter .15s ease;
-      white-space:nowrap;
-    }
-    .delbtn:hover{ filter: brightness(1.06); }
-    .delbtn:active{ transform: scale(.98); }
-
-    details summary{
-      cursor:pointer;
-      font-weight:900;
-      color:var(--txt);
-      list-style:none;
-    }
-    details summary::-webkit-details-marker{ display:none; }
-
-    .smallbtn{
-      padding:10px 12px;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.10);
-      color:var(--txt);
-      font-weight:900;
-      cursor:pointer;
-      width:100%;
-    }
-    
-    .progress{
-      height:10px;
-      background:rgba(255,255,255,.1);
-      border-radius:20px;
-      overflow:hidden;
-      margin-top:10px;
-    }
-    
-    #progressBar{
-      height:100%;
-      width:0%;
-      background:linear-gradient(135deg,#F50870,#9C27B0);
-      transition:width .3s;
-    }
-
-
-    .toast{
-      position: fixed;
-      left: 50%;
-      bottom: 18px;
-      transform: translateX(-50%) translateY(120px);
-      background: linear-gradient(135deg, rgba(245,8,112,.85), rgba(156,39,176,.85));
-      border: 1px solid rgba(255,255,255,.18);
-      color: #fff;
-      padding: 10px 14px;
-      border-radius: 999px;
-      font-weight: 900;
-      box-shadow: var(--shadow);
-      transition: transform .25s ease;
-      z-index: 999;
-    }
-    .toast.show{ transform: translateX(-50%) translateY(0); }
-  </style>
+.delbtn{
+  background:#ff4d6d;
+  color:white;
+  border:none;
+  padding:6px 10px;
+  border-radius:10px;
+  cursor:pointer;
+}
+</style>
 </head>
 
 <body>
-  <div class="topbar">
-    <div class="title">
-      <div class="badge">🚆</div>
-      <div>
-        <div style="font-size:16px;">Suivi CFF</div>
-        <div class="muted" style="font-size:12px;">Billets + rentabilité demi-tarif</div>
-      </div>
-    </div>
-    <button class="btn" onclick="location.href='index.html'">⬅ Retour</button>
+
+<div class="wrap">
+
+<div class="card">
+  <label>Personne</label>
+  <select id="pers"></select>
+
+  <label>Montant</label>
+  <input type="number" id="montant">
+
+  <button class="btn primary" onclick="ajouter()">Ajouter</button>
+
+  <div class="kpi">
+    <div>Total<br><b id="kpiTotal">0</b></div>
+    <div>Reste<br><b id="kpiReste">0</b></div>
+    <div>Abonnement<br><b id="kpiPrix">0</b></div>
   </div>
 
-  <div class="wrap">
-    <div class="card">
-      <div class="row">
-        <div class="col">
-          <label>Personne</label>
-          <select id="pers"></select>
-        </div>
-        <div class="col">
-          <label>Montant billet (CHF)</label>
-          <input type="number" id="montant" step="0.05" placeholder="ex: 12.50">
-        </div>
-        <div class="col">
-          <button class="smallbtn primary" onclick="ajouter()">Ajouter trajet</button>
-        </div>
-      </div>
+  <div class="progress"><div id="progressBar"></div></div>
 
-      <div class="kpi">
-        <div>
-          <div class="muted">Dépenses depuis début</div>
-          <div class="v" id="kpiTotal">—</div>
-        </div>
-        
-        <div>
-          <div class="muted">À rentabiliser</div>
-          <div class="v" id="kpiReste">—</div>
-        </div>
-          <div class="progress">
-            <div id="progressBar"></div>
-          </div>
-        <div>
-          <div class="muted">Prix abonnement</div>
-          <div class="v" id="kpiPrix">—</div>
-        </div>
-        <div>
-          <div class="muted">Différence</div>
-          <div class="v" id="kpiDiff">—</div>
-        </div>
-      </div>
+</div>
 
-      <div id="pill" class="pill" style="display:none;"></div>
-      <div class="muted" style="margin-top:10px;">
-        Début abonnement : <strong id="kpiDate">—</strong>
-      </div>
-    </div>
+<div class="card">
+  <b>Historique</b>
+  <div id="liste"></div>
+</div>
 
-    <div class="card">
-      <details>
-        <summary>⚙️ Config abonnement (définie une fois)</summary>
-        <div style="height:10px;"></div>
-        <div class="row">
-          <div class="col">
-            <label>Date de début</label>
-            <input type="date" id="dateDebut">
-          </div>
-          <div class="col">
-            <label>Prix abonnement (CHF)</label>
-            <input type="number" id="prix" step="1">
-          </div>
-          <div class="col">
-            <button class="smallbtn" onclick="saveConfig()">Enregistrer</button>
-          </div>
-        </div>
-        <div class="muted">Astuce : par défaut Yann/Mélanie = 170, Jérémie/Antonin = 120.</div>
-      </details>
-    </div>
-
-    <div class="card">
-      <div style="font-weight:900;">Historique (personne sélectionnée)</div>
-      <div class="list" id="liste"></div>
-    </div>
-  </div>
-
-  <div class="toast" id="toast">—</div>
+</div>
 
 <script>
-  const API = "https://script.google.com/macros/s/AKfycbxOJEus1Fev5I4YZsSbjpIXXlgGJBY7QmFkkqZtkXYD6eEPwqmgCl8r2hfrO1X9eyqxSA/exec";
+const API="TON_URL_APPS_SCRIPT";
 
+let trips=[];
+let prix=0;
 
-  const percent = Math.min(100, (total / prix) * 100);
-  document.getElementById("progressBar").style.width = percent + "%";
+// ✅ Dropdown
+function setPersons(){
+  const sel=document.getElementById("pers");
+  const people=["jeremie","antonin","yann","melanie"];
 
-  
-  const DEFAULTS = {
-    jeremie: { prix: 120, date_debut: "2026-01-01" },
-    antonin: { prix: 120, date_debut: "2026-01-01" },
-    yann:    { prix: 170, date_debut: "2026-01-01" },
-    melanie: { prix: 170, date_debut: "2026-01-01" },
-  };
+  sel.innerHTML=people.map(p=>`<option value="${p}">${p}</option>`).join("");
 
-  let config = {};
-  let trips = [];
+  sel.addEventListener("change",loadTrips);
+}
 
-  function toast(msg){
-    const t=document.getElementById('toast');
-    t.textContent=msg;
-    t.classList.add('show');
-    setTimeout(()=>t.classList.remove('show'),2200);
-  }
+// ✅ Charger trajets
+async function loadTrips(){
+  const p=document.getElementById("pers").value;
 
-  function qs(obj){ return new URLSearchParams(obj).toString(); }
+  const txt=await fetch(API+"?sheet=CFF&action=lire&personne="+p).then(r=>r.text());
 
-  function setPersons() {
-    const sel = document.getElementById("pers");
-    const persons = ["jeremie","antonin","yann","melanie"];
-    sel.innerHTML = persons.map(p => `<option value="${p}">${p.charAt(0).toUpperCase()+p.slice(1)}</option>`).join("");
+  trips=[];
+  const list=document.getElementById("liste");
+  list.innerHTML="";
 
-    const last = localStorage.getItem("cff_person") || "jeremie";
-    sel.value = persons.includes(last) ? last : "jeremie";
+  if(txt){
+    txt.split("~~~~").forEach(l=>{
+      const [date,pers,m,row]=l.split("|");
+      const montant=parseFloat(m);
 
-    sel.addEventListener("change", async () => {
-      localStorage.setItem("cff_person", sel.value);
-      applyConfigToUI();
-      await loadTrips();
+      if(!date||!montant)return;
+
+      trips.push({date,pers,montant,row});
+
+      list.innerHTML+=`
+        <div class="item">
+          <div>${montant} CHF<br><small>${date}</small></div>
+          <button class="delbtn" onclick="supprimer(${row})">🗑️</button>
+        </div>`;
     });
   }
 
-  async function loadConfig() {
-    const url = API + "?" + qs({ sheet:"CFF_CONFIG", action:"lire" });
-    const text = await fetch(url).then(r => r.text());
+  compute();
+}
 
-    config = {};
-    if (text && text.trim()) {
-      text.split("~~~~").forEach(line => {
-        const [pers, date_debut, prix] = line.split("|");
-        if (!pers) return;
-        const p = String(pers).trim().toLowerCase();
-        config[p] = {
-          date_debut: date_debut || DEFAULTS[p]?.date_debut || "2026-01-01",
-          prix: parseFloat(prix || DEFAULTS[p]?.prix || 0)
-        };
-      });
-    }
+// ✅ Calcul KPI
+function compute(){
+  let total=0;
+  trips.forEach(t=>total+=t.montant);
 
-    ["jeremie","antonin","yann","melanie"].forEach(p => {
-      if (!config[p]) config[p] = {...DEFAULTS[p]};
-    });
-  }
+  document.getElementById("kpiTotal").textContent=total.toFixed(2);
 
-  function applyConfigToUI(){
-    const p = document.getElementById("pers").value;
-    const cfg = config[p] || DEFAULTS[p];
+  const reste=prix-total;
+  document.getElementById("kpiReste").textContent=
+    reste>0 ? reste.toFixed(2)+" CHF" : "OK";
 
-    document.getElementById("dateDebut").value = cfg.date_debut;
-    document.getElementById("prix").value = cfg.prix;
+  document.getElementById("kpiPrix").textContent=prix;
 
-    document.getElementById("kpiPrix").textContent = (cfg.prix || 0).toFixed(0) + " CHF";
-    document.getElementById("kpiDate").textContent = cfg.date_debut || "—";
+  const percent=prix>0 ? Math.min(100,total/prix*100):0;
+  document.getElementById("progressBar").style.width=percent+"%";
+}
 
-    
-    const reste = prix - total;
+// ✅ Ajouter
+async function ajouter(){
+  const p=document.getElementById("pers").value;
+  const montant=document.getElementById("montant").value;
 
-    document.getElementById("kpiReste").textContent =
-    (reste > 0 ? reste.toFixed(2)+" CHF à amortir" : "✅ Rentabilisé !");
-
-
-    computeRentability();
-  }
-
-  async function saveConfig(){
-    const p = document.getElementById("pers").value;
-    const date_debut = document.getElementById("dateDebut").value;
-    const prix = document.getElementById("prix").value;
-
-    const body = new URLSearchParams({
-      sheet:"CFF_CONFIG",
-      action:"enregistrer",
-      personne:p,
-      date_debut,
-      prix
-    });
-
-    const res = await fetch(API, { method:"POST", body }).then(r => r.text());
-    if (res.trim() !== "ok") alert(res);
-
-    await loadConfig();
-    applyConfigToUI();
-    toast("✅ Config enregistrée");
-  }
-
-  async function loadTrips(){
-    const p = document.getElementById("pers").value;
-    const from = (config[p]?.date_debut) || document.getElementById("dateDebut").value || "";
-
-    const url = API + "?" + qs({ sheet:"CFF", action:"lire", personne:p, from });
-    const text = await fetch(url).then(r => r.text());
-
-    trips = [];
-    const list = document.getElementById("liste");
-    list.innerHTML = "";
-
-    if (text && text.trim()) {
-      text.split("~~~~").forEach(line => {
-        // ✅ maintenant: date|pers|montant|row
-        const [date, pers, montant, row] = line.split("|");
-        const m = parseFloat(montant);
-        const r = parseInt(row, 10);
-        if (!date || !pers || !isFinite(m) || !r) return;
-        trips.push({date, pers:String(pers).toLowerCase(), montant:m, row:r});
-      });
-
-      // tri plus récent en haut (OK car YYYY-MM-DD)
-      trips.sort((a,b) => (a.date < b.date ? 1 : -1));
-
-      trips.forEach(t => {
-        const div = document.createElement("div");
-        div.className = "item";
-        div.innerHTML = `
-          <div class="left">
-            <div style="font-weight:900;">${t.montant.toFixed(2)} CHF</div>
-            <div class="date">${t.date}</div>
-          </div>
-          <div class="right">
-            <div style="font-weight:900;opacity:.9;">${t.pers}</div>
-            <button class="delbtn" onclick="supprimerTrajet(${t.row})">🗑️</button>
-          </div>
-        `;
-        list.appendChild(div);
-      });
-    }
-
-    computeRentability();
-  }
-
-  function computeRentability(){
-    const p = document.getElementById("pers").value;
-    const cfg = config[p] || DEFAULTS[p];
-    const prix = parseFloat(cfg.prix || 0);
-
-    let total = 0;
-    trips.forEach(t => total += t.montant);
-
-    const diff = total - prix;
-
-    document.getElementById("kpiTotal").textContent = total.toFixed(2) + " CHF";
-    document.getElementById("kpiDiff").textContent = (diff>=0?"+":"") + diff.toFixed(2) + " CHF";
-
-    const pill = document.getElementById("pill");
-    pill.style.display = "inline-flex";
-    pill.className = "pill " + (diff >= 0 ? "ok" : "no");
-    pill.innerHTML = (diff >= 0) ? "✅ Demi-tarif rentable" : "❌ Demi-tarif pas rentable";
-  }
-
-  async function ajouter(){
-    const p = document.getElementById("pers").value;
-    const montant = parseFloat(document.getElementById("montant").value);
-
-    if (!isFinite(montant) || montant <= 0){
-      alert("⚠️ Montant invalide");
-      return;
-    }
-
-    const body = new URLSearchParams({
+  await fetch(API,{
+    method:"POST",
+    body:new URLSearchParams({
       sheet:"CFF",
       action:"ajouter",
       personne:p,
-      montant: montant.toFixed(2)
-    });
+      montant
+    })
+  });
 
-    const res = await fetch(API, { method:"POST", body }).then(r => r.text());
-    if (res.trim() !== "ok") {
-      alert(res);
-      return;
-    }
+  loadTrips();
+}
 
-    document.getElementById("montant").value = "";
-    toast("✅ Trajet ajouté");
-    await loadTrips();
-  }
-
-  async function supprimerTrajet(row){
-    if(!confirm("Supprimer ce trajet ?")) return;
-
-    const body = new URLSearchParams({
+// ✅ Supprimer
+async function supprimer(row){
+  await fetch(API,{
+    method:"POST",
+    body:new URLSearchParams({
       sheet:"CFF",
       action:"supprimer",
-      row: String(row)
-    });
+      row
+    })
+  });
 
-    const res = await fetch(API, { method:"POST", body }).then(r => r.text());
-    if(res.trim() !== "ok"){
-      alert(res);
-      return;
-    }
-    toast("🗑️ Trajet supprimé");
-    await loadTrips();
-  }
+  loadTrips();
+}
 
-  (async function init(){
-    setPersons();
-    await loadConfig();
-    applyConfigToUI();
-    await loadTrips();
-  })();
+// INIT
+setPersons();
+prix=150; // 👉 mets ton prix ici ou via config
+loadTrips();
 </script>
+
 </body>
 </html>
