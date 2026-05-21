@@ -9,10 +9,12 @@
 :root{
   --accent:#F50870;
   --accent2:#9C27B0;
+  --accentViolet:#7B1FA2;
   --txt:#fff;
   --muted:rgba(255,255,255,.7);
 }
 
+/* 🌈 BACKGROUND */
 body{
   margin:0;
   font-family:sans-serif;
@@ -24,7 +26,62 @@ body{
     linear-gradient(180deg,#120516,#1b0830);
 }
 
-.wrap{max-width:700px;margin:auto;padding:16px;}
+/* HEADER */
+.topbar{
+  position:fixed;
+  top:0;
+  width:100%;
+  display:flex;
+  justify-content:flex-end;
+  padding:12px;
+  z-index:10;
+}
+
+/* BOUTONS */
+.btn{
+  border:none;
+  padding:12px 14px;
+  border-radius:14px;
+  font-weight:900;
+  cursor:pointer;
+  transition:all .15s ease;
+}
+
+.primary{
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  box-shadow:0 8px 24px rgba(245,8,112,.35);
+  color:white;
+}
+
+.primary:hover{
+  transform:translateY(-2px);
+}
+
+.primary:active{
+  transform:scale(.96);
+}
+
+/* bouton retour */
+.backbtn{
+  background:linear-gradient(135deg,#7B1FA2,#9C27B0);
+  box-shadow:0 6px 18px rgba(156,39,176,.35);
+  color:white;
+}
+
+.backbtn:hover{
+  transform:translateY(-2px);
+}
+
+.backbtn:active{
+  transform:scale(.96);
+}
+
+/* LAYOUT */
+.wrap{
+  max-width:700px;
+  margin:auto;
+  padding:70px 16px 16px; /* espace pour header */
+}
 
 .card{
   background:rgba(255,255,255,.08);
@@ -34,6 +91,7 @@ body{
   backdrop-filter:blur(10px);
 }
 
+/* INPUT */
 select,input{
   width:100%;
   padding:12px;
@@ -43,16 +101,18 @@ select,input{
   color:white;
 }
 
+/* KPI */
 .kpi{
   display:grid;
   grid-template-columns:repeat(3,1fr);
   gap:10px;
-  margin-top:10px;
+  margin-top:12px;
 }
 
 .kpi div{font-size:13px;}
 .kpi b{font-size:18px;}
 
+/* PROGRESS */
 .progress{
   height:10px;
   background:rgba(255,255,255,.1);
@@ -67,8 +127,7 @@ select,input{
   background:linear-gradient(135deg,#F50870,#9C27B0);
 }
 
-.list{margin-top:10px;}
-
+/* LIST */
 .item{
   display:flex;
   justify-content:space-between;
@@ -78,6 +137,7 @@ select,input{
   margin-top:6px;
 }
 
+/* bouton suppression */
 .del{
   background:linear-gradient(135deg,#ff4d6d,#F50870);
   border:none;
@@ -86,77 +146,16 @@ select,input{
   color:white;
   cursor:pointer;
 }
-
-.bigbtn{
-  width:100%;
-  margin-top:10px;
-  font-size:15px;
-  letter-spacing:0.5px;
-}
-
-/* bouton style propre */
-.btn{
-  border:none;
-  padding:12px 14px;
-  border-radius:14px;
-  font-weight:900;
-  cursor:pointer;
-  transition: all .15s ease;
-}
-  
-
-.backbtn{
-  background: linear-gradient(135deg, #7B1FA2, #9C27B0);
-  border:1px solid rgba(255,255,255,.2);
-  backdrop-filter: blur(6px);
-}
-
-
-/* effet hover */
-.backbtn:hover{
-  transform:translateY(-2px);
-  box-shadow:0 10px 24px rgba(156,39,176,.45);
-}
-
-/* effet clic */
-.backbtn:active{
-  transform:scale(.97);
-}
-
-
-/* bouton principal rose */
-.primary{
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
-  color:white;
-  box-shadow:0 6px 18px rgba(245,8,112,.25);
-}
-
-/* hover */
-.primary:hover{
-  transform:translateY(-2px);
-  box-shadow:0 10px 24px rgba(245,8,112,.35);
-}
-
-/* clic */
-.primary:active{
-  transform:scale(.97);
-}
-
-
-  
 </style>
 </head>
 
 <body>
-<body>
-  <div class="topbar">
-    <div class="title">
-    
-    </div>
-    <button class="btn" onclick="location.href='index.html'">⬅ Retour</button>
-  </div>
 
-
+<div class="topbar">
+  <button class="btn backbtn" onclick="location.href='index.html'">
+    ⬅ Retour
+  </button>
+</div>
 
 <div class="wrap">
 
@@ -167,10 +166,7 @@ select,input{
   <label>Montant billet</label>
   <input type="number" id="montant">
 
-  
-<button class="btn primary bigbtn" onclick="add()">
-  ➕ Ajouter trajet
-</button>
+  <button class="btn primary" onclick="add()">➕ Ajouter trajet</button>
 
   <div class="kpi">
     <div>Total<br><b id="total">0</b></div>
@@ -179,12 +175,11 @@ select,input{
   </div>
 
   <div class="progress"><div id="bar"></div></div>
-
 </div>
 
 <div class="card">
   <b>Historique</b>
-  <div id="list" class="list"></div>
+  <div id="list"></div>
 </div>
 
 </div>
@@ -193,40 +188,38 @@ select,input{
 const API="https://script.google.com/macros/s/AKfycbxOJEus1Fev5I4YZsSbjpIXXlgGJBY7QmFkkqZtkXYD6eEPwqmgCl8r2hfrO1X9eyqxSA/exec";
 
 const USERS={
-  jeremie:{label:"Jérémie", prix:120},
-  antonin:{label:"Antonin", prix:120},
-  yann:{label:"Yann", prix:170},
-  melanie:{label:"Mélanie", prix:170}
+  jeremie:{label:"Jérémie",prix:120},
+  antonin:{label:"Antonin",prix:120},
+  yann:{label:"Yann",prix:170},
+  melanie:{label:"Mélanie",prix:170}
 };
 
 let trips=[];
 
-// ✅ dropdown propre
-
-function initUsers(){
+/* ✅ init users */
+function init(){
   const sel=document.getElementById("pers");
 
   sel.innerHTML=Object.entries(USERS)
     .map(([k,v])=>`<option value="${k}">${v.label}</option>`)
     .join("");
 
-  // ✅ récupère la dernière personne
-  const last = localStorage.getItem("cff_person") || "jeremie";
-  sel.value = USERS[last] ? last : "jeremie";
+  const last=localStorage.getItem("cff_person") || "jeremie";
+  sel.value=USERS[last] ? last : "jeremie";
 
-  sel.onchange = () => {
-    // ✅ sauvegarde
-    localStorage.setItem("cff_person", sel.value);
+  sel.onchange=()=>{
+    localStorage.setItem("cff_person",sel.value);
     load();
   };
+
+  load();
 }
 
-// ✅ charger historique
+/* ✅ load */
 async function load(){
   const p=document.getElementById("pers").value;
 
-  const text=await fetch(API+"?sheet=CFF&action=lire&personne="+p)
-    .then(r=>r.text());
+  const text=await fetch(API+"?sheet=CFF&action=lire&personne="+p).then(r=>r.text());
 
   trips=[];
   const list=document.getElementById("list");
@@ -242,23 +235,23 @@ async function load(){
       trips.push({date,pers,montant,row});
 
       list.innerHTML+=`
-        <div class="item">
-          <div>
-            ${montant.toFixed(2)} CHF<br>
-            <small>${date}</small>
-          </div>
-          <div>
-            ${USERS[pers].label}
-            <button class="del" onclick="del(${row})">🗑️</button>
-          </div>
-        </div>`;
+      <div class="item">
+        <div>
+          ${montant.toFixed(2)} CHF<br>
+          <small>${date}</small>
+        </div>
+        <div>
+          ${USERS[pers]?.label || pers}
+          <button class="del" onclick="del(${row})">🗑️</button>
+        </div>
+      </div>`;
     });
   }
 
   compute();
 }
 
-// ✅ calcul + progression
+/* ✅ compute */
 function compute(){
   const p=document.getElementById("pers").value;
   const prix=USERS[p].prix;
@@ -272,16 +265,18 @@ function compute(){
   document.getElementById("prix").textContent=prix+" CHF";
 
   document.getElementById("reste").textContent=
-    reste>0 ? reste.toFixed(2)+" CHF" : "✅ Abonnement rentable";
+    reste>0 ? reste.toFixed(2)+" CHF" : "✅ Rentabilisé";
 
   const percent=Math.min(100,(total/prix)*100);
   document.getElementById("bar").style.width=percent+"%";
 }
 
-// ✅ ajout
+/* ✅ add */
 async function add(){
   const p=document.getElementById("pers").value;
   const montant=document.getElementById("montant").value;
+
+  if(!montant) return;
 
   await fetch(API,{
     method:"POST",
@@ -293,10 +288,11 @@ async function add(){
     })
   });
 
+  document.getElementById("montant").value="";
   load();
 }
 
-// ✅ suppression
+/* ✅ delete */
 async function del(row){
   await fetch(API,{
     method:"POST",
@@ -310,9 +306,7 @@ async function del(row){
   load();
 }
 
-// INIT
-initUsers();
-load();
+init();
 </script>
 
 </body>
