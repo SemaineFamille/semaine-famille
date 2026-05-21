@@ -104,18 +104,13 @@ select,input{
   transition: all .15s ease;
 }
   
-.backbtn{
-  background: linear-gradient(135deg, #7B1FA2, #9C27B0);  /* ✅ plus violet */
-  color:white;
-  border:none;
-  padding:10px 14px;
-  border-radius:14px;
-  font-weight:900;
-  cursor:pointer;
 
-  box-shadow:0 6px 18px rgba(156,39,176,.35);
-  transition:all .15s ease;
+.backbtn{
+  background: linear-gradient(135deg, #7B1FA2, #9C27B0);
+  border:1px solid rgba(255,255,255,.2);
+  backdrop-filter: blur(6px);
 }
+
 
 /* effet hover */
 .backbtn:hover{
@@ -128,7 +123,6 @@ select,input{
   transform:scale(.97);
 }
 
-  
 
 /* bouton principal rose */
 .primary{
