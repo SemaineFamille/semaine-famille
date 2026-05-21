@@ -234,18 +234,20 @@ async function loadConfig(){
   }
 }
 
+
 function formatDateFR(dateStr){
   if(!dateStr) return "—";
 
   const d = new Date(dateStr);
   if(isNaN(d)) return dateStr;
 
-  const jour = String(d.getDate()).padStart(2,"0");
-  const mois = String(d.getMonth()+1).padStart(2,"0");
-  const annee = d.getFullYear();
-
-  return `${jour}/${mois}/${annee}`;
+  return d.toLocaleDateString("fr-FR", {
+    day:"2-digit",
+    month:"long",
+    year:"numeric"
+  });
 }
+
 
 async function load(){
   await loadConfig();
