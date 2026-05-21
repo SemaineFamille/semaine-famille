@@ -1,340 +1,625 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CFF</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CFF</title>
+  <style>
+    :root{
+      --bg:#f3e5f5;
 
-<style>
-:root{
-  --accent:#F50870;
-  --accent2:#9C27B0;
-  --violet:#7B1FA2;
-  --txt:#fff;
-  --muted:rgba(255,255,255,.7);
-}
+      /* 🌸 Palette rose/violet */
+      --accent:#F50870;     /* rose */
+      --accent2:#9C27B0;    /* violet */
+      --violet:#7B1FA2;     /* violet + sombre */
+      --accent3:#FF7AB6;    /* rose clair */
+      --danger:#ff4d6d;
 
-/* 🌈 FOND */
-body{
-  margin:0;
-  font-family:system-ui,sans-serif;
-  color:var(--txt);
+      /* glass / texte */
+      --txt:#fff7fb;
+      --muted:rgba(255,255,255,.78);
+      --shadow: 0 10px 30px rgba(0,0,0,.22);
+      --radius:16px;
+      --btnradius:14px;
+    }
 
-  background:
-    radial-gradient(900px 600px at 10% 0%, rgba(245,8,112,.4), transparent),
-    radial-gradient(900px 600px at 90% 0%, rgba(156,39,176,.4), transparent),
-    linear-gradient(180deg,#120516,#1b0830);
-}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 
-/* HEADER */
-.topbar{
-  position:fixed;
-  top:0;
-  width:100%;
-  display:flex;
-  justify-content:flex-end;
-  padding:12px 18px;
-  box-sizing:border-box;
-  z-index:10;
-}
+      /* ✅ fond plus clair + dégradés */
+      background:
+        radial-gradient(1200px 680px at 15% -10%, rgba(245,8,112,.28) 0%, transparent 62%),
+        radial-gradient(1000px 560px at 100% 0%, rgba(156,39,176,.26) 0%, transparent 58%),
+        radial-gradient(900px 560px at 20% 105%, rgba(255,122,182,.16) 0%, transparent 55%),
+        linear-gradient(180deg, #1b0b2a 0%, #140826 45%, #0b0616 100%);
 
-.backbtn{
-  background:linear-gradient(135deg,var(--violet),#9C27B0);
-  border:none;
-  padding:10px 14px;
-  border-radius:14px;
-  font-weight:900;
-  color:white;
-  cursor:pointer;
-}
+      color:var(--txt);
+    }
 
-/* LAYOUT */
-.wrap{
-  max-width:720px;
-  margin:auto;
-  padding:70px 16px 16px;
-}
+    /* Header fixe (bouton retour haut droite) */
+    .topbar{
+      position:fixed; top:0; left:0; right:0;
+      z-index:10;
+      display:flex;
+      justify-content:flex-end;
+      padding:12px 18px;
+      box-sizing:border-box;
+      pointer-events:none; /* pour éviter overlay gênant */
+    }
+    .topbar .btn{ pointer-events:auto; }
 
-.card{
-  background:rgba(255,255,255,.08);
-  border-radius:16px;
-  padding:14px;
-  margin-bottom:16px;
-}
+    .wrap{
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 70px 16px 16px; /* laisse la place au header */
+    }
 
-/* ✅ ALIGNEMENT PARFAIT */
-.row{
-  display:flex;
-  gap:12px;
-}
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin: 12px 0;
+      backdrop-filter: blur(10px);
+    }
 
-.col{
-  flex:1;
-}
+    /* Alignement parfait des 2 champs */
+    .row{
+      display:flex;
+      gap:12px;
+      align-items:stretch;
+    }
+    .col{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      min-width:0;
+    }
 
-/* ✅ EXACT MÊME TAILLE */
-select, input{
-  height:42px;
-  width:100%;
-  padding:0 10px;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,.2);
-  background:rgba(20,6,34,.8);
-  color:white;
-}
+    label{
+      display:block;
+      color:var(--muted);
+      font-size: 12px;
+      font-weight:900;
+      margin-bottom:6px;
+      letter-spacing:.2px;
+    }
 
-/* BOUTON */
-.primary{
-  width:100%;
-  margin-top:10px;
-  padding:12px;
-  border-radius:14px;
-  border:none;
-  font-weight:900;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
-  color:white;
-}
+    /* ✅ même taille exact */
+    select, input{
+      width:100%;
+      height:42px;
+      box-sizing:border-box;
+      padding:0 12px;
+      border-radius: 12px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(20, 6, 34, .65);
+      color:var(--txt);
+      outline:none;
+    }
 
-/* DATE */
-.date{
-  margin-top:8px;
-  font-size:13px;
-  color:var(--muted);
-}
+    /* ✅ select sans fond blanc / rendu cohérent */
+    select{
+      appearance:none;
+      -webkit-appearance:none;
+      -moz-appearance:none;
+      background-image:
+        linear-gradient(45deg, transparent 50%, rgba(255,255,255,.9) 50%),
+        linear-gradient(135deg, rgba(255,255,255,.9) 50%, transparent 50%);
+      background-position:
+        calc(100% - 18px) calc(50% - 3px),
+        calc(100% - 13px) calc(50% - 3px);
+      background-size:5px 5px;
+      background-repeat:no-repeat;
+      padding-right:34px;
+    }
 
-/* KPI */
-.kpi{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
-  margin-top:12px;
-}
-.kpi b{font-size:18px;}
+    /* Boutons harmonisés */
+    .btn{
+      border:none;
+      padding:10px 14px;
+      border-radius:12px;
+      color:var(--txt);
+      font-weight:900;
+      cursor:pointer;
+      transition: transform .10s ease, filter .15s ease, box-shadow .15s ease;
+      background: rgba(255,255,255,.12);
+    }
+    .btn:hover{ filter: brightness(1.06); }
+    .btn:active{ transform: scale(.98); }
 
-/* PROGRESS */
-.progress{
-  height:10px;
-  background:rgba(255,255,255,.1);
-  border-radius:20px;
-  margin-top:10px;
-}
-#bar{
-  height:100%;
-  width:0%;
-  background:linear-gradient(135deg,#F50870,#9C27B0);
-}
+    .btn-primary{
+      width:100%;
+      margin-top:10px;
+      padding:12px 14px;
+      border-radius:14px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 10px 24px rgba(245,8,112,.22);
+    }
 
-/* LIST */
-.item{
-  display:flex;
-  justify-content:space-between;
-  padding:10px;
-  border-radius:12px;
-  background:rgba(0,0,0,.25);
-  margin-top:6px;
-}
+    .btn-back{
+      background: linear-gradient(135deg, var(--violet), var(--accent2));
+      box-shadow: 0 8px 22px rgba(156,39,176,.25);
+    }
 
-.del{
-  background:linear-gradient(135deg,#ff4d6d,#F50870);
-  border:none;
-  padding:6px 10px;
-  border-radius:10px;
-  color:white;
-  cursor:pointer;
-}
-</style>
+    .btn-del{
+      border:none;
+      border-radius:12px;
+      padding:10px 12px;
+      cursor:pointer;
+      font-weight:900;
+      color:#fff;
+      background: linear-gradient(135deg, rgba(255,77,109,.95), rgba(245,8,112,.85));
+      border:1px solid rgba(255,255,255,.14);
+      white-space:nowrap;
+    }
+    .btn-del:hover{ filter: brightness(1.08); }
+
+    /* KPI + progress */
+    .kpi{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap:10px;
+      margin-top:12px;
+    }
+    .kpi > div{
+      background: rgba(0,0,0,.18);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius: 14px;
+      padding: 10px;
+    }
+    .kpi .muted{ color:var(--muted); font-weight:800; font-size:12px; }
+    .kpi .v{ font-size:18px; font-weight:900; }
+
+    .progress{
+      height:10px;
+      background:rgba(255,255,255,.10);
+      border-radius:20px;
+      overflow:hidden;
+      margin-top:12px;
+    }
+    #progressBar{
+      height:100%;
+      width:0%;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      transition:width .3s ease;
+    }
+
+    /* Badges info (expiration / nouveau cycle) */
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      font-weight:900;
+      font-size: 13px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      margin-top:10px;
+    }
+    .pill.warn{ color:#ffe7b0; border-color: rgba(255,231,176,.25); background: rgba(255,193,7,.12); }
+    .pill.ok{ color:#b7ffe0; border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.12); }
+    .pill.new{ color:#ffd0dc; border-color: rgba(245,8,112,.35); background: rgba(245,8,112,.12); }
+
+    /* Ligne abonnement (à gauche) */
+    .abo-line{
+      margin-top:8px;
+      color:var(--muted);
+      font-weight:800;
+      font-size:13px;
+      text-align:left;
+    }
+
+    /* Liste */
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      margin-top:10px;
+    }
+    .item{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      padding:10px 12px;
+      border-radius:14px;
+      background: rgba(0,0,0,.18);
+      border:1px solid rgba(255,255,255,.08);
+      font-size: 14px;
+      align-items:center;
+      transition:transform .15s, box-shadow .15s, opacity .2s;
+    }
+    .item:hover{
+      transform:translateY(-2px);
+      box-shadow:0 6px 18px rgba(245,8,112,.25);
+    }
+    .item .left{ display:flex; flex-direction:column; gap:2px; }
+    .item .date{ color:var(--muted); font-size:12px; font-weight:800; }
+
+    /* Toast */
+    .toast{
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%) translateY(120px);
+      background: linear-gradient(135deg, rgba(245,8,112,.85), rgba(156,39,176,.85));
+      border: 1px solid rgba(255,255,255,.18);
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-weight: 900;
+      box-shadow: var(--shadow);
+      transition: transform .25s ease;
+      z-index: 999;
+    }
+    .toast.show{ transform: translateX(-50%) translateY(0); }
+  </style>
 </head>
 
 <body>
 
-<div class="topbar">
-  <button class="backbtn" onclick="location.href='index.html'">⬅ Retour</button>
-</div>
-
-<div class="wrap">
-
-<div class="card">
-
-<div class="row">
-  <div class="col">
-    <label>Personne</label>
-    <select id="pers"></select>
+  <!-- Header (Retour haut droite) -->
+  <div class="topbar">
+    <button class="btn btn-back" onclick="location.href='index.html'">⬅ Retour</button>
   </div>
 
-  <div class="col">
-    <label>Montant billet</label>
-    <input type="number" id="montant">
+  <div class="wrap">
+    <div class="card">
+      <div class="row">
+        <div class="col">
+          <label>Personne</label>
+          <select id="pers"></select>
+        </div>
+        <div class="col">
+          <label>Montant billet (CHF)</label>
+          <input type="number" id="montant" step="0.05" placeholder="ex: 12.50">
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="ajouter()">➕ Ajouter trajet</button>
+
+      <!-- Abonnement depuis (gauche) -->
+      <div class="abo-line">
+        Abonnement depuis : <strong id="kpiDate">—</strong>
+      </div>
+
+      <!-- Pill: warning / new cycle -->
+      <div id="pillInfo" class="pill" style="display:none;"></div>
+
+      <div class="kpi">
+        <div>
+          <div class="muted">Dépenses depuis début</div>
+          <div class="v" id="kpiTotal">—</div>
+        </div>
+        <div>
+          <div class="muted">À rentabiliser</div>
+          <div class="v" id="kpiReste">—</div>
+        </div>
+        <div>
+          <div class="muted">Prix abonnement</div>
+          <div class="v" id="kpiPrix">—</div>
+        </div>
+      </div>
+
+      <div class="progress"><div id="progressBar"></div></div>
+
+      <div class="kpi" style="margin-top:10px;">
+        <div style="grid-column:1 / -1;">
+          <div class="muted">Différence</div>
+          <div class="v" id="kpiDiff">—</div>
+        </div>
+      </div>
+
+      <div id="pillRentable" class="pill" style="display:none;"></div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:900;">Historique (personne sélectionnée)</div>
+      <div class="list" id="liste"></div>
+    </div>
   </div>
-</div>
 
-<button class="primary" onclick="add()">➕ Ajouter trajet</button>
-
-<div class="date">
-  Abonnement depuis : <b id="dateDebut">—</b>
-</div>
-
-<div class="kpi">
-  <div>Total<br><b id="total">0</b></div>
-  <div>Reste<br><b id="reste">0</b></div>
-  <div>Prix<br><b id="prix">0</b></div>
-</div>
-
-<div class="progress"><div id="bar"></div></div>
-
-</div>
-
-<div class="card">
-  <b>Historique</b>
-  <div id="list"></div>
-</div>
-
-</div>
+  <div class="toast" id="toast">—</div>
 
 <script>
-const API="https://script.google.com/macros/s/AKfycbxOJEus1Fev5I4YZsSbjpIXXlgGJBY7QmFkkqZtkXYD6eEPwqmgCl8r2hfrO1X9eyqxSA/exec";
+  const API = "https://script.google.com/macros/s/AKfycbxOJEus1Fev5I4YZsSbjpIXXlgGJBY7QmFkkqZtkXYD6eEPwqmgCl8r2hfrO1X9eyqxSA/exec";
 
-const USERS={
-  jeremie:"Jérémie",
-  antonin:"Antonin",
-  yann:"Yann",
-  melanie:"Mélanie"
-};
+  // ✅ Affichage avec accents
+  const PERSONS = [
+    {value:"jeremie", label:"Jérémie"},
+    {value:"antonin", label:"Antonin"},
+    {value:"yann",    label:"Yann"},
+    {value:"melanie", label:"Mélanie"}
+  ];
 
-let trips=[];
-let config={};
-
-function init(){
-  const sel=document.getElementById("pers");
-
-  sel.innerHTML=Object.entries(USERS)
-    .map(([k,v])=>`<option value="${k}">${v}</option>`)
-    .join("");
-
-  const last=localStorage.getItem("cff_person")||"jeremie";
-  sel.value=USERS[last]?last:"jeremie";
-
-  sel.onchange=()=>{
-    localStorage.setItem("cff_person",sel.value);
-    load();
+  // defaults si config absente
+  const DEFAULTS = {
+    jeremie: { prix: 120, date_debut: "2026-01-01" },
+    antonin: { prix: 120, date_debut: "2026-01-01" },
+    yann:    { prix: 170, date_debut: "2026-01-01" },
+    melanie: { prix: 170, date_debut: "2026-01-01" },
   };
 
-  load();
-}
+  let config = {};
+  let trips = [];
 
-/* ✅ charge config google sheet */
-async function loadConfig(){
-  const txt=await fetch(API+"?sheet=CFF_CONFIG&action=lire").then(r=>r.text());
+  // Paramètres d’automatisation
+  const DUREE_ABO_ANNEES = 1;
+  const ALERTE_JOURS_AVANT = 30;
 
-  config={};
-
-  if(txt){
-    txt.split("~~~~").forEach(l=>{
-      const [pers,date,prix]=l.split("|");
-      config[pers.trim()]={date,prix:parseFloat(prix)};
-    });
+  function toast(msg){
+    const t=document.getElementById('toast');
+    t.textContent=msg;
+    t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),2200);
   }
-}
 
+  function qs(obj){ return new URLSearchParams(obj).toString(); }
 
-function formatDateFR(dateStr){
-  if(!dateStr) return "—";
+  function formatDateFR(dateStr){
+    if(!dateStr) return "—";
+    const d = new Date(dateStr);
+    if(isNaN(d.getTime())) return String(dateStr).split(' ')[0]; // fallback
+    return d.toLocaleDateString("fr-FR", { day:"2-digit", month:"2-digit", year:"numeric" });
+  }
 
-  const d = new Date(dateStr);
-  if(isNaN(d)) return dateStr;
+  function addYears(dateStr, years){
+    const d = new Date(dateStr + "T00:00:00");
+    d.setFullYear(d.getFullYear() + years);
+    return d.toISOString().slice(0,10);
+  }
 
-  return d.toLocaleDateString("fr-FR", {
-    day:"2-digit",
-    month:"long",
-    year:"numeric"
-  });
-}
+  function daysBetween(aStr, bStr){
+    const a = new Date(aStr + "T00:00:00").getTime();
+    const b = new Date(bStr + "T00:00:00").getTime();
+    return Math.round((b - a) / (24*60*60*1000));
+  }
 
+  function todayYMD(){
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,'0');
+    const dd = String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${dd}`;
+  }
 
-async function load(){
-  await loadConfig();
+  function setPersons(){
+    const sel = document.getElementById("pers");
+    sel.innerHTML = PERSONS.map(p => `<option value="${p.value}">${p.label}</option>`).join("");
+    const last = localStorage.getItem("cff_person") || "jeremie";
+    sel.value = PERSONS.some(p=>p.value===last) ? last : "jeremie";
 
-  const p=document.getElementById("pers").value;
-
-  const cfg=config[p];
-
-document.getElementById("dateDebut").textContent =
-  formatDateFR(cfg?.date);
-
-
-  const text=await fetch(API+"?sheet=CFF&action=lire&personne="+p).then(r=>r.text());
-
-  trips=[];
-  const list=document.getElementById("list");
-  list.innerHTML="";
-
-  if(text){
-    text.split("~~~~").forEach(l=>{
-      const [date,pers,m,row]=l.split("|");
-      const montant=parseFloat(m);
-
-      if(!date||!montant)return;
-
-      trips.push({date,pers,montant,row});
-
-      list.innerHTML+=`
-      <div class="item">
-        <div>${montant.toFixed(2)} CHF<br><small>${date}</small></div>
-        <div>
-          ${USERS[pers]}
-          <button class="del" onclick="del(${row})">🗑️</button>
-        </div>
-      </div>`;
+    sel.addEventListener("change", async () => {
+      localStorage.setItem("cff_person", sel.value);
+      await refreshAll();
     });
   }
 
-  compute();
-}
+  async function loadConfig(){
+    const url = API + "?" + qs({ sheet:"CFF_CONFIG", action:"lire" });
+    const text = await fetch(url).then(r => r.text());
 
-/* ✅ calcul corrigé */
-function compute(){
-  const p=document.getElementById("pers").value;
-  const prix=config[p]?.prix || 0;
+    config = {};
+    if (text && text.trim()) {
+      text.split("~~~~").forEach(line => {
+        const [pers, date_debut, prix] = line.split("|");
+        if (!pers) return;
+        const p = String(pers).trim().toLowerCase();
+        config[p] = {
+          date_debut: (date_debut || "").trim(),
+          prix: parseFloat(prix || 0)
+        };
+      });
+    }
 
-  let total=0;
-  trips.forEach(t=>total+=t.montant);
+    // compléter avec défauts
+    Object.keys(DEFAULTS).forEach(p=>{
+      if(!config[p]) config[p] = {...DEFAULTS[p]};
+      if(!config[p].date_debut) config[p].date_debut = DEFAULTS[p].date_debut;
+      if(!isFinite(config[p].prix) || config[p].prix<=0) config[p].prix = DEFAULTS[p].prix;
+    });
+  }
 
-  const reste=prix-total;
+  async function saveConfig(personne, date_debut, prix){
+    const body = new URLSearchParams({
+      sheet:"CFF_CONFIG",
+      action:"enregistrer",
+      personne,
+      date_debut,
+      prix: String(prix)
+    });
+    const res = await fetch(API, { method:"POST", body }).then(r => r.text());
+    return res.trim();
+  }
 
-  document.getElementById("total").textContent=total.toFixed(2)+" CHF";
-  document.getElementById("prix").textContent=prix+" CHF";
+  // ✅ Automatisation : fin d’abonnement -> nouveau cycle
+  async function autoManageSubscription(personne){
+    const cfg = config[personne];
+    if(!cfg) return;
 
-  document.getElementById("reste").textContent=
-    reste>0 ? reste.toFixed(2)+" CHF" : "✅ Rentabilisé";
+    const start = cfg.date_debut;
+    const today = todayYMD();
+    const end = addYears(start, DUREE_ABO_ANNEES);
+    const joursRestants = daysBetween(today, end);
 
-  const percent=Math.min(100,(total/prix)*100);
-  document.getElementById("bar").style.width=percent+"%";
-}
+    const pillInfo = document.getElementById("pillInfo");
+    pillInfo.style.display = "none";
 
-/* CRUD */
-async function add(){
-  const p=document.getElementById("pers").value;
-  const m=document.getElementById("montant").value;
+    // 1) Alerte bientôt expiré
+    if(joursRestants <= ALERTE_JOURS_AVANT && joursRestants >= 0){
+      pillInfo.style.display = "inline-flex";
+      pillInfo.className = "pill warn";
+      pillInfo.innerHTML = `⏳ Abonnement bientôt expiré (${joursRestants} jour${joursRestants>1?'s':''})`;
+    }
 
-  if(!m)return;
+    // 2) Expiré -> nouveau cycle automatique
+    if(joursRestants < 0){
+      const newStart = today;
+      const res = await saveConfig(personne, newStart, cfg.prix);
 
-  await fetch(API,{
-    method:"POST",
-    body:new URLSearchParams({sheet:"CFF",action:"ajouter",personne:p,montant:m})
-  });
+      if(res === "ok"){
+        // mise à jour locale + badge
+        cfg.date_debut = newStart;
 
-  document.getElementById("montant").value="";
-  load();
-}
+        pillInfo.style.display = "inline-flex";
+        pillInfo.className = "pill new";
+        pillInfo.innerHTML = `🆕 Nouveau cycle démarré (${formatDateFR(newStart)})`;
 
-async function del(row){
-  await fetch(API,{
-    method:"POST",
-    body:new URLSearchParams({sheet:"CFF",action:"supprimer",row})
-  });
+        toast("🆕 Abonnement renouvelé automatiquement");
+      } else {
+        toast("⚠️ Impossible de renouveler : " + res);
+      }
+    }
+  }
 
-  load();
-}
+  async function loadTrips(){
+    const p = document.getElementById("pers").value;
+    const from = (config[p]?.date_debut) || ""; // filtre depuis date_debut
 
-init();
+    const url = API + "?" + qs({ sheet:"CFF", action:"lire", personne:p, from });
+    const text = await fetch(url).then(r => r.text());
+
+    trips = [];
+    const list = document.getElementById("liste");
+    list.innerHTML = "";
+
+    if (text && text.trim()) {
+      text.split("~~~~").forEach(line => {
+        // supporte 3 colonnes (sans row) ou 4 colonnes (avec row)
+        const parts = line.split("|");
+        const date = parts[0];
+        const pers = (parts[1] || "").toLowerCase();
+        const montant = parseFloat(parts[2]);
+        const row = parts[3] ? parseInt(parts[3],10) : null;
+
+        if (!date || !pers || !isFinite(montant)) return;
+
+        trips.push({date, pers, montant, row});
+      });
+
+      trips.sort((a,b) => (a.date < b.date ? 1 : -1));
+
+      trips.forEach(t => {
+        const canDelete = !!t.row;
+        const div = document.createElement("div");
+        div.className = "item";
+        div.innerHTML = `
+          <div class="left">
+            <div style="font-weight:900;">${t.montant.toFixed(2)} CHF</div>
+            <div class="date">${formatDateFR(t.date)}</div>
+          </div>
+          <div class="right" style="display:flex;align-items:center;gap:10px;">
+            <div style="font-weight:900;opacity:.9;">${PERSONS.find(x=>x.value===t.pers)?.label || t.pers}</div>
+            ${canDelete ? `<button class="btn-del" onclick="supprimerTrajet(${t.row}, this)">🗑️</button>` : ``}
+          </div>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    computeRentability();
+  }
+
+  function computeRentability(){
+    const p = document.getElementById("pers").value;
+    const cfg = config[p] || DEFAULTS[p];
+    const prix = parseFloat(cfg.prix || 0);
+
+    let total = 0;
+    trips.forEach(t => total += t.montant);
+
+    const diff = total - prix;
+    const reste = prix - total;
+
+    document.getElementById("kpiTotal").textContent = total.toFixed(2) + " CHF";
+    document.getElementById("kpiPrix").textContent  = (prix || 0).toFixed(0) + " CHF";
+    document.getElementById("kpiDiff").textContent  = (diff>=0?"+":"") + diff.toFixed(2) + " CHF";
+
+    document.getElementById("kpiReste").textContent =
+      (reste > 0 ? reste.toFixed(2) + " CHF" : "✅ Rentabilisé");
+
+    const bar = document.getElementById("progressBar");
+    const percent = (prix > 0) ? Math.min(100, (total / prix) * 100) : 0;
+    bar.style.width = percent.toFixed(0) + "%";
+
+    const pill = document.getElementById("pillRentable");
+    pill.style.display = "inline-flex";
+    pill.className = "pill " + (diff >= 0 ? "ok" : "no");
+    pill.innerHTML = (diff >= 0) ? "✅ Demi-tarif rentable" : "❌ Demi-tarif pas rentable";
+  }
+
+  async function ajouter(){
+    const p = document.getElementById("pers").value;
+    const montant = parseFloat(document.getElementById("montant").value);
+
+    if (!isFinite(montant) || montant <= 0){
+      toast("⚠️ Montant invalide");
+      return;
+    }
+
+    const body = new URLSearchParams({
+      sheet:"CFF",
+      action:"ajouter",
+      personne:p,
+      montant: montant.toFixed(2)
+    });
+
+    const res = await fetch(API, { method:"POST", body }).then(r => r.text());
+    if (res.trim() !== "ok") {
+      toast("⚠️ " + res);
+      return;
+    }
+
+    document.getElementById("montant").value = "";
+    toast("✅ Trajet ajouté");
+    await loadTrips();
+  }
+
+  async function supprimerTrajet(row, btn){
+    if(!confirm("Supprimer ce trajet ?")) return;
+
+    const body = new URLSearchParams({
+      sheet:"CFF",
+      action:"supprimer",
+      row: String(row)
+    });
+
+    const res = await fetch(API, { method:"POST", body }).then(r => r.text());
+    if(res.trim() !== "ok"){
+      toast("⚠️ " + res);
+      return;
+    }
+
+    // suppression visuelle douce
+    const item = btn.closest(".item");
+    if(item){
+      item.style.opacity = "0";
+      item.style.transform = "translateY(6px)";
+      setTimeout(()=>item.remove(), 200);
+    }
+    toast("🗑️ Trajet supprimé");
+    await loadTrips();
+  }
+
+  async function refreshAll(){
+    await loadConfig();
+    const p = document.getElementById("pers").value;
+
+    // automatise expiration / nouveau cycle / alerte
+    await autoManageSubscription(p);
+
+    // afficher date depuis config (format court)
+    document.getElementById("kpiDate").textContent = formatDateFR(config[p]?.date_debut);
+
+    await loadTrips();
+  }
+
+  (async function init(){
+    setPersons();
+    await refreshAll();
+  })();
 </script>
 
 </body>
