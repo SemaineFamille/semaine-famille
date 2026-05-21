@@ -376,6 +376,11 @@
 <script>
   const API = "https://script.google.com/macros/s/AKfycbxOJEus1Fev5I4YZsSbjpIXXlgGJBY7QmFkkqZtkXYD6eEPwqmgCl8r2hfrO1X9eyqxSA/exec";
 
+
+  const percent = Math.min(100, (total / prix) * 100);
+  document.getElementById("progressBar").style.width = percent + "%";
+
+  
   const DEFAULTS = {
     jeremie: { prix: 120, date_debut: "2026-01-01" },
     antonin: { prix: 120, date_debut: "2026-01-01" },
