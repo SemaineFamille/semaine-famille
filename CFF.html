@@ -202,119 +202,219 @@ const USERS={
 let trips=[];
 let config={};
 
-function init(){
-  const sel=document.getElementById("pers");
+// Paramètres abonnement
+const SUBSCRIPTION_YEARS = 1;     // valide 1 an
+const WARN_DAYS = 30;            // alerte 30 jours avant échéance
 
-  sel.innerHTML=Object.entries(USERS)
-    .map(([k,v])=>`<option value="${k}">${v}</option>`)
-    .join("");
-
-  const last=localStorage.getItem("cff_person")||"jeremie";
-  sel.value=USERS[last]?last:"jeremie";
-
-  sel.onchange=()=>{
-    localStorage.setItem("cff_person",sel.value);
-    load();
-  };
-
-  load();
+/* ----------------- Dates ----------------- */
+function todayYMD(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const dd = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${dd}`;
 }
 
-/* ✅ charge config google sheet */
-async function loadConfig(){
-  const txt=await fetch(API+"?sheet=CFF_CONFIG&action=lire").then(r=>r.text());
+function toYMD(dateStr){
+  // Convertit "Sat Aug 09 2025 ..." / "2025-08-09" / "09/08/2025" -> "YYYY-MM-DD"
+  if(!dateStr) return "";
+  const s = String(dateStr).trim();
 
-  config={};
+  // déjà ISO
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
 
-  if(txt){
-    txt.split("~~~~").forEach(l=>{
-      const [pers,date,prix]=l.split("|");
-      config[pers.trim()]={date,prix:parseFloat(prix)};
-    });
+  // format fr 09/08/2025 ou 09.08.2025
+  const m1 = s.match(/^(\d{2})[\/.](\d{2})[\/.](\d{4})$/);
+  if(m1) return `${m1[3]}-${m1[2]}-${m1[1]}`;
+
+  // Date JS parseable
+  const d = new Date(s);
+  if(!isNaN(d.getTime())){
+    const y = d.getFullYear();
+    const mo = String(d.getMonth()+1).padStart(2,'0');
+    const da = String(d.getDate()).padStart(2,'0');
+    return `${y}-${mo}-${da}`;
   }
-}
 
+  // fallback : on renvoie tel quel (mais risque)
+  return s;
+}
 
 function formatDateFR(dateStr){
-  if(!dateStr) return "—";
+  const ymd = toYMD(dateStr);
+  if(!ymd || !/^\d{4}-\d{2}-\d{2}$/.test(ymd)) return "—";
+  const d = new Date(ymd + "T00:00:00");
+  return d.toLocaleDateString("fr-FR", { day:"2-digit", month:"long", year:"numeric" });
+}
 
-  const d = new Date(dateStr);
-  if(isNaN(d)) return dateStr;
+function addYearsYMD(ymd, years){
+  const d = new Date(ymd + "T00:00:00");
+  d.setFullYear(d.getFullYear() + years);
+  return d.toISOString().slice(0,10);
+}
 
-  return d.toLocaleDateString("fr-FR", {
-    day:"2-digit",
-    month:"long",
-    year:"numeric"
+function daysUntilYMD(futureYmd){
+  const now = new Date(todayYMD()+"T00:00:00").getTime();
+  const fut = new Date(futureYmd+"T00:00:00").getTime();
+  return Math.floor((fut - now) / (24*60*60*1000));
+}
+
+/* ----------------- UI helpers ----------------- */
+function setDateLabel(text){
+  const el = document.getElementById("dateDebut");
+  if(el) el.textContent = text;
+}
+
+/* ----------------- Config (Google Sheet) ----------------- */
+async function loadConfig(){
+  const txt = await fetch(API+"?sheet=CFF_CONFIG&action=lire").then(r=>r.text());
+
+  config = {};
+  if(txt && txt.trim()){
+    txt.split("~~~~").forEach(line=>{
+      const parts = line.split("|");
+      const pers = (parts[0]||"").trim().toLowerCase();
+      const dateRaw = (parts[1]||"").trim();
+      const prixRaw = (parts[2]||"").trim();
+
+      if(!pers) return;
+
+      config[pers] = {
+        date_raw: dateRaw,
+        date: toYMD(dateRaw),                 // ✅ date normalisée ISO
+        prix: parseFloat(prixRaw || "0") || 0
+      };
+    });
+  }
+
+  // valeurs par défaut si manquantes (ne casse pas tes données)
+  Object.keys(USERS).forEach(p=>{
+    if(!config[p]) config[p] = { date_raw:"", date:"", prix:0 };
+    if(!config[p].date) config[p].date = "2026-01-01";
+    if(!config[p].prix || config[p].prix<=0){
+      // tes valeurs usuelles
+      config[p].prix = (p==="yann" || p==="melanie") ? 170 : 120;
+    }
   });
 }
 
+async function saveConfig(personne, date_debut_ymd, prix){
+  const body = new URLSearchParams({
+    sheet:"CFF_CONFIG",
+    action:"enregistrer",
+    personne,
+    date_debut: date_debut_ymd,
+    prix: String(prix)
+  });
 
-async function load(){
-  await loadConfig();
-
-  const p=document.getElementById("pers").value;
-
-  const cfg=config[p];
-
-document.getElementById("dateDebut").textContent =
-  formatDateFR(cfg?.date);
-
-
-  const text=await fetch(API+"?sheet=CFF&action=lire&personne="+p).then(r=>r.text());
-
-  trips=[];
-  const list=document.getElementById("list");
-  list.innerHTML="";
-
-  if(text){
-    text.split("~~~~").forEach(l=>{
-      const [date,pers,m,row]=l.split("|");
-      const montant=parseFloat(m);
-
-      if(!date||!montant)return;
-
-      trips.push({date,pers,montant,row});
-
-      list.innerHTML+=`
-      <div class="item">
-        <div>${montant.toFixed(2)} CHF<br><small>${date}</small></div>
-        <div>
-          ${USERS[pers]}
-          <button class="del" onclick="del(${row})">🗑️</button>
-        </div>
-      </div>`;
-    });
-  }
-
-  compute();
+  const res = await fetch(API, { method:"POST", body }).then(r=>r.text());
+  return res.trim();
 }
 
-/* ✅ calcul corrigé */
+/* ----------------- Renouvellement abonnement ----------------- */
+async function checkAndRenewIfNeeded(personne){
+  const cfg = config[personne];
+  if(!cfg) return;
+
+  const start = cfg.date; // ISO
+  const end = addYearsYMD(start, SUBSCRIPTION_YEARS);
+  const remaining = daysUntilYMD(end);
+
+  // Alerte bientôt expiré
+  if(remaining <= WARN_DAYS && remaining >= 0){
+    setDateLabel(`${formatDateFR(start)} (⚠️ expire dans ${remaining} jour${remaining>1?'s':''})`);
+  } else {
+    setDateLabel(formatDateFR(start));
+  }
+
+  // Expiré -> renouvellement + "remise à zéro"
+  if(remaining < 0){
+    const newStart = todayYMD();
+    const res = await saveConfig(personne, newStart, cfg.prix);
+    if(res === "ok"){
+      cfg.date = newStart;
+      cfg.date_raw = newStart;
+      setDateLabel(`${formatDateFR(newStart)} (🆕 nouveau cycle)`);
+    } else {
+      // si échec, on garde l’ancien mais on indique le souci
+      setDateLabel(`${formatDateFR(start)} (⚠️ renouvellement impossible)`);
+    }
+  }
+}
+
+/* ----------------- Trips ----------------- */
+async function loadTrips(){
+  const p = document.getElementById("pers").value;
+  const cfg = config[p];
+
+  // On tente de filtrer côté Apps Script via from, MAIS on refiltre côté JS (fiable)
+  const from = cfg?.date || "";
+  const url = API + `?sheet=CFF&action=lire&personne=${encodeURIComponent(p)}&from=${encodeURIComponent(from)}`;
+  const text = await fetch(url).then(r=>r.text());
+
+  trips = [];
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  if(text && text.trim()){
+    text.split("~~~~").forEach(line=>{
+      const parts = line.split("|");
+      const dateStr = (parts[0]||"").trim();
+      const pers = (parts[1]||"").trim().toLowerCase();
+      const montant = parseFloat(parts[2]||"");
+      const row = parts[3] ? parseInt(parts[3],10) : null;
+
+      if(!dateStr || !pers || !isFinite(montant)) return;
+
+      const tripYMD = toYMD(dateStr);
+      const startYMD = cfg.date;
+
+      // ✅ Filtre fiable (remise à zéro logique au renouvellement)
+      if(tripYMD && startYMD && tripYMD < startYMD) return;
+
+      trips.push({date: tripYMD || dateStr, pers, montant, row});
+    });
+
+    // tri récent -> ancien
+    trips.sort((a,b)=> String(b.date).localeCompare(String(a.date)));
+
+    trips.forEach(t=>{
+      list.innerHTML += `
+        <div class="item">
+          <div>${t.montant.toFixed(2)} CHF<br><small>${formatDateFR(t.date)}</small></div>
+          <div>
+            ${USERS[t.pers] || t.pers}
+            ${t.row ? `<button class="del" onclick="del(${t.row})">🗑️</button>` : ``}
+          </div>
+        </div>`;
+    });
+  }
+}
+
 function compute(){
-  const p=document.getElementById("pers").value;
-  const prix=config[p]?.prix || 0;
+  const p = document.getElementById("pers").value;
+  const prix = config[p]?.prix || 0;
 
-  let total=0;
-  trips.forEach(t=>total+=t.montant);
+  let total = 0;
+  trips.forEach(t=> total += t.montant);
 
-  const reste=prix-total;
+  const reste = prix - total;
 
-  document.getElementById("total").textContent=total.toFixed(2)+" CHF";
-  document.getElementById("prix").textContent=prix+" CHF";
+  document.getElementById("total").textContent = total.toFixed(2) + " CHF";
+  document.getElementById("prix").textContent  = prix + " CHF";
+  document.getElementById("reste").textContent =
+    (reste > 0 ? reste.toFixed(2) + " CHF" : "✅ Rentabilisé");
 
-  document.getElementById("reste").textContent=
-    reste>0 ? reste.toFixed(2)+" CHF" : "✅ Rentabilisé";
-
-  const percent=Math.min(100,(total/prix)*100);
-  document.getElementById("bar").style.width=percent+"%";
+  const percent = (prix > 0) ? Math.min(100, (total/prix)*100) : 0;
+  document.getElementById("bar").style.width = percent + "%";
 }
 
 /* CRUD */
 async function add(){
-  const p=document.getElementById("pers").value;
-  const m=document.getElementById("montant").value;
+  const p = document.getElementById("pers").value;
+  const m = document.getElementById("montant").value;
 
-  if(!m)return;
+  if(!m) return;
 
   await fetch(API,{
     method:"POST",
@@ -322,7 +422,7 @@ async function add(){
   });
 
   document.getElementById("montant").value="";
-  load();
+  await refreshAll();
 }
 
 async function del(row){
@@ -331,7 +431,39 @@ async function del(row){
     body:new URLSearchParams({sheet:"CFF",action:"supprimer",row})
   });
 
-  load();
+  await refreshAll();
+}
+
+/* Init UI */
+function init(){
+  const sel = document.getElementById("pers");
+
+  sel.innerHTML = Object.entries(USERS)
+    .map(([k,v])=>`<option value="${k}">${v}</option>`)
+    .join("");
+
+  const last = localStorage.getItem("cff_person") || "jeremie";
+  sel.value = USERS[last] ? last : "jeremie";
+
+  sel.onchange = async ()=>{
+    localStorage.setItem("cff_person", sel.value);
+    await refreshAll();
+  };
+
+  refreshAll();
+}
+
+async function refreshAll(){
+  await loadConfig();
+
+  const p = document.getElementById("pers").value;
+
+  // ✅ renouvellement éventuel + alerte
+  await checkAndRenewIfNeeded(p);
+
+  // ✅ load trips filtrés + compute
+  await loadTrips();
+  compute();
 }
 
 init();
