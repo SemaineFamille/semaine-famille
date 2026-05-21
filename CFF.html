@@ -7,38 +7,39 @@
 
 <style>
 :root{
-  --bg:#f3e5f5;
   --accent:#F50870;
   --accent2:#9C27B0;
-  --danger:#ff4d6d;
-  --txt:#fff7fb;
-  --muted:rgba(255,255,255,.75);
-  --shadow:0 10px 30px rgba(0,0,0,.25);
-  --radius:16px;
+  --txt:#fff;
+  --muted:rgba(255,255,255,.7);
 }
 
 body{
   margin:0;
-  font-family: system-ui, sans-serif;
-  background:linear-gradient(180deg,#120516,#1b0830);
+  font-family:sans-serif;
   color:var(--txt);
+
+  background:
+    radial-gradient(800px 500px at 10% 0%, rgba(245,8,112,.35), transparent),
+    radial-gradient(800px 500px at 100% 0%, rgba(156,39,176,.35), transparent),
+    linear-gradient(180deg,#120516,#1b0830);
 }
 
-.wrap{max-width:720px;margin:auto;padding:16px;}
+.wrap{max-width:700px;margin:auto;padding:16px;}
 
 .card{
   background:rgba(255,255,255,.08);
   border-radius:16px;
   padding:14px;
-  margin:12px 0;
+  margin-bottom:16px;
+  backdrop-filter:blur(10px);
 }
 
-select, input{
+select,input{
   width:100%;
   padding:12px;
   border-radius:12px;
   border:1px solid rgba(255,255,255,.2);
-  background:rgba(20,6,34,.85); /* ✅ corrigé */
+  background:rgba(20,6,34,.8);
   color:white;
 }
 
@@ -49,21 +50,40 @@ select, input{
   margin-top:10px;
 }
 
+.kpi div{font-size:13px;}
+.kpi b{font-size:18px;}
+
+.progress{
+  height:10px;
+  background:rgba(255,255,255,.1);
+  border-radius:20px;
+  margin-top:12px;
+  overflow:hidden;
+}
+
+#bar{
+  height:100%;
+  width:0%;
+  background:linear-gradient(135deg,#F50870,#9C27B0);
+}
+
+.list{margin-top:10px;}
+
 .item{
   display:flex;
   justify-content:space-between;
   padding:10px;
   border-radius:12px;
-  background:rgba(0,0,0,.2);
+  background:rgba(0,0,0,.25);
   margin-top:6px;
 }
 
-.delbtn{
+.del{
   background:linear-gradient(135deg,#ff4d6d,#F50870);
   border:none;
-  color:white;
   padding:6px 10px;
   border-radius:10px;
+  color:white;
   cursor:pointer;
 }
 </style>
@@ -77,21 +97,24 @@ select, input{
   <label>Personne</label>
   <select id="pers"></select>
 
-  <label>Montant</label>
+  <label>Montant billet</label>
   <input type="number" id="montant">
 
-  <button onclick="ajouter()">Ajouter</button>
+  <button onclick="add()">Ajouter</button>
 
   <div class="kpi">
-    <div>Total<br><b id="kpiTotal">0</b></div>
-    <div>Prix<br><b id="kpiPrix">0</b></div>
-    <div>Diff<br><b id="kpiDiff">0</b></div>
+    <div>Total<br><b id="total">0</b></div>
+    <div>Reste<br><b id="reste">0</b></div>
+    <div>Abonnement<br><b id="prix">0</b></div>
   </div>
+
+  <div class="progress"><div id="bar"></div></div>
+
 </div>
 
 <div class="card">
   <b>Historique</b>
-  <div id="liste"></div>
+  <div id="list" class="list"></div>
 </div>
 
 </div>
@@ -99,56 +122,39 @@ select, input{
 <script>
 const API="https://script.google.com/macros/s/AKfycbxOJEus1Fev5I4YZsSbjpIXXlgGJBY7QmFkkqZtkXYD6eEPwqmgCl8r2hfrO1X9eyqxSA/exec";
 
-const NAMES={
-  jeremie:"Jérémie",
-  antonin:"Antonin",
-  yann:"Yann",
-  melanie:"Mélanie"
-};
-
-const DEFAULTS={
-  jeremie:{prix:120},
-  antonin:{prix:120},
-  yann:{prix:170},
-  melanie:{prix:170}
+const USERS={
+  jeremie:{label:"Jérémie", prix:120},
+  antonin:{label:"Antonin", prix:120},
+  yann:{label:"Yann", prix:170},
+  melanie:{label:"Mélanie", prix:170}
 };
 
 let trips=[];
-let config={};
 
-// ✅ dropdown avec accents
-function setPersons(){
+// ✅ dropdown propre
+function initUsers(){
   const sel=document.getElementById("pers");
 
-  sel.innerHTML=Object.entries(NAMES)
-    .map(([k,v])=>`<option value="${k}">${v}</option>`)
+  sel.innerHTML=Object.entries(USERS)
+    .map(([k,v])=>`<option value="${k}">${v.label}</option>`)
     .join("");
 
-  sel.addEventListener("change",()=>{
-    loadConfig().then(loadTrips);
-  });
+  sel.onchange=load;
 }
 
-// ✅ config simple
-async function loadConfig(){
-  const p=document.getElementById("pers").value;
-  const cfg=DEFAULTS[p] || {prix:0};
-  document.getElementById("kpiPrix").textContent=cfg.prix+" CHF";
-}
-
-// ✅ historique
-async function loadTrips(){
+// ✅ charger historique
+async function load(){
   const p=document.getElementById("pers").value;
 
-  const txt=await fetch(API+"?sheet=CFF&action=lire&personne="+p)
+  const text=await fetch(API+"?sheet=CFF&action=lire&personne="+p)
     .then(r=>r.text());
 
   trips=[];
-  const list=document.getElementById("liste");
+  const list=document.getElementById("list");
   list.innerHTML="";
 
-  if(txt && txt.trim()){
-    txt.split("~~~~").forEach(l=>{
+  if(text){
+    text.split("~~~~").forEach(l=>{
       const [date,pers,m,row]=l.split("|");
       const montant=parseFloat(m);
 
@@ -163,33 +169,38 @@ async function loadTrips(){
             <small>${date}</small>
           </div>
           <div>
-            ${NAMES[pers] || pers}
-            <button class="delbtn" onclick="supprimer(${row})">🗑️</button>
+            ${USERS[pers].label}
+            <button class="del" onclick="del(${row})">🗑️</button>
           </div>
-        </div>
-      `;
+        </div>`;
     });
   }
 
   compute();
 }
 
-// ✅ calcul
+// ✅ calcul + progression
 function compute(){
+  const p=document.getElementById("pers").value;
+  const prix=USERS[p].prix;
+
   let total=0;
   trips.forEach(t=>total+=t.montant);
 
-  const p=document.getElementById("pers").value;
-  const prix=DEFAULTS[p]?.prix || 0;
+  const reste=prix-total;
 
-  const diff=total-prix;
+  document.getElementById("total").textContent=total.toFixed(2)+" CHF";
+  document.getElementById("prix").textContent=prix+" CHF";
 
-  document.getElementById("kpiTotal").textContent=total.toFixed(2)+" CHF";
-  document.getElementById("kpiDiff").textContent=(diff>=0?"+":"")+diff.toFixed(2)+" CHF";
+  document.getElementById("reste").textContent=
+    reste>0 ? reste.toFixed(2)+" CHF" : "✅ OK";
+
+  const percent=Math.min(100,(total/prix)*100);
+  document.getElementById("bar").style.width=percent+"%";
 }
 
-// ✅ ajouter
-async function ajouter(){
+// ✅ ajout
+async function add(){
   const p=document.getElementById("pers").value;
   const montant=document.getElementById("montant").value;
 
@@ -203,11 +214,11 @@ async function ajouter(){
     })
   });
 
-  loadTrips();
+  load();
 }
 
-// ✅ supprimer
-async function supprimer(row){
+// ✅ suppression
+async function del(row){
   await fetch(API,{
     method:"POST",
     body:new URLSearchParams({
@@ -217,13 +228,12 @@ async function supprimer(row){
     })
   });
 
-  loadTrips();
+  load();
 }
 
 // INIT
-setPersons();
-loadConfig();
-loadTrips();
+initUsers();
+load();
 </script>
 
 </body>
