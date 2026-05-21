@@ -86,6 +86,44 @@ select,input{
   color:white;
   cursor:pointer;
 }
+
+.bigbtn{
+  width:100%;
+  margin-top:10px;
+  font-size:15px;
+  letter-spacing:0.5px;
+}
+
+/* bouton style propre */
+.btn{
+  border:none;
+  padding:12px 14px;
+  border-radius:14px;
+  font-weight:900;
+  cursor:pointer;
+  transition: all .15s ease;
+}
+
+/* bouton principal rose */
+.primary{
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:white;
+  box-shadow:0 6px 18px rgba(245,8,112,.25);
+}
+
+/* hover */
+.primary:hover{
+  transform:translateY(-2px);
+  box-shadow:0 10px 24px rgba(245,8,112,.35);
+}
+
+/* clic */
+.primary:active{
+  transform:scale(.97);
+}
+
+
+  
 </style>
 </head>
 
