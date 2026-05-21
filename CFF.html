@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CFF</title>
 
 <style>
@@ -21,8 +21,8 @@ body{
   color:var(--txt);
 
   background:
-    radial-gradient(800px 500px at 10% 0%, rgba(245,8,112,.35), transparent),
-    radial-gradient(800px 500px at 100% 0%, rgba(156,39,176,.35), transparent),
+    radial-gradient(900px 600px at 10% 0%, rgba(245,8,112,.4), transparent),
+    radial-gradient(900px 600px at 90% 0%, rgba(156,39,176,.4), transparent),
     linear-gradient(180deg,#120516,#1b0830);
 }
 
@@ -38,31 +38,14 @@ body{
   z-index:10;
 }
 
-/* BOUTONS */
-.btn{
-  border:none;
-  padding:12px 14px;
-  border-radius:14px;
-  font-weight:900;
-  cursor:pointer;
-  transition:all .15s ease;
-}
-
-.primary{
-  width:100%;
-  margin-top:10px;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
-  box-shadow:0 8px 24px rgba(245,8,112,.35);
-  color:white;
-}
-
-.primary:hover{transform:translateY(-2px);}
-.primary:active{transform:scale(.96);}
-
 .backbtn{
   background:linear-gradient(135deg,var(--violet),#9C27B0);
-  box-shadow:0 6px 18px rgba(156,39,176,.35);
+  border:none;
+  padding:10px 14px;
+  border-radius:14px;
+  font-weight:900;
   color:white;
+  cursor:pointer;
 }
 
 /* LAYOUT */
@@ -77,30 +60,46 @@ body{
   border-radius:16px;
   padding:14px;
   margin-bottom:16px;
-  backdrop-filter:blur(10px);
 }
 
-/* ALIGNEMENT CHAMPS */
+/* ✅ ALIGNEMENT PARFAIT */
 .row{
   display:flex;
   gap:12px;
-  align-items:stretch;
 }
 
 .col{
   flex:1;
-  display:flex;
-  flex-direction:column;
 }
 
-/* INPUT */
-select,input{
+/* ✅ EXACT MÊME TAILLE */
+select, input{
   height:42px;
-  padding:10px;
+  width:100%;
+  padding:0 10px;
   border-radius:12px;
   border:1px solid rgba(255,255,255,.2);
   background:rgba(20,6,34,.8);
   color:white;
+}
+
+/* BOUTON */
+.primary{
+  width:100%;
+  margin-top:10px;
+  padding:12px;
+  border-radius:14px;
+  border:none;
+  font-weight:900;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:white;
+}
+
+/* DATE */
+.date{
+  margin-top:8px;
+  font-size:13px;
+  color:var(--muted);
 }
 
 /* KPI */
@@ -108,9 +107,8 @@ select,input{
   display:grid;
   grid-template-columns:repeat(3,1fr);
   gap:10px;
-  margin-top:14px;
+  margin-top:12px;
 }
-
 .kpi b{font-size:18px;}
 
 /* PROGRESS */
@@ -118,25 +116,15 @@ select,input{
   height:10px;
   background:rgba(255,255,255,.1);
   border-radius:20px;
-  margin-top:12px;
-  overflow:hidden;
+  margin-top:10px;
 }
-
 #bar{
   height:100%;
   width:0%;
   background:linear-gradient(135deg,#F50870,#9C27B0);
 }
 
-/* DATE ABO */
-.datebox{
-  margin-top:8px;
-  font-size:13px;
-  color:var(--muted);
-  text-align:right;
-}
-
-/* LISTE */
+/* LIST */
 .item{
   display:flex;
   justify-content:space-between;
@@ -146,7 +134,6 @@ select,input{
   margin-top:6px;
 }
 
-/* DELETE */
 .del{
   background:linear-gradient(135deg,#ff4d6d,#F50870);
   border:none;
@@ -160,45 +147,39 @@ select,input{
 
 <body>
 
-<!-- HEADER -->
 <div class="topbar">
-  <button class="btn backbtn" onclick="location.href='index.html'">
-    ⬅ Retour
-  </button>
+  <button class="backbtn" onclick="location.href='index.html'">⬅ Retour</button>
 </div>
 
 <div class="wrap">
 
-<!-- FORM -->
 <div class="card">
 
-  <div class="row">
-    <div class="col">
-      <label>Personne</label>
-      <select id="pers"></select>
-    </div>
-
-    <div class="col">
-      <label>Montant</label>
-      <input type="number" id="montant">
-    </div>
+<div class="row">
+  <div class="col">
+    <label>Personne</label>
+    <select id="pers"></select>
   </div>
 
-  <button class="btn primary" onclick="add()">➕ Ajouter trajet</button>
-
-  <!-- ✅ DATE -->
-  <div class="datebox">
-    Abonnement depuis : <b id="dateDebutText">—</b>
+  <div class="col">
+    <label>Montant billet</label>
+    <input type="number" id="montant">
   </div>
+</div>
 
-  <!-- KPI -->
-  <div class="kpi">
-    <div>Total<br><b id="total">0</b></div>
-    <div>Reste<br><b id="reste">0</b></div>
-    <div>Prix<br><b id="prix">0</b></div>
-  </div>
+<button class="primary" onclick="add()">➕ Ajouter trajet</button>
 
-  <div class="progress"><div id="bar"></div></div>
+<div class="date">
+  Abonnement depuis : <b id="dateDebut">—</b>
+</div>
+
+<div class="kpi">
+  <div>Total<br><b id="total">0</b></div>
+  <div>Reste<br><b id="reste">0</b></div>
+  <div>Prix<br><b id="prix">0</b></div>
+</div>
+
+<div class="progress"><div id="bar"></div></div>
 
 </div>
 
@@ -213,20 +194,20 @@ select,input{
 const API="https://script.google.com/macros/s/AKfycbxOJEus1Fev5I4YZsSbjpIXXlgGJBY7QmFkkqZtkXYD6eEPwqmgCl8r2hfrO1X9eyqxSA/exec";
 
 const USERS={
-  jeremie:{label:"Jérémie",prix:120,date:"2026-01-01"},
-  antonin:{label:"Antonin",prix:120,date:"2026-01-01"},
-  yann:{label:"Yann",prix:170,date:"2026-01-01"},
-  melanie:{label:"Mélanie",prix:170,date:"2026-01-01"}
+  jeremie:"Jérémie",
+  antonin:"Antonin",
+  yann:"Yann",
+  melanie:"Mélanie"
 };
 
 let trips=[];
+let config={};
 
-/* INIT */
 function init(){
   const sel=document.getElementById("pers");
 
   sel.innerHTML=Object.entries(USERS)
-    .map(([k,v])=>`<option value="${k}">${v.label}</option>`)
+    .map(([k,v])=>`<option value="${k}">${v}</option>`)
     .join("");
 
   const last=localStorage.getItem("cff_person")||"jeremie";
@@ -240,15 +221,29 @@ function init(){
   load();
 }
 
-/* LOAD */
+/* ✅ charge config google sheet */
+async function loadConfig(){
+  const txt=await fetch(API+"?sheet=CFF_CONFIG&action=lire").then(r=>r.text());
+
+  config={};
+
+  if(txt){
+    txt.split("~~~~").forEach(l=>{
+      const [pers,date,prix]=l.split("|");
+      config[pers.trim()]={date,prix:parseFloat(prix)};
+    });
+  }
+}
+
 async function load(){
+  await loadConfig();
+
   const p=document.getElementById("pers").value;
 
-  document.getElementById("dateDebutText").textContent=
-    USERS[p].date;
+  const cfg=config[p];
+  document.getElementById("dateDebut").textContent=cfg?.date || "—";
 
-  const text=await fetch(API+"?sheet=CFF&action=lire&personne="+p)
-    .then(r=>r.text());
+  const text=await fetch(API+"?sheet=CFF&action=lire&personne="+p).then(r=>r.text());
 
   trips=[];
   const list=document.getElementById("list");
@@ -265,12 +260,9 @@ async function load(){
 
       list.innerHTML+=`
       <div class="item">
+        <div>${montant.toFixed(2)} CHF<br><small>${date}</small></div>
         <div>
-          ${montant.toFixed(2)} CHF<br>
-          <small>${date}</small>
-        </div>
-        <div>
-          ${USERS[pers]?.label}
+          ${USERS[pers]}
           <button class="del" onclick="del(${row})">🗑️</button>
         </div>
       </div>`;
@@ -280,10 +272,10 @@ async function load(){
   compute();
 }
 
-/* CALCUL */
+/* ✅ calcul corrigé */
 function compute(){
   const p=document.getElementById("pers").value;
-  const prix=USERS[p].prix;
+  const prix=config[p]?.prix || 0;
 
   let total=0;
   trips.forEach(t=>total+=t.montant);
@@ -294,42 +286,32 @@ function compute(){
   document.getElementById("prix").textContent=prix+" CHF";
 
   document.getElementById("reste").textContent=
-    reste>0?reste.toFixed(2)+" CHF":"✅ OK";
+    reste>0 ? reste.toFixed(2)+" CHF" : "✅ Rentabilisé";
 
   const percent=Math.min(100,(total/prix)*100);
   document.getElementById("bar").style.width=percent+"%";
 }
 
-/* ADD */
+/* CRUD */
 async function add(){
   const p=document.getElementById("pers").value;
-  const montant=document.getElementById("montant").value;
+  const m=document.getElementById("montant").value;
 
-  if(!montant)return;
+  if(!m)return;
 
   await fetch(API,{
     method:"POST",
-    body:new URLSearchParams({
-      sheet:"CFF",
-      action:"ajouter",
-      personne:p,
-      montant
-    })
+    body:new URLSearchParams({sheet:"CFF",action:"ajouter",personne:p,montant:m})
   });
 
   document.getElementById("montant").value="";
   load();
 }
 
-/* DELETE */
 async function del(row){
   await fetch(API,{
     method:"POST",
-    body:new URLSearchParams({
-      sheet:"CFF",
-      action:"supprimer",
-      row
-    })
+    body:new URLSearchParams({sheet:"CFF",action:"supprimer",row})
   });
 
   load();
