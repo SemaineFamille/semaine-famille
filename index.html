@@ -293,6 +293,29 @@ input[type="text"]:focus,select:focus{outline:none;border-color:var(--violet);}
 }
 </style>
  <script>
+
+document.addEventListener("DOMContentLoaded", () => {
+  const lastChild = localStorage.getItem("lastChild"); // persiste entre sessions [1](https://developer.mozilla.org/fr/docs/Web/API/Window/localStorage)
+  if (lastChild) {
+    openChild(lastChild);     // votre fonction qui ouvre la page Alessia
+    showScreen("child");      // votre logique d'UI (ex: masquer accueil)
+  } else {
+    showScreen("home");
+  }
+});
+
+function showScreen(name) {
+  document.getElementById("homeScreen").style.display  = (name === "home"  ? "block" : "none");
+  document.getElementById("childScreen").style.display = (name === "child" ? "block" : "none");
+}
+
+function openChild(childNameOrId) {
+  // Exemple : mettre à jour un titre, charger les tâches du Google Sheet, etc.
+  document.getElementById("childTitle").textContent = childNameOrId;
+  // TODO: chargeTasks(childNameOrId);
+}
+
+  
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("/semaine-famille/sw.js");
 }
