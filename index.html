@@ -981,15 +981,29 @@ function chargerCFF() {
 function openCFF() {
   location.href = 'CFF.html';
 }
+function chargerMAGICPASS() {
+  fetch(SCRIPT_URL + "?sheet=MAGICPASS&action=lire")
+    .then(r => r.text())
+    .then(data => {
+      let lignes = data.split("~~~~");
+      let html = "";
 
+      lignes.forEach(ligne => {
+        let parts = ligne.split("|");
+        if (parts.length > 0) {
+          html += `<div>${ligne}</div>`;
+        }
+      });
 
- 
-
-function openCFF() {
-  location.href = 'CFF.html';
+      document.getElementById("MAGICList").innerHTML = html;
+    });
 }
 
+function openMAGICPASS() {
+  location.href = 'MAGICPASS.html';
+}
 
+ 
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
 
   // met le bouton actif visuellement
