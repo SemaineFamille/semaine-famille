@@ -1,1 +1,475 @@
+<!DOCTYPE html><>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Magic Pass</title>
 
+<style>
+:root{
+  --accent:#29B6F6;     /* bleu clair */
+  --accent2:#0288D1;    /* bleu soutenu */
+  --violet:#01579B;     /* bleu profond pour boutons */
+  --txt:#fff;
+  --muted:rgba(255,255,255,.72);
+}
+
+/* 🌈 FOND (bleu) */
+body{
+  margin:0;
+  font-family:system-ui,sans-serif;
+  color:var(--txt);
+  background:
+    radial-gradient(900px 600px at 10% 0%, rgba(41,182,246,.40), transparent),
+    radial-gradient(900px 600px at 90% 0%, rgba(2,136,209,.35), transparent),
+    linear-gradient(180deg,#051625,#06223a);
+}
+
+/* HEADER */
+.topbar{
+  position:fixed;
+  top:0;
+  width:100%;
+  display:flex;
+  justify-content:flex-end;
+  padding:12px 18px;
+  box-sizing:border-box;
+  z-index:10;
+}
+.backbtn{
+  background:linear-gradient(135deg,var(--violet),#0B3D91);
+  border:none;
+  padding:10px 14px;
+  border-radius:14px;
+  font-weight:900;
+  color:white;
+  cursor:pointer;
+}
+
+/* LAYOUT */
+.wrap{
+  max-width:720px;
+  margin:auto;
+  padding:70px 16px 16px;
+}
+.card{
+  background:rgba(255,255,255,.08);
+  border-radius:16px;
+  padding:14px;
+  margin-bottom:16px;
+}
+
+/* ✅ ALIGNEMENT */
+.row{ display:flex; gap:12px; }
+.col{ flex:1; }
+
+/* INPUTS */
+select, input{
+  height:42px;
+  width:100%;
+  padding:0 10px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.2);
+  background:rgba(6,22,37,.85);
+  color:white;
+  box-sizing:border-box;
+}
+
+/* BOUTON */
+.primary{
+  width:100%;
+  margin-top:10px;
+  padding:12px;
+  border-radius:14px;
+  border:none;
+  font-weight:900;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:white;
+}
+
+/* DATE */
+.date{
+  margin-top:8px;
+  font-size:13px;
+  color:var(--muted);
+}
+
+/* KPI */
+.kpi{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-top:12px;
+}
+.kpi b{font-size:18px;}
+
+/* PROGRESS */
+.progress{
+  height:10px;
+  background:rgba(255,255,255,.1);
+  border-radius:20px;
+  margin-top:10px;
+}
+#bar{
+  height:100%;
+  width:0%;
+  background:linear-gradient(135deg,#29B6F6,#0288D1);
+  border-radius:20px;
+}
+
+/* LIST */
+.item{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:10px;
+  padding:10px;
+  border-radius:12px;
+  background:rgba(0,0,0,.25);
+  margin-top:6px;
+}
+.item small{ color:var(--muted); }
+
+.del{
+  background:linear-gradient(135deg,#4FC3F7,#0288D1);
+  border:none;
+  padding:6px 10px;
+  border-radius:10px;
+  color:white;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+  <button class="backbtn" onclick="location.href='index.html'">⬅ Retour</button>
+</div>
+
+<div class="wrap">
+
+  <div class="card">
+
+    <div class="row">
+      <div class="col">
+        <label>Personne</label>
+        <select id="pers"></select>
+      </div>
+
+      <div class="col">
+        <label>Montant (journée/billet)</label>
+        <input type="number" id="montant" step="0.05" min="0">
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:10px;">
+      <div class="col">
+        <label>Activité (ski, VTT…)</label>
+        <input type="text" id="activite" placeholder="ex: ski">
+      </div>
+
+      <div class="col">
+        <label>Lieu (optionnel)</label>
+        <input type="text" id="lieu" placeholder="ex: Villars">
+      </div>
+    </div>
+
+    <button class="primary" onclick="add()">➕ Ajouter journée</button>
+
+    <div class="date">
+      Abonnement depuis : <b id="dateDebut">—</b>
+    </div>
+
+    <div class="kpi">
+      <div>Total<br><b id="total">0</b></div>
+      <div>Reste<br><b id="reste">0</b></div>
+      <div>Prix<br><b id="prix">0</b></div>
+    </div>
+
+    <div class="progress"><div id="bar"></div></div>
+
+  </div>
+
+  <div class="card">
+    <b>Historique</b>
+    <div id="list"></div>
+  </div>
+
+</div>
+
+<script>
+const API="https://script.google.com/macros/s/AKfycbxOJEus1Fev5I4YZsSbjpIXXlgGJBY7QmFkkqZtkXYD6eEPwqmgCl8r2hfrO1X9eyqxSA/exec";
+
+const USERS={
+  jeremie:"Jérémie",
+  antonin:"Antonin",
+  yann:"Yann",
+  melanie:"Mélanie"
+};
+
+let days=[];
+let config={};
+
+// Paramètres abonnement
+const SUBSCRIPTION_YEARS = 1;
+const WARN_DAYS = 30;
+
+/* ----------------- Dates ----------------- */
+function todayYMD(){
+  const d=new Date();
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,'0');
+  const dd=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${dd}`;
+}
+function toYMD(dateStr){
+  if(!dateStr) return "";
+  const s=String(dateStr).trim();
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  const m1=s.match(/^(\d{2})[\/.](\d{2})[\/.](\d{4})$/);
+  if(m1) return `${m1[3]}-${m1[2]}-${m1[1]}`;
+  const d=new Date(s);
+  if(!isNaN(d.getTime())){
+    const y=d.getFullYear();
+    const mo=String(d.getMonth()+1).padStart(2,'0');
+    const da=String(d.getDate()).padStart(2,'0');
+    return `${y}-${mo}-${da}`;
+  }
+  return s;
+}
+function formatDateFR(dateStr){
+  const ymd=toYMD(dateStr);
+  if(!ymd || !/^\d{4}-\d{2}-\d{2}$/.test(ymd)) return "—";
+  const d=new Date(ymd+"T00:00:00");
+  return d.toLocaleDateString("fr-FR",{day:"2-digit",month:"long",year:"numeric"});
+}
+function addYearsYMD(ymd, years){
+  const d=new Date(ymd+"T00:00:00");
+  d.setFullYear(d.getFullYear()+years);
+  return d.toISOString().slice(0,10);
+}
+function daysUntilYMD(futureYmd){
+  const now=new Date(todayYMD()+"T00:00:00").getTime();
+  const fut=new Date(futureYmd+"T00:00:00").getTime();
+  return Math.floor((fut-now)/(24*60*60*1000));
+}
+function setDateLabel(text){
+  const el=document.getElementById("dateDebut");
+  if(el) el.textContent=text;
+}
+
+/* ----------------- Config (Google Sheet) -----------------
+MAGICPASS_CONFIG : personne|date_debut|prix_abonnement
+*/
+async function loadConfig(){
+  const txt=await fetch(API+"?sheet=MAGICPASS_CONFIG&action=lire").then(r=>r.text());
+
+  config={};
+  if(txt && txt.trim()){
+    txt.split("~~~~").forEach(line=>{
+      const parts=line.split("|");
+      const pers=(parts[0]||"").trim().toLowerCase();
+      const dateRaw=(parts[1]||"").trim();
+      const prixRaw=(parts[2]||"").trim();
+      if(!pers) return;
+
+      config[pers]={
+        date_raw: dateRaw,
+        date: toYMD(dateRaw),
+        prix: parseFloat(prixRaw||"0")||0
+      };
+    });
+  }
+
+  // Valeurs par défaut non bloquantes
+  Object.keys(USERS).forEach(p=>{
+    if(!config[p]) config[p]={date_raw:"",date:"",prix:0};
+    if(!config[p].date) config[p].date="2026-01-01"; // à adapter si tu veux
+  });
+}
+
+async function saveConfig(personne, date_debut_ymd, prix){
+  const body=new URLSearchParams({
+    sheet:"MAGICPASS_CONFIG",
+    action:"enregistrer",
+    personne,
+    date_debut: date_debut_ymd,
+    prix: String(prix)
+  });
+  const res=await fetch(API,{method:"POST",body}).then(r=>r.text());
+  return res.trim();
+}
+
+/* ----------------- Renouvellement abonnement ----------------- */
+async function checkAndRenewIfNeeded(personne){
+  const cfg=config[personne];
+  if(!cfg) return;
+
+  const start=cfg.date;
+  const end=addYearsYMD(start, SUBSCRIPTION_YEARS);
+  const remaining=daysUntilYMD(end);
+
+  if(remaining <= WARN_DAYS && remaining >= 0){
+    setDateLabel(`${formatDateFR(start)} (⚠️ expire dans ${remaining} jour${remaining>1?'s':''})`);
+  }else{
+    setDateLabel(formatDateFR(start));
+  }
+
+  if(remaining < 0){
+    const newStart=todayYMD();
+    const res=await saveConfig(personne, newStart, cfg.prix);
+    if(res==="ok"){
+      cfg.date=newStart;
+      cfg.date_raw=newStart;
+      setDateLabel(`${formatDateFR(newStart)} (🆕 nouveau cycle)`);
+    }else{
+      setDateLabel(`${formatDateFR(start)} (⚠️ renouvellement impossible)`);
+    }
+  }
+}
+
+/* ----------------- Jours / sorties ----------------- */
+async function loadDays(){
+  const p=document.getElementById("pers").value;
+  const cfg=config[p];
+
+  const from=cfg?.date || "";
+  const url=API + `?sheet=MAGICPASS&action=lire&personne=${encodeURIComponent(p)}&from=${encodeURIComponent(from)}`;
+  const text=await fetch(url).then(r=>r.text());
+
+  days=[];
+  const list=document.getElementById("list");
+  list.innerHTML="";
+
+  if(text && text.trim()){
+    text.split("~~~~").forEach(line=>{
+      const parts=line.split("|");
+      const dateStr=(parts[0]||"").trim();
+      const pers=(parts[1]||"").trim().toLowerCase();
+      const montant=parseFloat(parts[2]||"");
+      const activite=(parts[3]||"").trim();
+      const lieu=(parts[4]||"").trim();
+      const row=parts[5] ? parseInt(parts[5],10) : null;
+
+      if(!dateStr || !pers || !isFinite(montant)) return;
+
+      const ymd=toYMD(dateStr);
+      const startYMD=cfg.date;
+
+      // filtre robuste (on ignore tout ce qui est avant le début du cycle)
+      if(ymd && startYMD && ymd < startYMD) return;
+
+      days.push({date: ymd || dateStr, pers, montant, activite, lieu, row});
+    });
+
+    days.sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+
+    days.forEach(d=>{
+      const subtitle = [
+        d.activite ? d.activite : null,
+        d.lieu ? d.lieu : null
+      ].filter(Boolean).join(" · ");
+
+      list.innerHTML += `
+        <div class="item">
+          <div>
+            ${d.montant.toFixed(2)} CHF
+            ${subtitle ? `<br><small>${subtitle}</small>` : ``}
+            <br><small>${formatDateFR(d.date)}</small>
+          </div>
+          <div>
+            ${USERS[d.pers] || d.pers}
+            ${d.row ? `<button class="del" onclick="del(${d.row})">🗑️</button>` : ``}
+          </div>
+        </div>`;
+    });
+  }
+}
+
+function compute(){
+  const p=document.getElementById("pers").value;
+  const prix=config[p]?.prix || 0;
+
+  let total=0;
+  days.forEach(d=> total += d.montant);
+
+  const reste = prix - total;
+
+  document.getElementById("total").textContent = total.toFixed(2) + " CHF";
+  document.getElementById("prix").textContent  = prix + " CHF";
+  document.getElementById("reste").textContent =
+    (reste > 0 ? reste.toFixed(2) + " CHF" : "✅ Rentabilisé");
+
+  const percent = (prix > 0) ? Math.min(100, (total/prix)*100) : 0;
+  document.getElementById("bar").style.width = percent + "%";
+}
+
+/* CRUD */
+async function add(){
+  const p=document.getElementById("pers").value;
+  const m=document.getElementById("montant").value;
+  const a=document.getElementById("activite").value;
+  const l=document.getElementById("lieu").value;
+
+  if(!m) return;
+
+  await fetch(API,{
+    method:"POST",
+    body:new URLSearchParams({
+      sheet:"MAGICPASS",
+      action:"ajouter",
+      personne:p,
+      montant:m,
+      activite:a,
+      lieu:l
+    })
+  });
+
+  document.getElementById("montant").value="";
+  document.getElementById("activite").value="";
+  document.getElementById("lieu").value="";
+  await refreshAll();
+}
+
+async function del(row){
+  await fetch(API,{
+    method:"POST",
+    body:new URLSearchParams({sheet:"MAGICPASS",action:"supprimer",row})
+  });
+  await refreshAll();
+}
+
+/* Init UI */
+function init(){
+  const sel=document.getElementById("pers");
+  sel.innerHTML = Object.entries(USERS)
+    .map(([k,v])=>`<option value="${k}">${v}</option>`)
+    .join("");
+
+  const last=localStorage.getItem("magic_person") || "jeremie";
+  sel.value = USERS[last] ? last : "jeremie";
+
+  sel.onchange = async ()=>{
+    localStorage.setItem("magic_person", sel.value);
+    await refreshAll();
+  };
+
+  refreshAll();
+}
+
+async function refreshAll(){
+  await loadConfig();
+  const p=document.getElementById("pers").value;
+
+  // renouvellement + alerte
+  await checkAndRenewIfNeeded(p);
+
+  // jours + compute
+  await loadDays();
+  compute();
+}
+
+init();
+</script>
+
+</body>
+</html>
+<html lang="fr">
