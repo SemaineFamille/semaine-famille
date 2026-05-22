@@ -422,7 +422,7 @@ if ("serviceWorker" in navigator) {
     <button class="nav-tab" id="jobTab" onclick="showPage('job')">📅 Job</button>
     <button class="nav-tab" id="adminTab" onclick="requestAdmin()">⚙️ Admin</button>
     <button class="nav-tab" onclick="location.href='CFF.html'">🚆 CFF</button>
-    <button class="nav-tab" onclick="location.href='MAGICPASS.html'">✨ MAGIC</button>
+    <button class="nav-tab" onclick="location.href='magicpass.html'">✨ MAGIC</button>
   
   </div>
 </div>
@@ -440,7 +440,7 @@ if ("serviceWorker" in navigator) {
     <button class="quick-btn" onclick="showPage('courses')"><span class="icon">🛒</span>Courses</button>
     <button class="quick-btn" onclick="showPage('taches')"><span class="icon">✅</span>Tâches</button>
     <button class="quick-btn" onclick="location.href='CFF.html'"><span class="icon">🚆</span>CFF</button>
-    <button class="quick-btn" onclick="location.href='MAGICPASS.html'"><span class="icon">✨</span>MAGIC</button>
+    <button class="quick-btn" onclick="location.href='magicpass.html'"><span class="icon">✨</span>MAGIC</button>
 
   </div>
 </div>
@@ -849,7 +849,7 @@ function login(user){
       <button class="quick-btn" onclick="showPage('taches')"><span class="icon">✅</span>Tâches</button>
       <button class="quick-btn" onclick="showPage('job')"><span class="icon">📅</span>Job</button>
       <button class="quick-btn" onclick="location.href='CFF.html'"><span class="icon">🚆</span>CFF</button>
-      <button class="quick-btn" onclick="location.href='MAGICPASS.html'"><span class="icon">✨</span>MAGIC</button>
+      <button class="quick-btn" onclick="location.href='magicpass.html'"><span class="icon">✨</span>MAGIC</button>
 
       
       <button class="quick-btn" onclick="requestAdmin()" style="background:linear-gradient(135deg,#FF5722,#FF9800)"><span class="icon">⚙️</span>Admin</button>`;
@@ -861,7 +861,7 @@ function login(user){
       <button class="quick-btn" onclick="showPage('courses')"><span class="icon">🛒</span>Courses</button>
       <button class="quick-btn" onclick="showPage('job')"><span class="icon">📅</span>Job</button>
       <button class="quick-btn" onclick="location.href='CFF.html'"><span class="icon">🚆</span>CFF</button>
-      <button class="quick-btn" onclick="location.href='MAGICPASS.html'"><span class="icon">✨</span>MAGIC</button>
+      <button class="quick-btn" onclick="location.href='magicpass.html'"><span class="icon">✨</span>MAGIC</button>
 
  `;
   }
@@ -982,7 +982,7 @@ function openCFF() {
   location.href = 'CFF.html';
 }
 function chargerMAGICPASS() {
-  fetch(SCRIPT_URL + "?sheet=MAGICPASS&action=lire")
+  fetch(SCRIPT_URL + "?sheet=magicpass&action=lire")
     .then(r => r.text())
     .then(data => {
       let lignes = data.split("~~~~");
@@ -995,12 +995,12 @@ function chargerMAGICPASS() {
         }
       });
 
-      document.getElementById("MAGICList").innerHTML = html;
+      document.getElementById("magicpassList").innerHTML = html;
     });
 }
 
 function openMAGICPASS() {
-  location.href = 'MAGICPASS.html';
+  location.href = 'magicpass.html';
 }
 
  
