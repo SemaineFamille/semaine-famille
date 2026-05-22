@@ -1941,6 +1941,13 @@ function renderPreview(enfant){
     });
   }
   document.getElementById('preview-content').innerHTML=html;
+
+function selectChild(childNameOrId) {
+  localStorage.setItem("lastChild", childNameOrId); // stocké durablement [1](https://developer.mozilla.org/fr/docs/Web/API/Window/localStorage)
+  openChild(childNameOrId);
+  showScreen("child");
+}
+
 }
 </script>
 
