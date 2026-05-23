@@ -423,6 +423,7 @@ if ("serviceWorker" in navigator) {
     <button class="nav-tab" id="adminTab" onclick="requestAdmin()">⚙️ Admin</button>
     <button class="nav-tab" onclick="location.href='CFF.html'">🚆 CFF</button>
     <button class="nav-tab" onclick="location.href='magicpass.html'">✨ MAGIC</button>
+    <button class="nav-tab" onclick="location.href='VACANCES.html'">🌴 VACANCES</button>
   
   </div>
 </div>
@@ -441,6 +442,8 @@ if ("serviceWorker" in navigator) {
     <button class="quick-btn" onclick="showPage('taches')"><span class="icon">✅</span>Tâches</button>
     <button class="quick-btn" onclick="location.href='CFF.html'"><span class="icon">🚆</span>CFF</button>
     <button class="quick-btn" onclick="location.href='magicpass.html'"><span class="icon">✨🏔️</span>MAGIC</button>
+    <button class="quick-btn" onclick="location.href='VACANCES.html'"><span class="icon">🌴</span>VACANCES</button>
+
 
   </div>
 </div>
@@ -850,6 +853,7 @@ function login(user){
       <button class="quick-btn" onclick="showPage('job')"><span class="icon">📅</span>Job</button>
       <button class="quick-btn" onclick="location.href='CFF.html'"><span class="icon">🚆</span>CFF</button>
       <button class="quick-btn" onclick="location.href='magicpass.html'"><span class="icon">✨🏔️</span>MAGIC</button>
+      <button class="quick-btn" onclick="location.href='VACANCES.html'"><span class="icon">🌴</span>VACANCES</button>
 
       
       <button class="quick-btn" onclick="requestAdmin()" style="background:linear-gradient(135deg,#FF5722,#FF9800)"><span class="icon">⚙️</span>Admin</button>`;
@@ -1002,7 +1006,27 @@ function chargerMAGICPASS() {
 function openMAGICPASS() {
   location.href = 'magicpass.html';
 }
+function chargerVACANCES() {
+  fetch(SCRIPT_URL + "?sheet=VACANCES&action=lire")
+    .then(r => r.text())
+    .then(data => {
+      let lignes = data.split("~~~~");
+      let html = "";
 
+      lignes.forEach(ligne => {
+        let parts = ligne.split("|");
+        if (parts.length > 0) {
+          html += `<div>${ligne}</div>`;
+        }
+      });
+
+      document.getElementById("VACANCESList").innerHTML = html;
+    });
+}
+
+function openVACANCES() {
+  location.href = 'VACANCES.html';
+}
  
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
 
