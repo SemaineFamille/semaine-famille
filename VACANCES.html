@@ -1,1 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <base target="_top">
+    <?!= include('Stylesheet'); ?>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Vacances – Planning activités</h1>
 
+      <div class="card">
+        <div class="row">
+          <label>Qui es-tu ?</label>
+          <select id="user"></select>
+          <button class="btn" id="reload">🔄 Recharger</button>
+        </div>
+
+        <div id="parentTools" class="parent-tools" style="display:none">
+          <h2>⚙️ Dates des vacances</h2>
+          <div class="row">
+            <input id="start" type="date">
+            <input id="end" type="date">
+            <button class="btn primary" id="applyDates">Appliquer</button>
+          </div>
+          <p class="sub">Changer les dates régénère le calendrier (réutilisable à chaque vacances).</p>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h2>💡 Proposer une activité</h2>
+          <p class="sub">Les enfants ajoutent des idées (prix + lien). Les parents les choisiront ensuite dans le calendrier.</p>
+
+          <div class="row">
+            <input id="titre" type="text" placeholder="Activité (ex: piscine, cinéma...)">
+          </div>
+          <div class="row">
+            <input id="prix" type="text" placeholder="Prix (ex: 15 CHF)">
+            <input id="lien" type="url" placeholder="Lien (optionnel)">
+          </div>
+          <button class="btn primary" id="addProp">+ Ajouter la proposition</button>
+
+          <h3 class="mt">📋 Liste des propositions</h3>
+          <div id="props" class="list"></div>
+        </div>
+
+        <div class="card">
+          <h2>📅 Calendrier (choix parents)</h2>
+          <p class="sub">Chaque jour : 2 choix. Menu déroulant alimenté par les propositions.</p>
+          <div id="cal" class="cal"></div>
+        </div>
+      </div>
+    </div>
+
+    <?!= include('JavaScript'); ?>
+  </body>
+</html>
