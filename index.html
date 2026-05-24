@@ -1007,8 +1007,7 @@ function openMAGICPASS() {
   location.href = 'magicpass.html';
 }
 function chargerVACANCES() {
-  fetch(SCRIPT_URL + "?sheet=VACANCES&action=lire")
-    .then(r => r.text())
+  fetch(API + '?sheet=VACANCES&action=model&userId=' + userId).then(r=>r.json())
     .then(data => {
       let lignes = data.split("~~~~");
       let html = "";
