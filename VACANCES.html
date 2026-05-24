@@ -42,8 +42,21 @@
   textarea{width:100%;min-height:44px;resize:vertical;border-radius:10px;border:2px solid #e0d0e8;padding:8px;font-size:13px;font-weight:650;background:#fff}
   .saving{font-size:11px;font-weight:900;color:#7b5e8a;margin-top:6px}
   .parent-tools{margin-top:12px;padding-top:10px;border-top:2px solid #f0e6f6}
+  .topbar{
+    display:flex;
+    justify-content:flex-end;
+    margin-bottom:10px;
+  }
+  
+  .btn.back{
+    background:#673ab7;
+  }  
+
+
+
 </style>
   <script>
+    
   let model = null;
 
   function byId(id){ return document.getElementById(id); }
