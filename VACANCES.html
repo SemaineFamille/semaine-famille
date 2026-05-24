@@ -9,7 +9,7 @@ body{
   margin:0;
   background:linear-gradient(135deg,#7b1fa2,#f06292);
   color:white;
-  font-size:22px; /* 🔥 PLUS GROS */
+  font-size:26px; /* ✅ BEAUCOUP PLUS GRAND */
 }
 
 /* TOPBAR */
@@ -19,22 +19,22 @@ body{
   padding:12px;
 }
 
-/* NE PAS TOUCHER TON STYLE RETOUR */
 .btn{
   border:none;
   border-radius:18px;
-  padding:16px;
-  font-size:20px;
+  padding:18px;
+  font-size:22px;
   font-weight:bold;
 }
 
+/* LAYOUT */
 .wrap{padding:12px;}
 
 .card{
   background:white;
   color:black;
   border-radius:22px;
-  padding:18px;
+  padding:20px;
   margin-bottom:16px;
 }
 
@@ -42,35 +42,46 @@ body{
 select,input{
   width:100%;
   padding:18px;
-  font-size:20px;
+  font-size:22px;
   border-radius:16px;
   margin-top:10px;
 }
 
-/* CALENDRIER */
+/* ✅ CALENDRIER PLUS COMPACT */
 .calendar{
   display:grid;
   grid-template-columns:repeat(2,1fr);
   gap:12px;
 }
 
+/* ✅ CASE JOUR */
 .day{
   background:white;
   color:black;
   border-radius:20px;
-  padding:14px;
-  text-align:center;
-  font-size:16px;
+  padding:12px;
+  font-size:18px;
 }
 
+/* ✅ TITRE PLUS GROS */
 .dayTitle{
-  font-size:18px;
+  font-size:20px;
   font-weight:bold;
   margin-bottom:8px;
 }
 
-.slot{
-  margin-top:8px;
+/* ✅ 2 CHOIX HORIZONTAUX */
+.options{
+  display:flex;
+  gap:6px;
+  margin-top:6px;
+}
+
+/* ✅ SELECT PETIT MAIS LISIBLE */
+.options select{
+  flex:1;
+  font-size:16px;
+  padding:10px;
 }
 
 /* PROPOSITIONS */
@@ -79,18 +90,19 @@ select,input{
   border-radius:18px;
   padding:14px;
   margin-top:12px;
+  font-size:18px;
 }
 
 .vote{
-  margin-top:8px;
+  margin-top:10px;
   display:flex;
   justify-content:space-between;
   align-items:center;
 }
 
 .vote button{
-  font-size:18px;
-  padding:8px 12px;
+  font-size:16px;
+  padding:10px;
   border-radius:12px;
   border:none;
   background:#9C27B0;
@@ -161,11 +173,11 @@ function renderProps(){
     div.innerHTML=`
       <div>🎯 <b>${p.titre}</b></div>
       <div>💰 ${p.prix || '-'}</div>
-      ${p.lien ? `<div>🔗 <a href="${p.lien}" target="_blank">ouvrir</a></div>`:''}
+      ${p.lien ? `<div>🔗 <a href="${p.lien}" target="_blank">Voir</a></div>`:''}
 
       <div class="vote">
         <span>👍 ${p.votes}</span>
-        <button onclick="vote('${p.id}')">Voter</button>
+        <button onclick="vote('${p.id}')">👍</button>
       </div>
     `;
 
@@ -179,7 +191,7 @@ function vote(id){
   renderProps();
 }
 
-/******** CALENDAR ********/
+/******** CALENDRIER ********/
 function buildOptions(){
   let html=`<option value="">--</option>`;
   model.propositions.forEach(p=>{
@@ -199,13 +211,8 @@ function renderCalendar(){
     div.innerHTML=`
       <div class="dayTitle">📅 ${day.date}</div>
 
-      <div class="slot">
-        🌤
+      <div class="options">
         <select>${buildOptions()}</select>
-      </div>
-
-      <div class="slot">
-        🌆
         <select>${buildOptions()}</select>
       </div>
     `;
@@ -266,20 +273,20 @@ function goBack(){
 </div>
 
 <div class="card">
-  <h2>🌴 Calendrier vacances</h2>
+  <h2>🌴 Vacances</h2>
   <div id="cal" class="calendar"></div>
 </div>
 
 <div class="card">
   <h2>💡 Ajouter une idée</h2>
 
-  <input id="titre" placeholder="Escape game 🔐 / Karting 🏎">
-  <input id="prix" placeholder="prix (CHF / EUR)">
-  <input id="lien" placeholder="site internet">
+  <input id="titre" placeholder="Karting 🏎 / Escape 🔐">
+  <input id="prix" placeholder="prix">
+  <input id="lien" placeholder="site web">
 
   <button class="btn" style="background:#00E5FF;color:black" onclick="add()">Ajouter</button>
 
-  <h3>🔥 Idées proposées</h3>
+  <h3>🔥 Idées</h3>
   <div id="props"></div>
 </div>
 
