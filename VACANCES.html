@@ -1,114 +1,200 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<base target="_top">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-body{
-  font-family:system-ui;
-  margin:0;
-  background:linear-gradient(135deg,#7b1fa2,#f06292);
-  color:white;
-  font-size:26px; /* ✅ BEAUCOUP PLUS GRAND */
+:root{
+  --accent:#F50870;
+  --accent2:#9C27B0;
+  --bg1:#120516;
+  --bg2:#1b0830;
+  --txt:#fff;
 }
 
-/* TOPBAR */
+/* ✅ FOND STYLE CFF */
+body{
+  margin:0;
+  font-family:system-ui;
+  color:var(--txt);
+
+  background:
+    radial-gradient(900px 600px at 10% 0%, rgba(245,8,112,.3), transparent),
+    radial-gradient(900px 600px at 90% 0%, rgba(156,39,176,.3), transparent),
+    linear-gradient(180deg,var(--bg1),var(--bg2));
+}
+
+/* ✅ HEADER IDENTIQUE */
 .topbar{
+  position:fixed;
+  top:0;
+  width:100%;
   display:flex;
   justify-content:flex-end;
-  padding:12px;
+  padding:12px 18px;
 }
 
-.btn{
+.backbtn{
+  background:linear-gradient(135deg,var(--accent2),var(--accent));
   border:none;
-  border-radius:18px;
-  padding:18px;
-  font-size:22px;
-  font-weight:bold;
+  padding:12px 16px;
+  border-radius:14px;
+  font-weight:900;
+  color:white;
 }
 
-/* LAYOUT */
-.wrap{padding:12px;}
+/* ✅ LARGEUR COMME CFF */
+.wrap{
+  max-width:720px;
+  margin:auto;
+  padding:80px 16px 16px;
+}
 
+/* ✅ CARD */
 .card{
-  background:white;
-  color:black;
-  border-radius:22px;
-  padding:20px;
+  background:rgba(255,255,255,.08);
+  border-radius:16px;
+  padding:16px;
   margin-bottom:16px;
 }
 
-/* INPUT */
-select,input{
-  width:100%;
-  padding:18px;
-  font-size:22px;
-  border-radius:16px;
-  margin-top:10px;
-}
-
-/* ✅ CALENDRIER PLUS COMPACT */
-.calendar{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
+/* ✅ ALIGNEMENT CFF */
+.row{
+  display:flex;
   gap:12px;
 }
 
-/* ✅ CASE JOUR */
-.day{
-  background:white;
-  color:black;
-  border-radius:20px;
-  padding:12px;
+.col{
+  flex:1;
+}
+
+/* ✅ INPUT PROPRE */
+select,input{
+  height:48px;
+  width:100%;
+  padding:0 12px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.2);
+  background:rgba(20,6,34,.8);
+  color:white;
   font-size:18px;
 }
 
-/* ✅ TITRE PLUS GROS */
-.dayTitle{
-  font-size:20px;
-  font-weight:bold;
-  margin-bottom:8px;
+/* ✅ BOUTON */
+.primary{
+  width:100%;
+  margin-top:10px;
+  padding:14px;
+  border-radius:14px;
+  border:none;
+  font-weight:900;
+  font-size:18px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:white;
 }
 
-/* ✅ 2 CHOIX HORIZONTAUX */
+/* ✅ CALENDRIER PROPRE */
+.calendar{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+}
+
+.day{
+  background:rgba(0,0,0,.25);
+  border-radius:12px;
+  padding:10px;
+}
+
+.day b{
+  font-size:15px;
+}
+
 .options{
   display:flex;
   gap:6px;
   margin-top:6px;
 }
 
-/* ✅ SELECT PETIT MAIS LISIBLE */
 .options select{
-  flex:1;
-  font-size:16px;
-  padding:10px;
+  height:36px;
+  font-size:14px;
 }
 
-/* PROPOSITIONS */
+/* ✅ PROPOSITIONS */
 .prop{
-  background:#f3e5f5;
-  border-radius:18px;
-  padding:14px;
-  margin-top:12px;
-  font-size:18px;
+  background:rgba(0,0,0,.25);
+  border-radius:12px;
+  padding:10px;
+  margin-top:6px;
 }
 
 .vote{
-  margin-top:10px;
   display:flex;
   justify-content:space-between;
-  align-items:center;
+  margin-top:6px;
 }
 
 .vote button{
-  font-size:16px;
-  padding:10px;
-  border-radius:12px;
   border:none;
-  background:#9C27B0;
+  padding:6px 10px;
+  border-radius:10px;
+  background:var(--accent);
   color:white;
 }
 </style>
+</head>
+
+<body>
+
+<div class="topbar">
+  <button class="backbtn" onclick="goBack()">⬅ Retour</button>
+</div>
+
+<div class="wrap">
+
+<div class="card">
+
+<div class="row">
+  <div class="col">
+    <label>👤 Qui es-tu</label>
+    <select id="user"></select>
+  </div>
+</div>
+
+</div>
+
+<div class="card">
+  <b>🌴 Vacances</b>
+
+  <div id="cal" class="calendar"></div>
+</div>
+
+<div class="card">
+
+<div class="row">
+  <div class="col">
+    <input id="titre" placeholder="Escape game 🔐">
+  </div>
+</div>
+
+<div class="row">
+  <div class="col">
+    <input id="prix" placeholder="Prix">
+  </div>
+  <div class="col">
+    <input id="lien" placeholder="Lien">
+  </div>
+</div>
+
+<button class="primary" onclick="add()">➕ Ajouter</button>
+
+<b>🔥 Idées</b>
+<div id="props"></div>
+
+</div>
+
+</div>
 
 <script>
 
@@ -123,27 +209,21 @@ let model={
     {id:'melanie',nom:'Mélanie',avatar:'🌸'}
   ],
 
-  propositions:[
-    {id:'1',titre:'Cinéma 🎬',prix:'15 CHF',lien:'',votes:0},
-    {id:'2',titre:'Piscine 🏊',prix:'5 CHF',lien:'',votes:2}
-  ],
-
+  propositions:[],
   calendrier:[]
 };
 
-/******** CALENDRIER ********/
-function generateCalendar(){
+/******** INIT ********/
+function initCal(){
   if(model.calendrier.length) return;
-
   const start=new Date();
+
   for(let i=0;i<10;i++){
     let d=new Date(start);
     d.setDate(d.getDate()+i);
 
     model.calendrier.push({
-      date:d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'}),
-      c1:'',
-      c2:''
+      date:d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})
     });
   }
 }
@@ -155,33 +235,55 @@ function fillUsers(){
 
   model.enfants.forEach(e=>{
     const o=document.createElement('option');
-    o.value=e.id;
     o.textContent=e.avatar+" "+e.nom;
     sel.appendChild(o);
   });
 }
 
-/******** PROPOSITIONS ********/
-function renderProps(){
-  const cont=document.getElementById('props');
-  cont.innerHTML='';
-
+/******** CAL ********/
+function optionsHTML(){
+  let html="<option></option>";
   model.propositions.forEach(p=>{
-    const div=document.createElement('div');
-    div.className='prop';
+    html+=`<option>${p.titre}</option>`;
+  });
+  return html;
+}
 
-    div.innerHTML=`
-      <div>🎯 <b>${p.titre}</b></div>
-      <div>💰 ${p.prix || '-'}</div>
-      ${p.lien ? `<div>🔗 <a href="${p.lien}" target="_blank">Voir</a></div>`:''}
+function renderCal(){
+  const c=document.getElementById('cal');
+  c.innerHTML='';
 
-      <div class="vote">
-        <span>👍 ${p.votes}</span>
-        <button onclick="vote('${p.id}')">👍</button>
+  model.calendrier.forEach(d=>{
+    c.innerHTML+=`
+      <div class="day">
+        <b>📅 ${d.date}</b>
+        <div class="options">
+          <select>${optionsHTML()}</select>
+          <select>${optionsHTML()}</select>
+        </div>
       </div>
     `;
+  });
+}
 
-    cont.appendChild(div);
+/******** PROPS ********/
+function renderProps(){
+  const p=document.getElementById('props');
+  p.innerHTML='';
+
+  model.propositions.forEach(x=>{
+    p.innerHTML+=`
+      <div class="prop">
+        🎯 ${x.titre}<br>
+        💰 ${x.prix}<br>
+        ${x.lien?`🔗 <a href="${x.lien}" target="_blank">voir</a><br>`:''}
+
+        <div class="vote">
+          👍 ${x.votes}
+          <button onclick="vote(${x.id})">+1</button>
+        </div>
+      </div>
+    `;
   });
 }
 
@@ -191,37 +293,6 @@ function vote(id){
   renderProps();
 }
 
-/******** CALENDRIER ********/
-function buildOptions(){
-  let html=`<option value="">--</option>`;
-  model.propositions.forEach(p=>{
-    html+=`<option>${p.titre}</option>`;
-  });
-  return html;
-}
-
-function renderCalendar(){
-  const cont=document.getElementById('cal');
-  cont.innerHTML='';
-
-  model.calendrier.forEach(day=>{
-    const div=document.createElement('div');
-    div.className='day';
-
-    div.innerHTML=`
-      <div class="dayTitle">📅 ${day.date}</div>
-
-      <div class="options">
-        <select>${buildOptions()}</select>
-        <select>${buildOptions()}</select>
-      </div>
-    `;
-
-    cont.appendChild(div);
-  });
-}
-
-/******** ADD ********/
 function add(){
   const titre=document.getElementById('titre').value;
   const prix=document.getElementById('prix').value;
@@ -238,15 +309,15 @@ function add(){
   });
 
   renderProps();
-  renderCalendar();
+  renderCal();
 }
 
-/******** LOAD ********/
+/******** INIT ********/
 function load(){
-  generateCalendar();
+  initCal();
   fillUsers();
+  renderCal();
   renderProps();
-  renderCalendar();
 }
 
 window.onload=load;
@@ -256,41 +327,6 @@ function goBack(){
 }
 
 </script>
-
-</head>
-
-<body>
-
-<div class="topbar">
-  <button class="btn back" onclick="goBack()">⬅Retour</button>
-</div>
-
-<div class="wrap">
-
-<div class="card">
-  <h2>👤 Qui es-tu ?</h2>
-  <select id="user"></select>
-</div>
-
-<div class="card">
-  <h2>🌴 Vacances</h2>
-  <div id="cal" class="calendar"></div>
-</div>
-
-<div class="card">
-  <h2>💡 Ajouter une idée</h2>
-
-  <input id="titre" placeholder="Karting 🏎 / Escape 🔐">
-  <input id="prix" placeholder="prix">
-  <input id="lien" placeholder="site web">
-
-  <button class="btn" style="background:#00E5FF;color:black" onclick="add()">Ajouter</button>
-
-  <h3>🔥 Idées</h3>
-  <div id="props"></div>
-</div>
-
-</div>
 
 </body>
 </html>
