@@ -4,27 +4,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
+
 :root{
   --accent:#F50870;
   --accent2:#9C27B0;
-  --bg1:#120516;
-  --bg2:#1b0830;
   --txt:#fff;
 }
 
-/* ✅ FOND STYLE CFF */
+/* 🌈 FOND PLUS CLAIR */
 body{
   margin:0;
   font-family:system-ui;
   color:var(--txt);
 
   background:
-    radial-gradient(900px 600px at 10% 0%, rgba(245,8,112,.3), transparent),
-    radial-gradient(900px 600px at 90% 0%, rgba(156,39,176,.3), transparent),
-    linear-gradient(180deg,var(--bg1),var(--bg2));
+    radial-gradient(700px 500px at 10% 0%, rgba(255,255,255,.2), transparent),
+    radial-gradient(700px 500px at 90% 0%, rgba(255,255,255,.2), transparent),
+    linear-gradient(135deg,#F8BBD0,#E1BEE7,#CE93D8);
 }
 
-/* ✅ HEADER IDENTIQUE */
+/* HEADER */
 .topbar{
   position:fixed;
   top:0;
@@ -43,44 +42,40 @@ body{
   color:white;
 }
 
-/* ✅ LARGEUR COMME CFF */
+/* LAYOUT */
 .wrap{
   max-width:720px;
   margin:auto;
   padding:80px 16px 16px;
 }
 
-/* ✅ CARD */
 .card{
-  background:rgba(255,255,255,.08);
+  background:rgba(255,255,255,.85);
+  color:black;
   border-radius:16px;
   padding:16px;
   margin-bottom:16px;
 }
 
-/* ✅ ALIGNEMENT CFF */
+/* GRID ALIGNEMENT */
 .row{
   display:flex;
   gap:12px;
 }
 
-.col{
-  flex:1;
-}
+.col{flex:1}
 
-/* ✅ INPUT PROPRE */
+/* INPUT */
 select,input{
   height:48px;
   width:100%;
   padding:0 12px;
   border-radius:12px;
-  border:1px solid rgba(255,255,255,.2);
-  background:rgba(20,6,34,.8);
-  color:white;
+  border:1px solid #ddd;
   font-size:18px;
 }
 
-/* ✅ BOUTON */
+/* BOUTON */
 .primary{
   width:100%;
   margin-top:10px;
@@ -93,7 +88,7 @@ select,input{
   color:white;
 }
 
-/* ✅ CALENDRIER PROPRE */
+/* ✅ CALENDRIER */
 .calendar{
   display:grid;
   grid-template-columns:repeat(2,1fr);
@@ -101,13 +96,13 @@ select,input{
 }
 
 .day{
-  background:rgba(0,0,0,.25);
+  background:white;
   border-radius:12px;
   padding:10px;
 }
 
 .day b{
-  font-size:15px;
+  font-size:16px;
 }
 
 .options{
@@ -117,21 +112,22 @@ select,input{
 }
 
 .options select{
-  height:36px;
-  font-size:14px;
+  height:38px;
+  font-size:15px;
 }
 
 /* ✅ PROPOSITIONS */
 .prop{
-  background:rgba(0,0,0,.25);
+  background:#f3e5f5;
   border-radius:12px;
   padding:10px;
-  margin-top:6px;
+  margin-top:8px;
 }
 
 .vote{
   display:flex;
   justify-content:space-between;
+  align-items:center;
   margin-top:6px;
 }
 
@@ -142,6 +138,7 @@ select,input{
   background:var(--accent);
   color:white;
 }
+
 </style>
 </head>
 
@@ -154,19 +151,12 @@ select,input{
 <div class="wrap">
 
 <div class="card">
-
-<div class="row">
-  <div class="col">
-    <label>👤 Qui es-tu</label>
-    <select id="user"></select>
-  </div>
-</div>
-
+  <label>👤 Qui es-tu</label>
+  <select id="user"></select>
 </div>
 
 <div class="card">
   <b>🌴 Vacances</b>
-
   <div id="cal" class="calendar"></div>
 </div>
 
@@ -174,7 +164,7 @@ select,input{
 
 <div class="row">
   <div class="col">
-    <input id="titre" placeholder="Escape game 🔐">
+    <input id="titre" placeholder="Karting 🏎 / Escape 🔐">
   </div>
 </div>
 
@@ -189,7 +179,7 @@ select,input{
 
 <button class="primary" onclick="add()">➕ Ajouter</button>
 
-<b>🔥 Idées</b>
+<b>🔥 Idées proposées</b>
 <div id="props"></div>
 
 </div>
@@ -213,11 +203,11 @@ let model={
   calendrier:[]
 };
 
-/******** INIT ********/
+/* INIT CAL */
 function initCal(){
   if(model.calendrier.length) return;
-  const start=new Date();
 
+  const start=new Date();
   for(let i=0;i<10;i++){
     let d=new Date(start);
     d.setDate(d.getDate()+i);
@@ -228,19 +218,16 @@ function initCal(){
   }
 }
 
-/******** USERS ********/
+/* USERS */
 function fillUsers(){
   const sel=document.getElementById('user');
   sel.innerHTML='';
-
   model.enfants.forEach(e=>{
-    const o=document.createElement('option');
-    o.textContent=e.avatar+" "+e.nom;
-    sel.appendChild(o);
+    sel.innerHTML+=`<option>${e.avatar} ${e.nom}</option>`;
   });
 }
 
-/******** CAL ********/
+/* CAL */
 function optionsHTML(){
   let html="<option></option>";
   model.propositions.forEach(p=>{
@@ -266,7 +253,7 @@ function renderCal(){
   });
 }
 
-/******** PROPS ********/
+/* PROPS */
 function renderProps(){
   const p=document.getElementById('props');
   p.innerHTML='';
@@ -274,8 +261,8 @@ function renderProps(){
   model.propositions.forEach(x=>{
     p.innerHTML+=`
       <div class="prop">
-        🎯 ${x.titre}<br>
-        💰 ${x.prix}<br>
+        <b>🎯 ${x.titre}</b><br>
+        💰 ${x.prix || '-'}<br>
         ${x.lien?`🔗 <a href="${x.lien}" target="_blank">voir</a><br>`:''}
 
         <div class="vote">
@@ -287,12 +274,14 @@ function renderProps(){
   });
 }
 
+/* VOTE */
 function vote(id){
   const p=model.propositions.find(x=>x.id==id);
   p.votes++;
   renderProps();
 }
 
+/* ADD */
 function add(){
   const titre=document.getElementById('titre').value;
   const prix=document.getElementById('prix').value;
@@ -312,7 +301,7 @@ function add(){
   renderCal();
 }
 
-/******** INIT ********/
+/* INIT */
 function load(){
   initCal();
   fillUsers();
