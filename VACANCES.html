@@ -215,7 +215,8 @@ select,input{
 <script>
 /** 🔌 Mets ici l’URL de ton Apps Script déployé (Web App) */
 const API_URL = "https://script.google.com/macros/s/AKfycbzUKrmzXep1WFNasSbZcQvYpfmybypxWwS_GAecMYPRE0_f0ipQRfT7j9xNZtiZs0ED/exec";
-
+console.log("VACANCES chargé, API_URL =", API_URL);
+  
 /** Modèle local, mais alimenté par l’API */
 let model = {
   enfants: [],
@@ -244,6 +245,7 @@ async function apiPOST(payload){
    LOAD DATA FROM SHEETS
 ========================= */
 async function loadFromAPI(){
+  console.log("Appel API getAll...");
   const res = await apiGET("getAll");
   if(!res.ok) {
     console.error(res.error);
