@@ -213,129 +213,246 @@ select,input{
 </div>
 
 <script>
-let model={
-  enfants:[
-    {id:'alessia',nom:'Alessia',avatar:'🧋'},
-    {id:'antonin',nom:'Antonin',avatar:'📷'},
-    {id:'clement',nom:'Clément',avatar:'🚴‍♂️'},
-    {id:'diego',nom:'Diego',avatar:'⚽'},
-    {id:'jeremie',nom:'Jérémie',avatar:'🏑'},
-    {id:'yann',nom:'Yann',avatar:'🧔'},
-    {id:'melanie',nom:'Mélanie',avatar:'🌸'}
-  ],
-  propositions:[],
-  calendrier:[]
+/** 🔌 Mets ici l’URL de ton Apps Script déployé (Web App) */
+const API_URL = "https://script.google.com/macros/s/AKfycbzUKrmzXep1WFNasSbZcQvYpfmybypxWwS_GAecMYPRE0_f0ipQRfT7j9xNZtiZs0ED/exec";
+
+/** Modèle local, mais alimenté par l’API */
+let model = {
+  enfants: [],
+  propositions: [],
+  calendrier: [] // contiendra des objets {dateKey, dateLabel, ...}
 };
 
-/* INIT CAL */
-function initCal(){
-  if(model.calendrier.length) return;
-
-  const start=new Date();
-  for(let i=0;i<14;i++){  // ✅ 14 jours au lieu de 10
-    let d=new Date(start);
-    d.setDate(d.getDate()+i);
-
-    model.calendrier.push({
-      date:d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})
-    });
-  }
+/* =========================
+   API HELPERS
+========================= */
+async function apiGET(action){
+  const r = await fetch(`${API_URL}?action=${encodeURIComponent(action)}`);
+  return await r.json();
 }
 
-/* USERS */
+async function apiPOST(payload){
+  const r = await fetch(API_URL, {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify(payload)
+  });
+  return await r.json();
+}
+
+/* =========================
+   LOAD DATA FROM SHEETS
+========================= */
+async function loadFromAPI(){
+  const res = await apiGET("getAll");
+  if(!res.ok) {
+    console.error(res.error);
+    alert("Erreur API: " + res.error);
+    return;
+  }
+
+  // ⚠️ Les champs renvoyés par le script
+  const data = res.data;
+
+  // enfants: [{id, nom, avatar}]
+  model.enfants = (data.enfants || []).map(e => ({
+    id: String(e.id || ""),
+    nom: String(e.nom || ""),
+    avatar: String(e.avatar || "")
+  }));
+
+  // propositions: [{id,titre,prix,lien,votes}]
+  model.propositions = (data.propositions || []).map(p => ({
+    id: String(p.id || ""),
+    titre: String(p.titre || ""),
+    prix: String(p.prix || ""),
+    lien: String(p.lien || ""),
+    votes: Number(p.votes || 0)
+  }));
+
+  // calendrier: lignes de la sheet calendrier (base + lignes user)
+  // Le script a des colonnes: dateKey, dateLabel, userId, choice1, choice2
+  model.calendrier = (data.calendrier || []).map(c => ({
+    dateKey: String(c.dateKey || ""),
+    dateLabel: String(c.dateLabel || ""),
+    userId: String(c.userId || ""),
+    choice1: String(c.choice1 || ""),
+    choice2: String(c.choice2 || "")
+  }));
+
+  fillUsers();
+  renderProps();
+  renderCal();
+}
+
+/* =========================
+   UI : USERS
+========================= */
+function getSelectedUserId(){
+  const sel = document.getElementById("user");
+  return sel.value; // on mettra value = id
+}
+
 function fillUsers(){
-  const sel=document.getElementById('user');
-  sel.innerHTML='';
-  model.enfants.forEach(e=>{
-    sel.innerHTML+=`<option>${e.avatar} ${e.nom}</option>`;
+  const sel = document.getElementById('user');
+  sel.innerHTML = '';
+
+  model.enfants.forEach(e => {
+    sel.innerHTML += `<option value="${escapeHtml(e.id)}">${escapeHtml(e.avatar)} ${escapeHtml(e.nom)}</option>`;
+  });
+
+  // Quand on change d'utilisateur, on re-render le calendrier (pour afficher ses choix)
+  sel.onchange = () => renderCal();
+}
+
+/* =========================
+   UI : PROPOSITIONS
+========================= */
+function renderProps(){
+  const p = document.getElementById('props');
+  p.innerHTML = '';
+
+  model.propositions.forEach(x => {
+    p.innerHTML += `
+      <div class="prop">
+        <b>🎯 ${escapeHtml(x.titre)}</b><br>
+        💰 ${escapeHtml(x.prix || '-')}<br>
+        ${x.lien ? `🔗 <a href="${escapeAttr(x.lien)}" target="_blank">voir</a><br>` : ''}
+
+        <div class="vote">
+          👍 ${Number(x.votes || 0)}
+          <button onclick="vote('${escapeAttr(x.id)}')">+1</button>
+        </div>
+      </div>
+    `;
   });
 }
 
-/* CAL */
-function optionsHTML(){
-  let html="<option></option>";
-  model.propositions.forEach(p=>{
-    html+=`<option>${p.titre}</option>`;
+async function add(){
+  const titre = document.getElementById('titre').value.trim();
+  const prix  = document.getElementById('prix').value.trim();
+  const lien  = document.getElementById('lien').value.trim();
+
+  if(!titre) return;
+
+  const res = await apiPOST({ action:"addProp", titre, prix, lien });
+  if(!res.ok){
+    alert("Erreur addProp: " + res.error);
+    return;
+  }
+
+  // Recharge tout pour rester synchro
+  document.getElementById('titre').value = '';
+  document.getElementById('prix').value = '';
+  document.getElementById('lien').value = '';
+
+  await loadFromAPI();
+}
+
+async function vote(id){
+  const res = await apiPOST({ action:"vote", id });
+  if(!res.ok){
+    alert("Erreur vote: " + res.error);
+    return;
+  }
+  await loadFromAPI();
+}
+
+/* =========================
+   UI : CALENDRIER (14 jours)
+   Affiche 14 dates "base" + les choix de l'utilisateur sélectionné
+========================= */
+function optionsHTML(selectedValue){
+  let html = `<option value=""></option>`;
+  model.propositions.forEach(p => {
+    const sel = (p.titre === selectedValue) ? "selected" : "";
+    html += `<option ${sel} value="${escapeAttr(p.titre)}">${escapeHtml(p.titre)}</option>`;
   });
   return html;
 }
 
 function renderCal(){
-  const c=document.getElementById('cal');
-  c.innerHTML='';
+  const c = document.getElementById('cal');
+  c.innerHTML = '';
 
-  model.calendrier.forEach(d=>{
-    c.innerHTML+=`
+  const userId = getSelectedUserId();
+
+  // On identifie les 14 lignes "base" (celles dont userId est vide)
+  const baseDays = model.calendrier
+    .filter(x => !x.userId) // lignes de base
+    .slice(0,14);           // sécurité
+
+  baseDays.forEach(day => {
+    // Cherche si l'utilisateur a déjà une ligne choix pour cette date
+    const userLine = model.calendrier.find(x => x.dateKey === day.dateKey && x.userId === userId);
+
+    const choice1 = userLine ? userLine.choice1 : "";
+    const choice2 = userLine ? userLine.choice2 : "";
+
+    c.innerHTML += `
       <div class="day">
-        <b>📅 ${d.date}</b>
+        <b>📅 ${escapeHtml(day.dateLabel || day.dateKey)}</b>
         <div class="options">
-          <select>${optionsHTML()}</select>
-          <select>${optionsHTML()}</select>
+          <select data-datekey="${escapeAttr(day.dateKey)}" data-slot="1">
+            ${optionsHTML(choice1)}
+          </select>
+          <select data-datekey="${escapeAttr(day.dateKey)}" data-slot="2">
+            ${optionsHTML(choice2)}
+          </select>
         </div>
       </div>
     `;
   });
-}
 
-/* PROPS */
-function renderProps(){
-  const p=document.getElementById('props');
-  p.innerHTML='';
-
-  model.propositions.forEach(x=>{
-    p.innerHTML+=`
-      <div class="prop">
-        <b>🎯 ${x.titre}</b><br>
-        💰 ${x.prix || '-'}<br>
-        ${x.lien?`🔗 <a href="${x.lien}" target="_blank">voir</a><br>`:''}
-
-        <div class="vote">
-          👍 ${x.votes}
-          <button onclick="vote(${x.id})">+1</button>
-        </div>
-      </div>
-    `;
+  // Ajoute les listeners pour sauvegarder dès qu'on change un select
+  c.querySelectorAll("select").forEach(sel => {
+    sel.onchange = () => saveChoicesForDay(sel.dataset.datekey);
   });
 }
 
-/* VOTE */
-function vote(id){
-  const p=model.propositions.find(x=>x.id==id);
-  p.votes++;
-  renderProps();
+async function saveChoicesForDay(dateKey){
+  const userId = getSelectedUserId();
+  const box = document.getElementById("cal");
+
+  const s1 = box.querySelector(`select[data-datekey="${CSS.escape(dateKey)}"][data-slot="1"]`);
+  const s2 = box.querySelector(`select[data-datekey="${CSS.escape(dateKey)}"][data-slot="2"]`);
+
+  const choice1 = s1 ? s1.value : "";
+  const choice2 = s2 ? s2.value : "";
+
+  const res = await apiPOST({ action:"setChoice", dateKey, userId, choice1, choice2 });
+  if(!res.ok){
+    alert("Erreur setChoice: " + res.error);
+    return;
+  }
+
+  // Recharge léger : on peut recharger tout pour être sûr que c’est synchro
+  await loadFromAPI();
 }
 
-/* ADD */
-function add(){
-  const titre=document.getElementById('titre').value;
-  const prix=document.getElementById('prix').value;
-  const lien=document.getElementById('lien').value;
-
-  if(!titre) return;
-
-  model.propositions.push({
-    id:Date.now(),
-    titre,
-    prix,
-    lien,
-    votes:0
-  });
-
-  renderProps();
-  renderCal();
-}
-
-/* INIT */
-function load(){
-  initCal();
-  fillUsers();
-  renderCal();
-  renderProps();
-}
-window.onload=load;
-
+/* =========================
+   NAV
+========================= */
 function goBack(){
   window.location.href='?page=index';
+}
+
+/* =========================
+   INIT
+========================= */
+window.onload = loadFromAPI;
+
+/* =========================
+   SECURITY HELPERS (anti injection dans HTML)
+========================= */
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, s => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[s]));
+}
+function escapeAttr(str){
+  // On échappe au minimum pour attributs
+  return escapeHtml(str).replace(/`/g,"&#096;");
 }
 </script>
 
