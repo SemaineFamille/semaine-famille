@@ -4,7 +4,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-
 :root{
   --accent:#F50870;
   --accent2:#9C27B0;
@@ -30,7 +29,7 @@ body{
   width:100%;
   display:flex;
   justify-content:flex-end;
-box-sizing:border-box;
+  box-sizing:border-box;
   z-index:10;
 
   padding:12px 26px;
@@ -48,8 +47,9 @@ box-sizing:border-box;
 /* LAYOUT */
 .wrap{
   max-width:720px;
-  margin-right:6px
-  padding:80px 16px 16px;
+  margin-right:6px;              /* ✅ ; manquant corrigé */
+  padding:92px 16px 16px;        /* ✅ un peu plus pour éviter tout chevauchement */
+  box-sizing:border-box;
 }
 
 .card{
@@ -63,10 +63,13 @@ box-sizing:border-box;
 /* GRID ALIGNEMENT */
 .row{
   display:flex;
-  gap:12px;
+  gap:10px;                      /* ✅ petit espace constant */
 }
 
-.col{flex:1}
+.col{
+  flex:1;
+  min-width:0;                   /* ✅ évite les dépassements/chevauchements en flex */
+}
 
 /* INPUT */
 select,input{
@@ -76,6 +79,27 @@ select,input{
   border-radius:12px;
   border:1px solid #ddd;
   font-size:18px;
+  box-sizing:border-box;         /* ✅ essentiel pour que 100% n’overflow pas */
+}
+
+/* ✅ Menu déroulant utilisateur plus court */
+#user{
+  max-width:340px;               /* ✅ ne prend plus toute la page */
+}
+
+/* Si tu veux l'aligner à gauche tout en restant "court" */
+.card label + #user{
+  display:block;
+}
+
+/* ✅ En mobile très étroit : prix/lien passent en colonne proprement */
+@media (max-width: 380px){
+  .row{
+    flex-wrap:wrap;
+  }
+  .row .col{
+    flex-basis:100%;
+  }
 }
 
 /* BOUTON */
@@ -141,7 +165,6 @@ select,input{
   background:var(--accent);
   color:white;
 }
-
 </style>
 </head>
 
@@ -153,44 +176,43 @@ select,input{
 
 <div class="wrap">
 
-<div class="card">
-  <label>👤 Qui es-tu</label>
-  <select id="user"></select>
-</div>
-
-<div class="card">
-  <b>🌴 Vacances</b>
-  <div id="cal" class="calendar"></div>
-</div>
-
-<div class="card">
-
-<div class="row">
-  <div class="col">
-    <input id="titre" placeholder="Karting 🏎 / Escape 🔐">
+  <div class="card">
+    <label>👤 Qui es-tu</label>
+    <select id="user"></select>
   </div>
-</div>
 
-<div class="row">
-  <div class="col">
-    <input id="prix" placeholder="Prix">
+  <div class="card">
+    <b>🌴 Vacances</b>
+    <div id="cal" class="calendar"></div>
   </div>
-  <div class="col">
-    <input id="lien" placeholder="Lien">
+
+  <div class="card">
+
+    <div class="row">
+      <div class="col">
+        <input id="titre" placeholder="Karting 🏎 / Escape 🔐">
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <input id="prix" placeholder="Prix">
+      </div>
+      <div class="col">
+        <input id="lien" placeholder="Lien">
+      </div>
+    </div>
+
+    <button class="primary" onclick="add()">➕ Ajouter</button>
+
+    <b>🔥 Idées proposées</b>
+    <div id="props"></div>
+
   </div>
-</div>
-
-<button class="primary" onclick="add()">➕ Ajouter</button>
-
-<b>🔥 Idées proposées</b>
-<div id="props"></div>
-
-</div>
 
 </div>
 
 <script>
-
 let model={
   enfants:[
     {id:'alessia',nom:'Alessia',avatar:'🧋'},
@@ -201,7 +223,6 @@ let model={
     {id:'yann',nom:'Yann',avatar:'🧔'},
     {id:'melanie',nom:'Mélanie',avatar:'🌸'}
   ],
-
   propositions:[],
   calendrier:[]
 };
@@ -211,7 +232,7 @@ function initCal(){
   if(model.calendrier.length) return;
 
   const start=new Date();
-  for(let i=0;i<10;i++){
+  for(let i=0;i<14;i++){  // ✅ 14 jours au lieu de 10
     let d=new Date(start);
     d.setDate(d.getDate()+i);
 
@@ -311,13 +332,11 @@ function load(){
   renderCal();
   renderProps();
 }
-
 window.onload=load;
 
 function goBack(){
   window.location.href='?page=index';
 }
-
 </script>
 
 </body>
