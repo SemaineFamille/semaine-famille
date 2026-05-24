@@ -9,161 +9,57 @@
   --accent2:#9C27B0;
   --txt:#fff;
 }
-
-/* 🌈 FOND PLUS CLAIR */
 body{
   margin:0;
   font-family:system-ui;
   color:var(--txt);
-
-  background:
-    radial-gradient(700px 500px at 10% 0%, rgba(255,255,255,.2), transparent),
-    radial-gradient(700px 500px at 90% 0%, rgba(255,255,255,.2), transparent),
-    linear-gradient(135deg,#F8BBD0,#E1BEE7,#CE93D8);
+  background:linear-gradient(135deg,#F8BBD0,#E1BEE7,#CE93D8);
 }
 
-/* HEADER */
 .topbar{
   position:fixed;
   top:0;
   width:100%;
   display:flex;
   justify-content:flex-end;
-  box-sizing:border-box;
-  z-index:10;
-
-  padding:12px 26px;
+  padding:12px;
 }
 
 .backbtn{
   background:linear-gradient(135deg,var(--accent2),var(--accent));
   border:none;
-  padding:12px 16px;
+  padding:12px;
   border-radius:14px;
-  font-weight:900;
   color:white;
 }
 
-/* LAYOUT */
 .wrap{
-  max-width:720px;
-  margin-right:6px;              /* ✅ ; manquant corrigé */
-  padding:92px 16px 16px;        /* ✅ un peu plus pour éviter tout chevauchement */
-  box-sizing:border-box;
+  padding:90px 16px;
 }
 
 .card{
-  background:rgba(255,255,255,.85);
+  background:white;
   color:black;
   border-radius:16px;
   padding:16px;
   margin-bottom:16px;
 }
 
-/* GRID ALIGNEMENT */
-.row{
-  display:flex;
-  gap:10px;                      /* ✅ petit espace constant */
-}
-
-.col{
-  flex:1;
-  min-width:0;                   /* ✅ évite les dépassements/chevauchements en flex */
-}
-
-/* INPUT */
 select,input{
-  height:48px;
   width:100%;
-  padding:0 12px;
-  border-radius:12px;
-  border:1px solid #ddd;
-  font-size:18px;
-  box-sizing:border-box;         /* ✅ essentiel pour que 100% n’overflow pas */
-}
-
-/* ✅ Menu déroulant utilisateur plus court */
-#user{
-  max-width:340px;               /* ✅ ne prend plus toute la page */
-}
-
-/* Si tu veux l'aligner à gauche tout en restant "court" */
-.card label + #user{
-  display:block;
-}
-
-/* ✅ En mobile très étroit : prix/lien passent en colonne proprement */
-@media (max-width: 380px){
-  .row{
-    flex-wrap:wrap;
-  }
-  .row .col{
-    flex-basis:100%;
-  }
-}
-
-/* BOUTON */
-.primary{
-  width:100%;
-  margin-top:10px;
-  padding:14px;
-  border-radius:14px;
-  border:none;
-  font-weight:900;
-  font-size:18px;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
-  color:white;
-}
-
-/* ✅ CALENDRIER */
-.calendar{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:10px;
-}
-
-.day{
-  background:white;
-  border-radius:12px;
   padding:10px;
-}
-
-.day b{
-  font-size:16px;
-}
-
-.options{
-  display:flex;
-  gap:6px;
   margin-top:6px;
 }
 
-.options select{
-  height:38px;
-  font-size:15px;
+button{
+  margin-top:10px;
 }
 
-/* ✅ PROPOSITIONS */
 .prop{
   background:#f3e5f5;
-  border-radius:12px;
   padding:10px;
-  margin-top:8px;
-}
-
-.vote{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-top:6px;
-}
-
-.vote button{
-  border:none;
-  padding:6px 10px;
+  margin-top:10px;
   border-radius:10px;
-  background:var(--accent);
-  color:white;
 }
 </style>
 </head>
@@ -176,205 +72,132 @@ select,input{
 
 <div class="wrap">
 
-  <div class="card">
-    <label>👤 Qui es-tu</label>
-    <select id="user"></select>
-  </div>
+<div class="card">
+<label>👤 Qui es-tu</label>
+<select id="user"></select>
+</div>
 
-  <div class="card">
-    <b>🌴 Vacances</b>
-    <div id="cal" class="calendar"></div>
-  </div>
+<div class="card">
+<input id="titre" placeholder="Idée">
+<input id="prix" placeholder="Prix">
+<input id="lien" placeholder="Lien">
+<button onclick="add()">Ajouter</button>
 
-  <div class="card">
-
-    <div class="row">
-      <div class="col">
-        <input id="titre" placeholder="Karting 🏎 / Escape 🔐">
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="col">
-        <input id="prix" placeholder="Prix">
-      </div>
-      <div class="col">
-        <input id="lien" placeholder="Lien">
-      </div>
-    </div>
-
-    <button class="primary" onclick="add()">➕ Ajouter</button>
-
-    <b>🔥 Idées proposées</b>
-    <div id="props"></div>
-
-  </div>
-
+<div id="props"></div>
 </div>
 
 <script>
- const SCRIPT_URL= "https://script.google.com/macros/s/AKfycbzUKrmzXep1WFNasSbZcQvYpfmybypxWwS_GAecMYPRE0_f0ipQRfT7j9xNZtiZs0ED/exec";
+const API_URL="https://script.google.com/macros/s/AKfycbzUKrmzXep1WFNasSbZcQvYpfmybypxWwS_GAecMYPRE0_f0ipQRfT7j9xNZtiZs0ED/exec";
 
-let model = { enfants:[], propositions:[], calendrier:[] };
+let model={enfants:[],propositions:[]};
 
-/* ================= API ================= */
-async function apiGET(action){
-  const r = await fetch(API_URL + "?action=" + action);
+/* API */
+async function apiGET(){
+  const r=await fetch(API_URL+"?action=getAll");
   return await r.json();
 }
 
-async function apiPOST(payload){
-  const r = await fetch(API_URL, {
+async function apiPOST(data){
+  const r=await fetch(API_URL,{
     method:"POST",
-    headers:{"Content-Type":"text/plain;charset=utf-8"},
-    body:JSON.stringify(payload)
+    headers:{"Content-Type":"text/plain"},
+    body:JSON.stringify(data)
   });
   return await r.json();
 }
 
-/* ================= LOAD ================= */
-async function loadFromAPI(){
-  const res = await apiGET("getAll");
-  if(!res.ok){
-    alert(res.error);
-    return;
-  }
-
-  const data = res.data || {};
-
-  model.enfants = data.enfants || [];
-  model.propositions = data.propositions || [];
-  model.calendrier = data.calendrier || [];
-
+/* LOAD */
+async function load(){
+  const res=await apiGET();
+  model=res.data;
   fillUsers();
-  renderProps();
-  renderCal();
+  render();
 }
 
-/* ================= USERS ================= */
-function getSelectedUserId(){
+/* USERS */
+function fillUsers(){
+  const s=document.getElementById("user");
+  s.innerHTML="";
+  model.enfants.forEach(e=>{
+    s.innerHTML+=`<option value="${e.id}">${e.nom}</option>`;
+  });
+}
+
+function getUser(){
   return document.getElementById("user").value;
 }
 
-function fillUsers(){
-  const sel = document.getElementById("user");
-  sel.innerHTML = "";
-
-  model.enfants.forEach(e=>{
-    sel.innerHTML += `<option value="${e.id}">${e.avatar} ${e.nom}</option>`;
-  });
-
-  sel.onchange = renderCal;
-}
-
-/* ================= PROPS ================= */
-function renderProps(){
-  const p = document.getElementById("props");
-  p.innerHTML = "";
-
-  model.propositions.forEach(x=>{
-    p.innerHTML += `
-      <div class="prop">
-        <b>🎯 ${escapeHtml(x.titre)}</b><br>
-        👤 ${escapeHtml(x.auteur || "")}<br>
-        💰 ${escapeHtml(x.prix || "-")}<br>
-        ${x.lien ? `<a href="${x.lien}" target="_blank">voir</a><br>` : ""}
-
-        <div class="vote">
-          👍 ${x.votes || 0}
-          <button onclick="vote('${x.id}')">+1</button>
-        </div>
-      </div>
-    `;
-  });
-}
-
-/* ================= ADD ================= */
+/* ADD */
 async function add(){
-  const userId = getSelectedUserId();
+  const titre=document.getElementById("titre").value;
+  const userId=getUser();
 
-  const titre = document.getElementById("titre").value.trim();
-  const prix = document.getElementById("prix").value.trim();
-  const lien = document.getElementById("lien").value.trim();
-
-  if(!titre) return;
-
-  const res = await apiPOST({
+  const res=await apiPOST({
     action:"addProp",
     titre,
-    prix,
-    lien,
     userId
   });
 
-  if(!res.ok){
-    alert(res.error);
-    return;
-  }
+  if(!res.ok){alert(res.error);return;}
 
-  document.getElementById("titre").value="";
-  document.getElementById("prix").value="";
-  document.getElementById("lien").value="";
-
-  loadFromAPI();
+  load();
 }
 
-/* ================= VOTE ================= */
+/* VOTE (1 seul) */
 async function vote(id){
-  const userId = getSelectedUserId();
+  const userId=getUser();
 
-  const res = await apiPOST({
+  const res=await apiPOST({
     action:"vote",
     id,
     userId
   });
 
   if(!res.ok){
-    alert(res.error);
+    alert(res.error); // message "déjà voté"
     return;
   }
 
-  loadFromAPI();
+  load();
 }
 
-/* ================= CAL ================= */
-function renderCal(){
-  const c = document.getElementById("cal");
-  c.innerHTML = "";
+/* RENDER */
+function render(){
+  const p=document.getElementById("props");
+  p.innerHTML="";
 
-  const userId = getSelectedUserId();
-
-  const days = model.calendrier.filter(x=>!x.userId).slice(0,14);
-
-  days.forEach(day=>{
-    c.innerHTML += `
-      <div class="day">
-        <b>${day.dateLabel}</b>
+  model.propositions.forEach(x=>{
+    p.innerHTML+=`
+      <div class="prop">
+        <b>${escapeHtml(x.titre)}</b><br>
+        👤 ${escapeHtml(x.auteur || "")}<br>
+        👍 ${x.votes || 0}
+        <button onclick="vote('${x.id}')">+1</button>
       </div>
     `;
   });
 }
 
-/* ================= NAV ================= */
+/* NAV */
 function goBack(){
-  window.location.href = "https://semainefamille.github.io/index.html";
+  window.location.href="https://semainefamille.github.io/index.html";
 }
 
-/* ================= INIT ================= */
-window.onload = loadFromAPI;
-
-/* ================= SECURITY ================= */
+/* SECURITY */
 function escapeHtml(str){
-  return String(str).replace(/[&<>"']/g, ch=>({
-    "&":"&amp;",
-    "<":"&lt;",
-    ">":"&gt;",
-    "\"":"&quot;",
-    "'":"&#39;"
-  }[ch]));
+  return String(str).replace(/[&<>"']/g, ch=>{
+    return {
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#39;"
+    }[ch];
+  });
 }
-</script>
 
+window.onload=load;
+</script>
 
 </body>
 </html>
