@@ -97,14 +97,28 @@ function goBack(){
       cont.innerHTML = '<div class="small">Aucune proposition pour l’instant.</div>';
       return;
     }
-
+function getColor(auteurId){
+  const map = {
+    alessia:'#F48FB1',
+    antonin:'#90CAF9',
+    clement:'#A5D6A7',
+    diego:'#FFCC80',
+    jeremie:'#CE93D8',
+    parents:'#B0BEC5'
+  };
+  return map[auteurId] || '#E1BEE7';
+}
     model.propositions.forEach(p=>{
       const div = document.createElement('div');
       div.className='item';
       div.innerHTML = `
         <div class="avatar">${avatarFor(p.auteurId)}</div>
         <div class="grow">
+        <div class="slot" style="border-color:${getColor(p.auteurId)}">
           <div class="meta">${p.titre}</div>
+          <div class="dnum">
+  ${new Date(day.date).toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'short' })}
+</div>
           <div class="small">Proposé par <b>${p.auteurNom || nameFor(p.auteurId)}</b> • Prix: <b>${p.prix || '—'}</b></div>
           ${p.lien ? `<div class="small"><a href="${p.lien}" target="_blank">🔗 Ouvrir le lien</a></div>` : ''}
         </div>
