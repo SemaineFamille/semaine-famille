@@ -501,7 +501,7 @@ window.onload = loadFromAPI;
 /* =========================
    SECURITY HELPERS
 ========================= */
-function escapeHtml(str){
+function escapeHtml(str){ 
   return String(str).replace(/[&<>"']/g, ch => ({
     "&":"&amp;",
     "<":"&lt;",
