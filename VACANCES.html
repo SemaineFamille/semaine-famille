@@ -213,250 +213,159 @@ select,input{
 </div>
 
 <script>
-/** 🔌 URL de ton Apps Script déployé (Web App) */
-const API_URL = "https://script.google.com/macros/s/AKfycbzUKrmzXep1WFNasSbZcQvYpfmybypxWwS_GAecMYPRE0_f0ipQRfT7j9xNZtiZs0ED/exec";
-console.log("VACANCES chargé, API_URL =", API_URL);
+  <script_URL = "https://script.google.com/macros/s/AKfycbzUKrmzXep1WFNasSbZcQvYpfmybypxWwS_GAecMYPRE0_f0ipQRfT7j9xNZtiZs0ED/exec";
 
-/** Modèle local, alimenté par l’API */
-let model = {
-  enfants: [],
-  propositions: [],
-  calendrier: [] // {dateKey, dateLabel, userId, choice1, choice2}
-};
+let model = { enfants:[], propositions:[], calendrier:[] };
 
-/* =========================
-   API HELPERS
-========================= */
+/* ================= API ================= */
 async function apiGET(action){
-  const r = await fetch(`${API_URL}?action=${encodeURIComponent(action)}`, { redirect: "follow" });
+  const r = await fetch(API_URL + "?action=" + action);
   return await r.json();
 }
 
-// ✅ IMPORTANT : text/plain pour éviter le preflight CORS avec Apps Script WebApp [1](https://stackoverflow.com/questions/53433938/how-do-i-allow-a-cors-requests-in-my-google-script)[2](https://www.linkedin.com/pulse/from-cors-code-how-i-solved-tricky-google-apps-script-petar-%C5%A1krbi%C4%87-lwptf)
 async function apiPOST(payload){
   const r = await fetch(API_URL, {
-    method: "POST",
-    redirect: "follow",
-    headers: { "Content-Type":"text/plain;charset=utf-8" },
-    body: JSON.stringify(payload)
+    method:"POST",
+    headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body:JSON.stringify(payload)
   });
   return await r.json();
 }
 
-/* =========================
-   LOAD DATA FROM SHEETS
-========================= */
+/* ================= LOAD ================= */
 async function loadFromAPI(){
-  console.log("Appel API getAll...");
   const res = await apiGET("getAll");
-
-  if(!res.ok) {
-    console.error("Erreur API:", res.error);
-    alert("Erreur API: " + res.error);
+  if(!res.ok){
+    alert(res.error);
     return;
   }
 
   const data = res.data || {};
 
-  model.enfants = (data.enfants || []).map(e => ({
-    id: String(e.id || ""),
-    nom: String(e.nom || ""),
-    avatar: String(e.avatar || "")
-  }));
-
-  model.propositions = (data.propositions || []).map(p => ({
-    id: String(p.id || ""),
-    titre: String(p.titre || ""),
-    prix: String(p.prix || ""),
-    lien: String(p.lien || ""),
-    votes: Number(p.votes || 0)
-  }));
-
-  model.calendrier = (data.calendrier || []).map(c => ({
-    dateKey: String(c.dateKey || ""),
-    dateLabel: String(c.dateLabel || ""),
-    userId: String(c.userId || ""),
-    choice1: String(c.choice1 || ""),
-    choice2: String(c.choice2 || "")
-  }));
+  model.enfants = data.enfants || [];
+  model.propositions = data.propositions || [];
+  model.calendrier = data.calendrier || [];
 
   fillUsers();
   renderProps();
   renderCal();
 }
 
-/* =========================
-   UI : USERS
-========================= */
+/* ================= USERS ================= */
 function getSelectedUserId(){
-  const sel = document.getElementById("user");
-  return sel ? sel.value : "";
+  return document.getElementById("user").value;
 }
 
 function fillUsers(){
-  const sel = document.getElementById('user');
-  if(!sel) return;
+  const sel = document.getElementById("user");
+  sel.innerHTML = "";
 
-  sel.innerHTML = '';
-
-  model.enfants.forEach(e => {
-    sel.innerHTML += `<option value="${escapeAttr(e.id)}">${escapeHtml(e.avatar)} ${escapeHtml(e.nom)}</option>`;
+  model.enfants.forEach(e=>{
+    sel.innerHTML += `<option value="${e.id}">${e.avatar} ${e.nom}</option>`;
   });
 
-  sel.onchange = () => renderCal();
+  sel.onchange = renderCal;
 }
 
-/* =========================
-   UI : PROPOSITIONS
-========================= */
+/* ================= PROPS ================= */
 function renderProps(){
-  const p = document.getElementById('props');
-  if(!p) return;
+  const p = document.getElementById("props");
+  p.innerHTML = "";
 
-  p.innerHTML = '';
-
-  model.propositions.forEach(x => {
+  model.propositions.forEach(x=>{
     p.innerHTML += `
       <div class="prop">
         <b>🎯 ${escapeHtml(x.titre)}</b><br>
-        💰 ${escapeHtml(x.prix || '-') }<br>
-        ${x.lien ? `🔗 <a href="${escapeAttr(x.lien)}" target="_blank" rel="noopener">voir</a><br>` : ''}
+        👤 ${escapeHtml(x.auteur || "")}<br>
+        💰 ${escapeHtml(x.prix || "-")}<br>
+        ${x.lien ? `<a href="${x.lien}" target="_blank">voir</a><br>` : ""}
 
         <div class="vote">
-          👍 ${Number(x.votes || 0)}
-          <button onclick="vote('${escapeAttr(x.id)}')">+1</button>
+          👍 ${x.votes || 0}
+          <button onclick="vote('${x.id}')">+1</button>
         </div>
       </div>
     `;
   });
 }
 
+/* ================= ADD ================= */
 async function add(){
-  console.log("CLICK AJOUTER");
+  const userId = getSelectedUserId();
 
-  const titreEl = document.getElementById('titre');
-  const prixEl  = document.getElementById('prix');
-  const lienEl  = document.getElementById('lien');
-
-  const titre = (titreEl ? titreEl.value : "").trim();
-  const prix  = (prixEl ? prixEl.value : "").trim();
-  const lien  = (lienEl ? lienEl.value : "").trim();
+  const titre = document.getElementById("titre").value.trim();
+  const prix = document.getElementById("prix").value.trim();
+  const lien = document.getElementById("lien").value.trim();
 
   if(!titre) return;
 
-  const res = await apiPOST({ action:"addProp", titre, prix, lien });
-  console.log("REPONSE addProp =", res);
-
-  if(!res.ok){
-    alert("Erreur addProp: " + res.error);
-    return;
-  }
-
-  if(titreEl) titreEl.value = '';
-  if(prixEl)  prixEl.value  = '';
-  if(lienEl)  lienEl.value  = '';
-
-  await loadFromAPI();
-}
-
-async function vote(id){
-  const res = await apiPOST({ action:"vote", id });
-  if(!res.ok){
-    alert("Erreur vote: " + res.error);
-    return;
-  }
-  await loadFromAPI();
-}
-
-/* =========================
-   UI : CALENDRIER (14 jours)
-========================= */
-function optionsHTML(selectedValue){
-  let html = `<option value=""></option>`;
-  model.propositions.forEach(p => {
-    const sel = (p.titre === selectedValue) ? "selected" : "";
-    html += `<option ${sel} value="${escapeAttr(p.titre)}">${escapeHtml(p.titre)}</option>`;
+  const res = await apiPOST({
+    action:"addProp",
+    titre,
+    prix,
+    lien,
+    userId
   });
-  return html;
+
+  if(!res.ok){
+    alert(res.error);
+    return;
+  }
+
+  document.getElementById("titre").value="";
+  document.getElementById("prix").value="";
+  document.getElementById("lien").value="";
+
+  loadFromAPI();
 }
 
-function renderCal(){
-  const c = document.getElementById('cal');
-  if(!c) return;
+/* ================= VOTE ================= */
+async function vote(id){
+  const userId = getSelectedUserId();
 
-  c.innerHTML = '';
+  const res = await apiPOST({
+    action:"vote",
+    id,
+    userId
+  });
+
+  if(!res.ok){
+    alert(res.error);
+    return;
+  }
+
+  loadFromAPI();
+}
+
+/* ================= CAL ================= */
+function renderCal(){
+  const c = document.getElementById("cal");
+  c.innerHTML = "";
 
   const userId = getSelectedUserId();
 
-  const baseDays = model.calendrier
-    .filter(x => !x.userId) // lignes de base
-    .slice(0,14);
+  const days = model.calendrier.filter(x=>!x.userId).slice(0,14);
 
-  baseDays.forEach(day => {
-    const userLine = model.calendrier.find(x => x.dateKey === day.dateKey && x.userId === userId);
-    const choice1 = userLine ? userLine.choice1 : "";
-    const choice2 = userLine ? userLine.choice2 : "";
-
+  days.forEach(day=>{
     c.innerHTML += `
       <div class="day">
-        <b>📅 ${escapeHtml(day.dateLabel || day.dateKey)}</b>
-        <div class="options">
-          <select data-datekey="${escapeAttr(day.dateKey)}" data-slot="1">
-            ${optionsHTML(choice1)}
-          </select>
-          <select data-datekey="${escapeAttr(day.dateKey)}" data-slot="2">
-            ${optionsHTML(choice2)}
-          </select>
-        </div>
+        <b>${day.dateLabel}</b>
       </div>
     `;
   });
-
-  c.querySelectorAll("select").forEach(sel => {
-    sel.onchange = () => saveChoicesForDay(sel.dataset.datekey);
-  });
 }
 
-async function saveChoicesForDay(dateKey){
-  const userId = getSelectedUserId();
-  const box = document.getElementById("cal");
-
-  const s1 = box.querySelector(`select[data-datekey="${CSS.escape(dateKey)}"][data-slot="1"]`);
-  const s2 = box.querySelector(`select[data-datekey="${CSS.escape(dateKey)}"][data-slot="2"]`);
-
-  const choice1 = s1 ? s1.value : "";
-  const choice2 = s2 ? s2.value : "";
-
-  const res = await apiPOST({ action:"setChoice", dateKey, userId, choice1, choice2 });
-  if(!res.ok){
-    alert("Erreur setChoice: " + res.error);
-    return;
-  }
-  await loadFromAPI();
-}
-
-/* =========================
-   NAV
-========================= */
-
-
+/* ================= NAV ================= */
 function goBack(){
-  window.location.href = "/";
+  window.location.href = "https://semainefamille.github.io/index.html";
 }
 
-
-
-/* =========================
-   INIT
-========================= */
+/* ================= INIT ================= */
 window.onload = loadFromAPI;
 
-/* =========================
-   SECURITY HELPERS (anti injection)
-   On échappe les caractères spéciaux &, <, >, ", '  [3](https://www.geeksforgeeks.org/javascript/how-to-escape-unescape-html-characters-in-string-in-javascript/)[4](https://www.30secondsofcode.org/js/s/escape-unescape-html/)
-========================= */
+/* ================= SECURITY ================= */
 function escapeHtml(str){
-  return String(str).replace(/[&<>"']/g, ch => ({
+  return String(str).replace(/[&<>"']/g, ch=>({
     "&":"&amp;",
     "<":"&lt;",
     ">":"&gt;",
@@ -464,12 +373,8 @@ function escapeHtml(str){
     "'":"&#39;"
   }[ch]));
 }
-
-function escapeAttr(str){
-  // Suffisant pour valeur d'attribut
-  return escapeHtml(str).replace(/`/g,"&#96;");
-}
 </script>
+
 
 </body>
 </html>
