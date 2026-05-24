@@ -400,14 +400,20 @@ async function add(){
    -> le blocage doit être appliqué côté Apps Script (voters). */
 async function vote(id){
   const userId = getSelectedUserId();
-  const res = await apiPOST({ action:"vote", id, userId });
+
+  const res loadFromAPI();  const res = await apiPOST({ 
+}
+    action:"vote", 
+    id,
+    userId
+  });
 
   if(!res || !res.ok){
-    alert((res && res.error) ? res.error : "Erreur vote");
+    alert(res?.error || "Erreur vote");
     return;
   }
-  await loadFromAPI();
-}
+
+
 
 /* =========================
    CALENDRIER (14 jours)
