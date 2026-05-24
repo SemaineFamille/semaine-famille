@@ -360,7 +360,21 @@ async function add(){
 }
 
 async function vote(id){
-  const res = await apiPOST({ action:"vote", id });
+  const userId = getSelectedUserId.ok){  const userId = getSelectedUserId();
+    alert(res.error); // ex: "déjà voté"
+    return;
+  }
+
+  await loadFromAPI();
+}
+
+  const res = await apiPOST({ 
+    action:"vote", 
+    id,
+    userId   // ✅ ajouté
+  });
+
+
   if(!res.ok){
     alert("Erreur vote: " + res.error);
     return;
