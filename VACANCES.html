@@ -438,13 +438,12 @@ async function saveChoicesForDay(dateKey){
 /* =========================
    NAV
 ========================= */
+
 function goBack(){
-  // ✅ Retour fiable : back si possible, sinon fallback
-  if (window.history && window.history.length > 1) {
-    window.history.back();
-  } else {
-    window.location.href = "index.html";
-  }
+  window.location.href = window.location.origin + "/"; 
+  // ex: https://semainefamille.github.io/
+}
+
 }
 
 /* =========================
