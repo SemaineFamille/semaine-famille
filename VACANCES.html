@@ -219,7 +219,14 @@ select,input{
 <script>
 /** 🔌 URL Apps Script WebApp */
 const API_URL = "https://script.google.com/macros/s/AKfycbzUKrmzXep1WFNasSbZcQvYpfmybypxWwS_GAecMYPRE0_f0ipQRfT7j9xNZtiZs0ED/exec";
+let calVisible = false;
 
+function toggleCal(){
+  const cal = document.getElementById("cal");
+  calVisible = !calVisible;
+
+  cal.style.display = calVisible ? "grid" : "none";
+}
 /** Modèle local */
 let model = {
   enfants: [],
