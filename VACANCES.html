@@ -1,350 +1,260 @@
 <!DOCTYPE html>
 <html lang="fr">
-  <head>
-    <base target="_top">
-    <?!= include('Stylesheet'); ?>
-  <style>
-  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:#f6f3fb;margin:0;color:#2d1b33;}
-  .wrap{max-width:1200px;margin:0 auto;padding:16px;}
-  h1{font-size:22px;margin:8px 0 16px;}
-  h2{font-size:16px;margin:0 0 10px;color:#6a1b9a}
-  h3{font-size:14px;margin:10px 0;color:#6a1b9a}
-  .mt{margin-top:16px}
-  .card{background:#fff;border-radius:16px;padding:14px;margin:12px 0;box-shadow:0 4px 20px rgba(156,39,176,.12);}
-  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-  label{font-weight:800}
-  select,input{padding:10px;border-radius:10px;border:2px solid #e0d0e8;font-size:14px;flex:1;min-width:180px}
-  .btn{padding:10px 14px;border:none;border-radius:12px;font-weight:900;cursor:pointer;background:#9C27B0;color:#fff}
-  .btn.primary{background:#F50870}
-  .btn.danger{background:#FF5722}
-  .sub{margin:8px 0 0;color:#7b5e8a;font-weight:650;font-size:13px}
+<head>
+  <base target="_top">
 
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  @media (max-width:980px){ .grid2{grid-template-columns:1fr} }
+<style>
+body{
+  font-family:system-ui;
+  background:#f6f3fb;
+  margin:0;
+  font-size:18px;
+}
 
-  .list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
-  .item{display:flex;gap:10px;align-items:flex-start;background:#f3e5f5;border-radius:12px;padding:10px}
-  .avatar{font-size:22px}
-  .meta{font-weight:800;color:#6a1b9a}
-  .small{font-size:12px;color:#7b5e8a;font-weight:700}
-  .item a{color:#1565c0;font-weight:800;text-decoration:none}
-  .item a:hover{text-decoration:underline}
-  .grow{flex:1}
+.wrap{padding:12px;}
 
-  .cal{display:flex;flex-direction:column;gap:8px;margin-top:10px}
-  .day{background:#f3e5f5;border-radius:14px;padding:10px}
-  .dhead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
-  .dnum{font-weight:900;color:#6a1b9a}
-  .slots{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  @media (max-width:520px){ .slots{grid-template-columns:1fr} }
-  .slot{background:#fff;border-radius:12px;padding:10px;border:2px solid #e0d0e8}
-  .slotTitle{font-weight:900;color:#2d1b33;margin-bottom:6px}
-  textarea{width:100%;min-height:44px;resize:vertical;border-radius:10px;border:2px solid #e0d0e8;padding:8px;font-size:13px;font-weight:650;background:#fff}
-  .saving{font-size:11px;font-weight:900;color:#7b5e8a;margin-top:6px}
-  .parent-tools{margin-top:12px;padding-top:10px;border-top:2px solid #f0e6f6}
-  .topbar{
-    display:flex;
-    justify-content:flex-end;
-    margin-bottom:10px;
-  }
-  
-  .btn.back{
-    background:#673ab7;
-  }  
+h1{font-size:24px;text-align:center;}
+h2{font-size:20px;color:#6a1b9a}
 
+/* TOPBAR */
+.topbar{
+  display:flex;
+  justify-content:flex-end;
+  padding:10px;
+}
+.btn{
+  padding:14px;
+  border:none;
+  border-radius:14px;
+  font-size:18px;
+  width:100%;
+  margin-top:8px;
+}
+.btn.back{background:#673ab7;color:#fff}
+.btn.primary{background:#F50870;color:#fff}
+.btn.small{width:auto;padding:10px 12px}
 
+/* CARD */
+.card{
+  background:#fff;
+  border-radius:18px;
+  padding:14px;
+  margin-bottom:12px;
+}
+
+/* INPUT */
+select,input,textarea{
+  width:100%;
+  padding:14px;
+  font-size:18px;
+  border-radius:12px;
+  border:2px solid #ddd;
+}
+
+/* LISTE */
+.item{
+  background:#f3e5f5;
+  border-radius:16px;
+  padding:12px;
+  margin-bottom:10px;
+}
+.avatar{font-size:26px}
+.meta{font-weight:900}
+
+/* CALENDRIER */
+.day{
+  background:#f3e5f5;
+  border-radius:16px;
+  padding:12px;
+  margin-bottom:10px;
+}
+.dnum{font-weight:bold;margin-bottom:8px}
+
+.slots{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.slot{
+  background:#fff;
+  padding:10px;
+  border-radius:12px;
+}
 
 </style>
-  <script>
-    
-  let model = null;
 
-  function byId(id){ return document.getElementById(id); }
-  function isParent(){ return byId('user').value === 'parents'; }
+<script>
 
-  function avatarFor(auteurId){
-    const e = model.enfants.find(x=>x.id===auteurId);
-    return e ? e.avatar : '🙂';
-  }
-  function nameFor(auteurId){
-    const e = model.enfants.find(x=>x.id===auteurId);
-    return e ? e.nom : auteurId;
-  }
+let model=null;
 
-  function fillUsers(){
-    const sel = byId('user');
-    sel.innerHTML = '';
-    model.enfants.forEach(e=>{
-      const o = document.createElement('option');
-      o.value = e.id;
-      o.textContent = `${e.avatar} ${e.nom}`;
-      sel.appendChild(o);
-    });
-    sel.addEventListener('change', refreshRoleUI);
-  }
+// ✅ fallback si serveur ne renvoie rien
+const fallbackEnfants = [
+  {id:'alessia', nom:'Alessia', avatar:'👧'},
+  {id:'antonin', nom:'Antonin', avatar:'👦'},
+  {id:'clement', nom:'Clément', avatar:'👦'},
+  {id:'parents', nom:'Parents', avatar:'👨‍👩‍👧'}
+];
 
-  function refreshRoleUI(){
-    byId('parentTools').style.display = isParent() ? 'block' : 'none';
-    renderCalendar(); // car parents ont les dropdown actifs
-  }
+function byId(id){return document.getElementById(id);}
+
+function fillUsers(){
+  const sel = byId('user');
+
+  const enfants = (model && model.enfants && model.enfants.length)
+    ? model.enfants
+    : fallbackEnfants;
+
+  sel.innerHTML='';
+  
+  enfants.forEach(e=>{
+    const o=document.createElement('option');
+    o.value=e.id;
+    o.textContent=e.avatar+" "+e.nom;
+    sel.appendChild(o);
+  });
+
+  sel.selectedIndex=0;
+}
+
 function goBack(){
-  window.location.href = '?page=index'; // adapte selon ton app
+  window.location.href='?page=index';
 }
-  function renderProps(){
-    const cont = byId('props');
-    cont.innerHTML = '';
-    if(!model.propositions.length){
-      cont.innerHTML = '<div class="small">Aucune proposition pour l’instant.</div>';
-      return;
-    }
-function getColor(auteurId){
-  const map = {
-    alessia:'#F48FB1',
-    antonin:'#90CAF9',
-    clement:'#A5D6A7',
-    diego:'#FFCC80',
-    jeremie:'#CE93D8',
-    parents:'#B0BEC5'
-  };
-  return map[auteurId] || '#E1BEE7';
+
+/************** PROPOSITIONS **************/
+function renderProps(){
+  const cont=byId('props');
+  cont.innerHTML='';
+
+  if(!model.propositions.length){
+    cont.innerHTML='Aucune proposition';
+    return;
+  }
+
+  model.propositions.forEach(p=>{
+    const div=document.createElement('div');
+    div.className='item';
+
+    div.innerHTML=`
+      <div class="avatar">${p.auteurNom || ''}</div>
+      <div class="meta">${p.titre}</div>
+      <div>💰 ${p.prix || '—'}</div>
+      ${p.lien ? `<a href="${p.lien}" target="_blank">🔗 lien</a>` : ''}
+    `;
+
+    cont.appendChild(div);
+  });
 }
-    model.propositions.forEach(p=>{
-      const div = document.createElement('div');
-      div.className='item';
-      div.innerHTML = `
-        <div class="avatar">${avatarFor(p.auteurId)}</div>
-        <div class="grow">
-        <div class="slot" style="border-color:${getColor(p.auteurId)}">
-          <div class="meta">${p.titre}</div>
-          <div class="dnum">
-  ${new Date(day.date).toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'short' })}
-</div>
-          <div class="small">Proposé par <b>${p.auteurNom || nameFor(p.auteurId)}</b> • Prix: <b>${p.prix || '—'}</b></div>
-          ${p.lien ? `<div class="small"><a href="${p.lien}" target="_blank">🔗 Ouvrir le lien</a></div>` : ''}
+
+/************** CALENDRIER **************/
+function buildOptions(selected){
+  let html=`<option value="">--</option>`;
+  model.propositions.forEach(p=>{
+    html+=`<option value="${p.id}" ${p.id==selected?'selected':''}>
+      ${p.titre}
+    </option>`;
+  });
+  return html;
+}
+
+function renderCalendar(){
+  const cont=byId('cal');
+  cont.innerHTML='';
+
+  model.calendrier.forEach(day=>{
+
+    const div=document.createElement('div');
+    div.className='day';
+
+    div.innerHTML=`
+      <div class="dnum">${day.date}</div>
+
+      <div class="slots">
+        <div class="slot">
+          <select onchange="save('${day.date}',1,this.value)">
+            ${buildOptions(day.c1_id)}
+          </select>
         </div>
-      `;
 
-      // suppression: seulement parents (simple)
-      if(isParent()){
-        const btn = document.createElement('button');
-        btn.className='btn danger';
-        btn.textContent='Supprimer';
-        btn.onclick = () => {
-          if(confirm('Supprimer cette proposition ?')){
-            google.script.run.withSuccessHandler(load).deleteProposition(p.id);
-          }
-        };
-        div.appendChild(btn);
-      }
-
-      cont.appendChild(div);
-    });
-  }
-
-  function buildOptions(selectedId){
-    // option vide = rien choisi, et option "LIBRE"
-    let html = `<option value="">— (aucun)</option>`;
-    html += `<option value="__LIBRE__"${selectedId==='__LIBRE__'?' selected':''}>✍️ Libre (texte)</option>`;
-    model.propositions.forEach(p=>{
-      const label = `${avatarFor(p.auteurId)} ${p.titre} (${p.prix || '—'})`;
-      html += `<option value="${p.id}" ${p.id===selectedId?'selected':''}>${label}</option>`;
-    });
-    return html;
-  }
-
-  function renderCalendar(){
-    const cont = byId('cal');
-    cont.innerHTML = '';
-
-    const parents = isParent();
-    model.calendrier.forEach(day=>{
-      const wrap = document.createElement('div');
-      wrap.className='day';
-
-      wrap.innerHTML = `
-        <div class="dhead">
-          <div class="dnum">${day.date}</div>
-          <div class="small">2 choix (parents)</div>
+        <div class="slot">
+          <select onchange="save('${day.date}',2,this.value)">
+            ${buildOptions(day.c2_id)}
+          </select>
         </div>
-        <div class="slots">
-          ${slotHtml(day.date, 1, day.c1_id, day.c1_txt, parents)}
-          ${slotHtml(day.date, 2, day.c2_id, day.c2_txt, parents)}
-        </div>
-      `;
-      cont.appendChild(wrap);
-    });
-
-    // brancher events après insertion
-    model.calendrier.forEach(day=>{
-      [1,2].forEach(slot=>{
-        const sel = byId(`sel-${day.date}-${slot}`);
-        const ta  = byId(`txt-${day.date}-${slot}`);
-        if(!sel) return;
-
-        // parents uniquement -> events actifs
-        if(isParent()){
-          sel.disabled = false;
-          sel.addEventListener('change', ()=>{
-            const v = sel.value;
-            if(v === '__LIBRE__'){
-              ta.style.display='block';
-            } else {
-              ta.style.display='none';
-              ta.value='';
-            }
-            saveChoice(day.date, slot);
-          });
-
-          ta.addEventListener('change', ()=> saveChoice(day.date, slot));
-        } else {
-          sel.disabled = true;
-          ta.disabled = true;
-        }
-
-        // affichage initial de la zone texte libre
-        if(sel.value === '__LIBRE__') ta.style.display='block';
-        else ta.style.display='none';
-      });
-    });
-  }
-
-  function slotHtml(date, slot, pid, txt, parents){
-    const selected = pid ? pid : (txt ? '__LIBRE__' : '');
-    return `
-      <div class="slot">
-        <div class="slotTitle">Choix ${slot}</div>
-        <select id="sel-${date}-${slot}" ${parents?'':'disabled'}>
-          ${buildOptions(selected)}
-        </select>
-        <textarea id="txt-${date}-${slot}" placeholder="Texte libre..." ${parents?'':'disabled'}>${txt || ''}</textarea>
-        <div class="saving" id="sav-${date}-${slot}"></div>
       </div>
     `;
-  }
 
-  function saveChoice(date, slot){
-    const sel = byId(`sel-${date}-${slot}`);
-    const ta  = byId(`txt-${date}-${slot}`);
-    const lab = byId(`sav-${date}-${slot}`);
+    cont.appendChild(div);
+  });
+}
 
-    const val = sel.value;
-    const propositionId = (val && val !== '__LIBRE__') ? val : '';
-    const texteLibre = (val === '__LIBRE__') ? (ta.value || '') : '';
+function save(date,slot,val){
+  google.script.run.setCalendarChoice(date,slot,val,'',byId('user').value);
+}
 
-    lab.textContent = '💾 Sauvegarde...';
-    google.script.run
-      .withSuccessHandler(()=>{ lab.textContent='✅ Enregistré'; setTimeout(()=>lab.textContent='',1200); })
-      .withFailureHandler(err=>{ lab.textContent='⚠️ Erreur'; console.error(err); })
-      .setCalendarChoice(date, slot, propositionId, texteLibre, byId('user').value);
-  }
+/************** LOAD **************/
+function load(){
+  google.script.run.withSuccessHandler(m=>{
+    model=m;
 
-  function bindButtons(){
-    byId('reload').onclick = load;
+    fillUsers();
+    renderProps();
+    renderCalendar();
 
-    byId('addProp').onclick = () => {
-      const auteurId = byId('user').value;
-      if(auteurId === 'parents'){
-        alert("Les enfants proposent, les parents choisissent 🙂");
-        return;
-      }
-      const titre = byId('titre').value.trim();
-      const prix  = byId('prix').value.trim();
-      const lien  = byId('lien').value.trim();
-      if(!titre) return;
+  }).getModel();
+}
 
-      google.script.run
-        .withSuccessHandler(()=>{
-          byId('titre').value=''; byId('prix').value=''; byId('lien').value='';
-          load();
-        })
-        .addProposition(auteurId, titre, prix, lien);
-    };
+window.onload=load;
 
-    byId('applyDates').onclick = () => {
-      if(!isParent()) return;
-      const s = byId('start').value;
-      const e = byId('end').value;
-      if(!s || !e) return;
-      google.script.run.withSuccessHandler(load).setDateRange(s,e);
-    };
-  }
-
-  function load(){
-    google.script.run.withSuccessHandler(m=>{
-      model = m;
-
-      fillUsers();
-
-      // dates UI
-      byId('start').value = model.params.start;
-      byId('end').value   = model.params.end;
-
-      refreshRoleUI();
-      renderProps();
-      renderCalendar();
-    }).getModel();
-  }
-
-  bindButtons();
-  load();
 </script>
-  </head>
-  <body>
-   <div class="topbar">
+</head>
+
+<body>
+
+<div class="topbar">
   <button class="btn back" onclick="goBack()">⬅ Retour</button>
-</div> 
-    <div class="wrap">
-      <h1>Vacances – Planning activités</h1>
+</div>
 
-      <div class="card">
-        <div class="row">
-          <label>Qui es-tu ?</label>
-          <select id="user"></select>
-          <button class="btn" id="reload">🔄 Recharger</button>
-        </div>
+<div class="wrap">
 
-        <div id="parentTools" class="parent-tools" style="display:none">
-          <h2>⚙️ Dates des vacances</h2>
-          <div class="row">
-            <input id="start" type="date">
-            <input id="end" type="date">
-            <button class="btn primary" id="applyDates">Appliquer</button>
-          </div>
-          <p class="sub">Changer les dates régénère le calendrier (réutilisable à chaque vacances).</p>
-        </div>
-      </div>
+<h1>Vacances</h1>
 
-     <div class="card">
+<div class="card">
+  <label>Qui es-tu ?</label>
+  <select id="user"></select>
+</div>
+
+<div class="card">
   <h2>📅 Calendrier</h2>
   <div id="cal"></div>
 </div>
 
-<div class="grid2">
-        <div class="card">
-          <h2>💡 Proposer une activité</h2>
-          <p class="sub">Les enfants ajoutent des idées (prix + lien). Les parents les choisiront ensuite dans le calendrier.</p>
+<div class="card">
+  <h2>💡 Propositions</h2>
 
-          <div class="row">
-            <input id="titre" type="text" placeholder="Activité (ex: piscine, cinéma...)">
-          </div>
-          <div class="row">
-            <input id="prix" type="text" placeholder="Prix (ex: 15 CHF)">
-            <input id="lien" type="url" placeholder="Lien (optionnel)">
-          </div>
-          <button class="btn primary" id="addProp">+ Ajouter la proposition</button>
+  <input id="titre" placeholder="activité">
+  <input id="prix" placeholder="prix">
+  <input id="lien" placeholder="lien">
 
-          <h3 class="mt">📋 Liste des propositions</h3>
-          <div id="props" class="list"></div>
-        </div>
+  <button class="btn primary" onclick="add()">Ajouter</button>
 
-        <div class="card">
-          <h2>📅 Calendrier (choix parents)</h2>
-          <p class="sub">Chaque jour : 2 choix. Menu déroulant alimenté par les propositions.</p>
-          <div id="cal" class="cal"></div>
-        </div>
-      </div>
-    </div>
+  <div id="props"></div>
+</div>
 
-    <?!= include('JavaScript'); ?>
-  </body>
+</div>
+
+<script>
+function add(){
+  google.script.run
+    .withSuccessHandler(load)
+    .addProposition(
+      byId('user').value,
+      byId('titre').value,
+      byId('prix').value,
+      byId('lien').value
+    );
+}
+</script>
+
+</body>
 </html>
