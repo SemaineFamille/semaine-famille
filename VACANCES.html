@@ -9,57 +9,161 @@
   --accent2:#9C27B0;
   --txt:#fff;
 }
+
+/* 🌈 FOND PLUS CLAIR */
 body{
   margin:0;
   font-family:system-ui;
   color:var(--txt);
-  background:linear-gradient(135deg,#F8BBD0,#E1BEE7,#CE93D8);
+
+  background:
+    radial-gradient(700px 500px at 10% 0%, rgba(255,255,255,.2), transparent),
+    radial-gradient(700px 500px at 90% 0%, rgba(255,255,255,.2), transparent),
+    linear-gradient(135deg,#F8BBD0,#E1BEE7,#CE93D8);
 }
 
+/* HEADER */
 .topbar{
   position:fixed;
   top:0;
   width:100%;
   display:flex;
   justify-content:flex-end;
-  padding:12px;
+  box-sizing:border-box;
+  z-index:10;
+
+  padding:12px 26px;
 }
 
 .backbtn{
   background:linear-gradient(135deg,var(--accent2),var(--accent));
   border:none;
-  padding:12px;
+  padding:12px 16px;
   border-radius:14px;
+  font-weight:900;
   color:white;
 }
 
+/* LAYOUT */
 .wrap{
-  padding:90px 16px;
+  max-width:720px;
+  margin-right:6px;              /* ✅ ; manquant corrigé */
+  padding:92px 16px 16px;        /* ✅ un peu plus pour éviter tout chevauchement */
+  box-sizing:border-box;
 }
 
 .card{
-  background:white;
+  background:rgba(255,255,255,.85);
   color:black;
   border-radius:16px;
   padding:16px;
   margin-bottom:16px;
 }
 
+/* GRID ALIGNEMENT */
+.row{
+  display:flex;
+  gap:10px;                      /* ✅ petit espace constant */
+}
+
+.col{
+  flex:1;
+  min-width:0;                   /* ✅ évite les dépassements/chevauchements en flex */
+}
+
+/* INPUT */
 select,input{
+  height:48px;
   width:100%;
+  padding:0 12px;
+  border-radius:12px;
+  border:1px solid #ddd;
+  font-size:18px;
+  box-sizing:border-box;         /* ✅ essentiel pour que 100% n’overflow pas */
+}
+
+/* ✅ Menu déroulant utilisateur plus court */
+#user{
+  max-width:340px;               /* ✅ ne prend plus toute la page */
+}
+
+/* Si tu veux l'aligner à gauche tout en restant "court" */
+.card label + #user{
+  display:block;
+}
+
+/* ✅ En mobile très étroit : prix/lien passent en colonne proprement */
+@media (max-width: 380px){
+  .row{
+    flex-wrap:wrap;
+  }
+  .row .col{
+    flex-basis:100%;
+  }
+}
+
+/* BOUTON */
+.primary{
+  width:100%;
+  margin-top:10px;
+  padding:14px;
+  border-radius:14px;
+  border:none;
+  font-weight:900;
+  font-size:18px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:white;
+}
+
+/* ✅ CALENDRIER */
+.calendar{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+}
+
+.day{
+  background:white;
+  border-radius:12px;
   padding:10px;
+}
+
+.day b{
+  font-size:16px;
+}
+
+.options{
+  display:flex;
+  gap:6px;
   margin-top:6px;
 }
 
-button{
-  margin-top:10px;
+.options select{
+  height:38px;
+  font-size:15px;
 }
 
+/* ✅ PROPOSITIONS */
 .prop{
   background:#f3e5f5;
+  border-radius:12px;
   padding:10px;
-  margin-top:10px;
+  margin-top:8px;
+}
+
+.vote{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:6px;
+}
+
+.vote button{
+  border:none;
+  padding:6px 10px;
   border-radius:10px;
+  background:var(--accent);
+  color:white;
 }
 </style>
 </head>
@@ -72,131 +176,299 @@ button{
 
 <div class="wrap">
 
-<div class="card">
-<label>👤 Qui es-tu</label>
-<select id="user"></select>
-</div>
+  <div class="card">
+    <label>👤 Qui es-tu</label>
+    <select id="user"></select>
+  </div>
 
-<div class="card">
-<input id="titre" placeholder="Idée">
-<input id="prix" placeholder="Prix">
-<input id="lien" placeholder="Lien">
-<button onclick="add()">Ajouter</button>
+  <div class="card">
+    <b>🌴 Vacances</b>
+    <div id="cal" class="calendar"></div>
+  </div>
 
-<div id="props"></div>
+  <div class="card">
+
+    <div class="row">
+      <div class="col">
+        <input id="titre" placeholder="Karting 🏎 / Escape 🔐">
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <input id="prix" placeholder="Prix">
+      </div>
+      <div class="col">
+        <input id="lien" placeholder="Lien">
+      </div>
+    </div>
+
+    <button class="primary" onclick="add()">➕ Ajouter</button>
+
+    <b>🔥 Idées proposées</b>
+    <div id="props"></div>
+
+  </div>
+
 </div>
 
 <script>
-const API_URL="https://script.google.com/macros/s/AKfycbzUKrmzXep1WFNasSbZcQvYpfmybypxWwS_GAecMYPRE0_f0ipQRfT7j9xNZtiZs0ED/exec";
+/** 🔌 URL de ton Apps Script déployé (Web App) */
+const API_URL = "https://script.google.com/macros/s/AKfycbzUKrmzXep1WFNasSbZcQvYpfmybypxWwS_GAecMYPRE0_f0ipQRfT7j9xNZtiZs0ED/exec";
+console.log("VACANCES chargé, API_URL =", API_URL);
 
-let model={enfants:[],propositions:[]};
+/** Modèle local, alimenté par l’API */
+let model = {
+  enfants: [],
+  propositions: [],
+  calendrier: [] // {dateKey, dateLabel, userId, choice1, choice2}
+};
 
-/* API */
-async function apiGET(){
-  const r=await fetch(API_URL+"?action=getAll");
+/* =========================
+   API HELPERS
+========================= */
+async function apiGET(action){
+  const r = await fetch(`${API_URL}?action=${encodeURIComponent(action)}`, { redirect: "follow" });
   return await r.json();
 }
 
-async function apiPOST(data){
-  const r=await fetch(API_URL,{
-    method:"POST",
-    headers:{"Content-Type":"text/plain"},
-    body:JSON.stringify(data)
+// ✅ IMPORTANT : text/plain pour éviter le preflight CORS avec Apps Script WebApp [1](https://stackoverflow.com/questions/53433938/how-do-i-allow-a-cors-requests-in-my-google-script)[2](https://www.linkedin.com/pulse/from-cors-code-how-i-solved-tricky-google-apps-script-petar-%C5%A1krbi%C4%87-lwptf)
+async function apiPOST(payload){
+  const r = await fetch(API_URL, {
+    method: "POST",
+    redirect: "follow",
+    headers: { "Content-Type":"text/plain;charset=utf-8" },
+    body: JSON.stringify(payload)
   });
   return await r.json();
 }
 
-/* LOAD */
-async function load(){
-  const res=await apiGET();
-  model=res.data;
-  fillUsers();
-  render();
-}
+/* =========================
+   LOAD DATA FROM SHEETS
+========================= */
+async function loadFromAPI(){
+  console.log("Appel API getAll...");
+  const res = await apiGET("getAll");
 
-/* USERS */
-function fillUsers(){
-  const s=document.getElementById("user");
-  s.innerHTML="";
-  model.enfants.forEach(e=>{
-    s.innerHTML+=`<option value="${e.id}">${e.nom}</option>`;
-  });
-}
-
-function getUser(){
-  return document.getElementById("user").value;
-}
-
-/* ADD */
-async function add(){
-  const titre=document.getElementById("titre").value;
-  const userId=getUser();
-
-  const res=await apiPOST({
-    action:"addProp",
-    titre,
-    userId
-  });
-
-  if(!res.ok){alert(res.error);return;}
-
-  load();
-}
-
-/* VOTE (1 seul) */
-async function vote(id){
-  const userId=getUser();
-
-  const res=await apiPOST({
-    action:"vote",
-    id,
-    userId
-  });
-
-  if(!res.ok){
-    alert(res.error); // message "déjà voté"
+  if(!res.ok) {
+    console.error("Erreur API:", res.error);
+    alert("Erreur API: " + res.error);
     return;
   }
 
-  load();
+  const data = res.data || {};
+
+  model.enfants = (data.enfants || []).map(e => ({
+    id: String(e.id || ""),
+    nom: String(e.nom || ""),
+    avatar: String(e.avatar || "")
+  }));
+
+  model.propositions = (data.propositions || []).map(p => ({
+    id: String(p.id || ""),
+    titre: String(p.titre || ""),
+    prix: String(p.prix || ""),
+    lien: String(p.lien || ""),
+    votes: Number(p.votes || 0)
+  }));
+
+  model.calendrier = (data.calendrier || []).map(c => ({
+    dateKey: String(c.dateKey || ""),
+    dateLabel: String(c.dateLabel || ""),
+    userId: String(c.userId || ""),
+    choice1: String(c.choice1 || ""),
+    choice2: String(c.choice2 || "")
+  }));
+
+  fillUsers();
+  renderProps();
+  renderCal();
 }
 
-/* RENDER */
-function render(){
-  const p=document.getElementById("props");
-  p.innerHTML="";
+/* =========================
+   UI : USERS
+========================= */
+function getSelectedUserId(){
+  const sel = document.getElementById("user");
+  return sel ? sel.value : "";
+}
 
-  model.propositions.forEach(x=>{
-    p.innerHTML+=`
+function fillUsers(){
+  const sel = document.getElementById('user');
+  if(!sel) return;
+
+  sel.innerHTML = '';
+
+  model.enfants.forEach(e => {
+    sel.innerHTML += `<option value="${escapeAttr(e.id)}">${escapeHtml(e.avatar)} ${escapeHtml(e.nom)}</option>`;
+  });
+
+  sel.onchange = () => renderCal();
+}
+
+/* =========================
+   UI : PROPOSITIONS
+========================= */
+function renderProps(){
+  const p = document.getElementById('props');
+  if(!p) return;
+
+  p.innerHTML = '';
+
+  model.propositions.forEach(x => {
+    p.innerHTML += `
       <div class="prop">
-        <b>${escapeHtml(x.titre)}</b><br>
-        👤 ${escapeHtml(x.auteur || "")}<br>
-        👍 ${x.votes || 0}
-        <button onclick="vote('${x.id}')">+1</button>
+        <b>🎯 ${escapeHtml(x.titre)}</b><br>
+        💰 ${escapeHtml(x.prix || '-') }<br>
+        ${x.lien ? `🔗 <a href="${escapeAttr(x.lien)}" target="_blank" rel="noopener">voir</a><br>` : ''}
+
+        <div class="vote">
+          👍 ${Number(x.votes || 0)}
+          <button onclick="vote('${escapeAttr(x.id)}')">+1</button>
+        </div>
       </div>
     `;
   });
 }
 
-/* NAV */
-function goBack(){
-  window.location.href="https://semainefamille.github.io/index.html";
+async function add(){
+  console.log("CLICK AJOUTER");
+
+  const titreEl = document.getElementById('titre');
+  const prixEl  = document.getElementById('prix');
+  const lienEl  = document.getElementById('lien');
+
+  const titre = (titreEl ? titreEl.value : "").trim();
+  const prix  = (prixEl ? prixEl.value : "").trim();
+  const lien  = (lienEl ? lienEl.value : "").trim();
+
+  if(!titre) return;
+
+  const res = await apiPOST({ action:"addProp", titre, prix, lien });
+  console.log("REPONSE addProp =", res);
+
+  if(!res.ok){
+    alert("Erreur addProp: " + res.error);
+    return;
+  }
+
+  if(titreEl) titreEl.value = '';
+  if(prixEl)  prixEl.value  = '';
+  if(lienEl)  lienEl.value  = '';
+
+  await loadFromAPI();
 }
 
-/* SECURITY */
-function escapeHtml(str){
-  return String(str).replace(/[&<>"']/g, ch=>{
-    return {
-      "&":"&amp;",
-      "<":"&lt;",
-      ">":"&gt;",
-      '"':"&quot;",
-      "'":"&#39;"
-    }[ch];
+async function vote(id){
+  const res = await apiPOST({ action:"vote", id });
+  if(!res.ok){
+    alert("Erreur vote: " + res.error);
+    return;
+  }
+  await loadFromAPI();
+}
+
+/* =========================
+   UI : CALENDRIER (14 jours)
+========================= */
+function optionsHTML(selectedValue){
+  let html = `<option value=""></option>`;
+  model.propositions.forEach(p => {
+    const sel = (p.titre === selectedValue) ? "selected" : "";
+    html += `<option ${sel} value="${escapeAttr(p.titre)}">${escapeHtml(p.titre)}</option>`;
+  });
+  return html;
+}
+
+function renderCal(){
+  const c = document.getElementById('cal');
+  if(!c) return;
+
+  c.innerHTML = '';
+
+  const userId = getSelectedUserId();
+
+  const baseDays = model.calendrier
+    .filter(x => !x.userId) // lignes de base
+    .slice(0,14);
+
+  baseDays.forEach(day => {
+    const userLine = model.calendrier.find(x => x.dateKey === day.dateKey && x.userId === userId);
+    const choice1 = userLine ? userLine.choice1 : "";
+    const choice2 = userLine ? userLine.choice2 : "";
+
+    c.innerHTML += `
+      <div class="day">
+        <b>📅 ${escapeHtml(day.dateLabel || day.dateKey)}</b>
+        <div class="options">
+          <select data-datekey="${escapeAttr(day.dateKey)}" data-slot="1">
+            ${optionsHTML(choice1)}
+          </select>
+          <select data-datekey="${escapeAttr(day.dateKey)}" data-slot="2">
+            ${optionsHTML(choice2)}
+          </select>
+        </div>
+      </div>
+    `;
+  });
+
+  c.querySelectorAll("select").forEach(sel => {
+    sel.onchange = () => saveChoicesForDay(sel.dataset.datekey);
   });
 }
 
-window.onload=load;
+async function saveChoicesForDay(dateKey){
+  const userId = getSelectedUserId();
+  const box = document.getElementById("cal");
+
+  const s1 = box.querySelector(`select[data-datekey="${CSS.escape(dateKey)}"][data-slot="1"]`);
+  const s2 = box.querySelector(`select[data-datekey="${CSS.escape(dateKey)}"][data-slot="2"]`);
+
+  const choice1 = s1 ? s1.value : "";
+  const choice2 = s2 ? s2.value : "";
+
+  const res = await apiPOST({ action:"setChoice", dateKey, userId, choice1, choice2 });
+  if(!res.ok){
+    alert("Erreur setChoice: " + res.error);
+    return;
+  }
+  await loadFromAPI();
+}
+
+/* =========================
+   NAV
+========================= */
+
+
+function goBack(){
+  window.location.href = "/";
+}
+
+
+
+/* =========================
+   INIT
+========================= */
+window.onload = loadFromAPI;
+
+/* =========================
+   SECURITY HELPERS (anti injection)
+   On échappe les caractères spéciaux &, <, >, ", '  [3](https://www.geeksforgeeks.org/javascript/how-to-escape-unescape-html-characters-in-string-in-javascript/)[4](https://www.30secondsofcode.org/js/s/escape-unescape-html/)
+========================= */
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, ch => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    "\"":"&quot;",
+    "'":"&#39;"
+  }[ch]));
+}
+
+function escapeAttr(str){
+  // Suffisant pour valeur d'attribut
+  return escapeHtml(str).replace(/`/g,"&#96;");
+}
 </script>
 
 </body>
