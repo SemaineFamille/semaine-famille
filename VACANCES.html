@@ -1,159 +1,145 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <base target="_top">
+<base target="_top">
 
 <style>
 body{
-  font-family:system-ui;
-  background:#f6f3fb;
+  font-family: system-ui;
   margin:0;
-  font-size:18px;
+  background:linear-gradient(135deg,#F50870,#9C27B0);
+  color:white;
 }
 
-.wrap{padding:12px;}
+.wrap{padding:12px}
 
-h1{font-size:24px;text-align:center;}
-h2{font-size:20px;color:#6a1b9a}
-
-/* TOPBAR */
 .topbar{
   display:flex;
-  justify-content:flex-end;
-  padding:10px;
+  justify-content:space-between;
+  margin-bottom:10px;
 }
+
 .btn{
   padding:14px;
-  border:none;
   border-radius:14px;
-  font-size:18px;
+  border:none;
+  font-weight:bold;
+  font-size:16px;
+}
+
+.back{background:#000;color:#fff}
+.primary{background:#00E5FF;color:#000}
+
+/* CARDS */
+.card{
+  background:white;
+  color:#000;
+  border-radius:20px;
+  padding:16px;
+  margin-bottom:12px;
+}
+
+/* INPUT */
+select,input{
   width:100%;
+  padding:16px;
+  font-size:18px;
+  border-radius:14px;
   margin-top:8px;
 }
-.btn.back{background:#673ab7;color:#fff}
-.btn.primary{background:#F50870;color:#fff}
-.btn.small{width:auto;padding:10px 12px}
 
-/* CARD */
-.card{
+/* CALENDRIER */
+.day{
   background:#fff;
   border-radius:18px;
   padding:14px;
   margin-bottom:12px;
 }
 
-/* INPUT */
-select,input,textarea{
-  width:100%;
-  padding:14px;
+.dayTitle{
+  font-weight:bold;
   font-size:18px;
-  border-radius:12px;
-  border:2px solid #ddd;
-}
-
-/* LISTE */
-.item{
-  background:#f3e5f5;
-  border-radius:16px;
-  padding:12px;
-  margin-bottom:10px;
-}
-.avatar{font-size:26px}
-.meta{font-weight:900}
-
-/* CALENDRIER */
-.day{
-  background:#f3e5f5;
-  border-radius:16px;
-  padding:12px;
-  margin-bottom:10px;
-}
-.dnum{font-weight:bold;margin-bottom:8px}
-
-.slots{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
 }
 
 .slot{
-  background:#fff;
-  padding:10px;
-  border-radius:12px;
+  margin-top:8px;
 }
 
+.slot select{
+  font-size:16px;
+}
+
+/* PROPOSITIONS */
+.prop{
+  background:#f3e5f5;
+  border-radius:14px;
+  padding:12px;
+  margin-top:10px;
+  font-size:16px;
+}
 </style>
 
 <script>
 
-let model=null;
+let model = {
+  enfants:[
+    {id:'alessia', nom:'Alessia', avatar:'🧋'},
+    {id:'antonin', nom:'Antonin', avatar:'🎮'},
+    {id:'clement', nom:'Clément', avatar:'🏀'},
+    {id:'parents', nom:'Parents', avatar:'😎'}
+  ],
 
-// ✅ fallback si serveur ne renvoie rien
-const fallbackEnfants = [
-  {id:'alessia', nom:'Alessia', avatar:'👧'},
-  {id:'antonin', nom:'Antonin', avatar:'👦'},
-  {id:'clement', nom:'Clément', avatar:'👦'},
-  {id:'parents', nom:'Parents', avatar:'👨‍👩‍👧'}
-];
+  propositions:[
+    {id:'1', titre:'Cinéma 🎬', prix:'15'},
+    {id:'2', titre:'Piscine 🏊', prix:'5'},
+    {id:'3', titre:'Bowling 🎳', prix:'20'}
+  ],
+
+  calendrier:[
+    {date:'2026-07-01', c1_id:'', c2_id:''},
+    {date:'2026-07-02', c1_id:'', c2_id:''},
+    {date:'2026-07-03', c1_id:'', c2_id:''}
+  ]
+};
 
 function byId(id){return document.getElementById(id);}
 
+/******** USERS ********/
 function fillUsers(){
-  const sel = byId('user');
-
-  const enfants = (model && model.enfants && model.enfants.length)
-    ? model.enfants
-    : fallbackEnfants;
-
+  const sel=byId('user');
   sel.innerHTML='';
-  
-  enfants.forEach(e=>{
+
+  model.enfants.forEach(e=>{
     const o=document.createElement('option');
     o.value=e.id;
-    o.textContent=e.avatar+" "+e.nom;
+    o.textContent = e.avatar + " " + e.nom;
     sel.appendChild(o);
   });
-
-  sel.selectedIndex=0;
 }
 
-function goBack(){
-  window.location.href='?page=index';
-}
-
-/************** PROPOSITIONS **************/
+/******** PROPS ********/
 function renderProps(){
   const cont=byId('props');
   cont.innerHTML='';
 
-  if(!model.propositions.length){
-    cont.innerHTML='Aucune proposition';
-    return;
-  }
-
   model.propositions.forEach(p=>{
     const div=document.createElement('div');
-    div.className='item';
-
-    div.innerHTML=`
-      <div class="avatar">${p.auteurNom || ''}</div>
-      <div class="meta">${p.titre}</div>
-      <div>💰 ${p.prix || '—'}</div>
-      ${p.lien ? `<a href="${p.lien}" target="_blank">🔗 lien</a>` : ''}
-    `;
-
+    div.className='prop';
+    div.innerHTML=`🎯 ${p.titre} — 💰 ${p.prix}`;
     cont.appendChild(div);
   });
 }
 
-/************** CALENDRIER **************/
+/******** CALENDAR ********/
 function buildOptions(selected){
-  let html=`<option value="">--</option>`;
+  let html='<option value="">-- choisir --</option>';
+
   model.propositions.forEach(p=>{
-    html+=`<option value="${p.id}" ${p.id==selected?'selected':''}>
+    html += `<option value="${p.id}">
       ${p.titre}
     </option>`;
   });
+
   return html;
 }
 
@@ -162,25 +148,24 @@ function renderCalendar(){
   cont.innerHTML='';
 
   model.calendrier.forEach(day=>{
-
     const div=document.createElement('div');
     div.className='day';
 
     div.innerHTML=`
-      <div class="dnum">${day.date}</div>
+      <div class="dayTitle">📅 ${day.date}</div>
 
-      <div class="slots">
-        <div class="slot">
-          <select onchange="save('${day.date}',1,this.value)">
-            ${buildOptions(day.c1_id)}
-          </select>
-        </div>
+      <div class="slot">
+        🌤 Matin
+        <select>
+          ${buildOptions(day.c1_id)}
+        </select>
+      </div>
 
-        <div class="slot">
-          <select onchange="save('${day.date}',2,this.value)">
-            ${buildOptions(day.c2_id)}
-          </select>
-        </div>
+      <div class="slot">
+        🌆 Après-midi
+        <select>
+          ${buildOptions(day.c2_id)}
+        </select>
       </div>
     `;
 
@@ -188,73 +173,71 @@ function renderCalendar(){
   });
 }
 
-function save(date,slot,val){
-  google.script.run.setCalendarChoice(date,slot,val,'',byId('user').value);
+/******** ADD ********/
+function add(){
+  const titre=byId('titre').value;
+  const prix=byId('prix').value;
+
+  if(!titre) return;
+
+  model.propositions.push({
+    id:Date.now(),
+    titre,
+    prix
+  });
+
+  renderProps();
+  renderCalendar();
 }
 
-/************** LOAD **************/
+/******** LOAD ********/
 function load(){
-  google.script.run.withSuccessHandler(m=>{
-    model=m;
-
-    fillUsers();
-    renderProps();
-    renderCalendar();
-
-  }).getModel();
+  fillUsers();
+  renderProps();
+  renderCalendar();
 }
 
 window.onload=load;
 
+function goBack(){
+  window.location.href='?page=index';
+}
 </script>
+
 </head>
 
 <body>
 
-<div class="topbar">
-  <button class="btn back" onclick="goBack()">⬅ Retour</button>
-</div>
-
 <div class="wrap">
 
-<h1>Vacances</h1>
+<div class="topbar">
+  <button class="btn back" onclick="goBack()">⬅ Retour</button>
+  <button class="btn primary">☀️ Vacances</button>
+</div>
 
 <div class="card">
-  <label>Qui es-tu ?</label>
+  <h2>👤 Qui es-tu ?</h2>
   <select id="user"></select>
 </div>
 
 <div class="card">
-  <h2>📅 Calendrier</h2>
+  <h2>📅 Planning</h2>
   <div id="cal"></div>
 </div>
 
 <div class="card">
-  <h2>💡 Propositions</h2>
+  <h2>💡 Proposer une idée</h2>
 
-  <input id="titre" placeholder="activité">
+  <input id="titre" placeholder="ex: Escape game 🔐">
   <input id="prix" placeholder="prix">
-  <input id="lien" placeholder="lien">
 
   <button class="btn primary" onclick="add()">Ajouter</button>
 
+  <h3>🔥 Idées</h3>
   <div id="props"></div>
 </div>
 
 </div>
-
-<script>
-function add(){
-  google.script.run
-    .withSuccessHandler(load)
-    .addProposition(
-      byId('user').value,
-      byId('titre').value,
-      byId('prix').value,
-      byId('lien').value
-    );
-}
-</script>
 
 </body>
 </html>
