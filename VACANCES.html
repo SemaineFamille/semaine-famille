@@ -217,58 +217,48 @@ select,input{
 </div>
 
 <script>
-/** 🔌 URL Apps Script WebApp */
 const API_URL = "https://script.google.com/macros/s/AKfycbzUKrmzXep1WFNasSbZcQvYpfmybypxWwS_GAecMYPRE0_f0ipQRfT7j9xNZtiZs0ED/exec";
+
+/* ================= CAL (toggle) ================= */
 let calVisible = false;
 
 function toggleCal(){
   const cal = document.getElementById("cal");
-  const title = cal.previousElementSibling;
 
   calVisible = !calVisible;
   cal.style.display = calVisible ? "grid" : "none";
 
-  title.innerHTML = calVisible 
-    ? "🌴 Vacances ⬆"
-    : "🌴 Vacances ⬇";
+  const title = document.querySelector(".card b");
+  title.innerHTML = calVisible ? "🌴 Vacances ⬆" : "🌴 Vacances ⬇";
 }
 
-/** Modèle local */
+/* ================= MODEL ================= */
 let model = {
   enfants: [],
   propositions: [],
   calendrier: []
 };
 
-/* =========================================================
-   JSONP helper (pour GitHub Pages -> évite CORS)
-   Apps Script peut servir du JSONP via ContentService (callback/prefix). [1](https://developers.google.com/apps-script/guides/content)[6](https://developers.google.com/apps-script/reference/content/)[2](https://developers.google.com/apps-script/guides/content?hl=fr)
-========================================================= */
+/* ================= API ================= */
 function jsonpCall(params){
   return new Promise((resolve, reject) => {
-    const cbName = "cb_" + Date.now() + "_" + Math.floor(Math.random()*100000);
-    params.callback = cbName;
+    const cb = "cb_" + Date.now();
+    params.callback = cb;
 
-    const qs = new URLSearchParams(params).toString();
-    const url = `${API_URL}?${qs}`;
+    const url = API_URL + "?" + new URLSearchParams(params);
 
     const s = document.createElement("script");
     s.src = url;
-    s.async = true;
 
-    window[cbName] = (data) => {
-      try { delete window[cbName]; } catch(e) { window[cbName] = undefined; }
+    window[cb] = (data)=>{
+      delete window[cb];
       s.remove();
       resolve(data);
     };
 
-    s.onerror = () => {
-      try { delete window[cbName]; } catch(e) { window[cbName] = undefined; }
-      s.remove();
-      reject(new Error("JSONP failed"));
-    };
+    s.onerror = ()=>reject("erreur API");
 
-    document.head.appendChild(s);
+    document.body.appendChild(s);
   });
 }
 
@@ -277,133 +267,79 @@ async function apiGET(action){
 }
 
 async function apiPOST(payload){
-  // On garde le nom apiPOST pour ne pas toucher au reste,
-  // mais en GitHub Pages on passe en GET JSONP (pas de CORS).
   return await jsonpCall(payload);
 }
 
-/* =========================
-   LOAD DATA
-========================= */
+/* ================= LOAD ================= */
 async function loadFromAPI(){
   const res = await apiGET("getAll");
+
   if(!res || !res.ok){
-    alert("Erreur API: " + (res && res.error ? res.error : "aucune réponse"));
+    alert(res?.error || "Erreur API");
     return;
   }
 
   const data = res.data || {};
 
-  model.enfants = (data.enfants || []).map(e => ({
-    id: String(e.id || ""),
-    nom: String(e.nom || ""),
-    avatar: String(e.avatar || "")
-  }));
-
-  model.propositions = (data.propositions || []).map(p => ({
-    id: String(p.id || ""),
-    titre: String(p.titre || ""),
-    prix: String(p.prix || ""),
-    lien: String(p.lien || ""),
-    votes: Number(p.votes || 0),
-    // facultatif si ton script renvoie "auteur" / "voters"
-    auteur: String(p.auteur || ""),
-    voters: String(p.voters || "")
-  }));
-
-  model.calendrier = (data.calendrier || []).map(c => ({
-    dateKey: String(c.dateKey || ""),
-    dateLabel: String(c.dateLabel || ""),
-    userId: String(c.userId || ""),
-    choice1: String(c.choice1 || ""),
-    choice2: String(c.choice2 || "")
-  }));
+  model.enfants = data.enfants || [];
+  model.propositions = data.propositions || [];
+  model.calendrier = data.calendrier || [];
 
   fillUsers();
   renderProps();
   renderCal();
 }
 
-/* =========================
-   USERS
-========================= */
+/* ================= USERS ================= */
 function getSelectedUserId(){
   const sel = document.getElementById("user");
   return sel ? sel.value : "";
 }
 
 function fillUsers(){
-  const sel = document.getElementById('user');
-  if(!sel) return;
+  const sel = document.getElementById("user");
+  sel.innerHTML = "";
 
-  sel.innerHTML = '';
-  model.enfants.forEach(e => {
-    sel.innerHTML += `<option value="${escapeAttr(e.id)}">${escapeHtml(e.avatar)} ${escapeHtml(e.nom)}</option>`;
-  });
-
-  sel.onchange = () => renderCal();
-}
-
-/* =========================
-   PROPOSITIONS
-========================= */
-function renderProps(){
-  const p = document.getElementById('props');
-  if(!p) return;
-
-  p.innerHTML = '';
-
-  model.propositions.forEach(x => {
-    p.innerHTML += `
-      <div class="prop">
-        <b>🎯 ${escapeHtml(x.titre)}</b><br>
-        💰 ${escapeHtml(x.prix || '-') }<br>
-        ${x.lien ? `🔗 <a href="${escapeAttr(x.lien)}" target="_blank" rel="noopener">voir</a><br>` : ''}
-
-        <div class="vote">
-          👍 ${Number(x.votes || 0)}
-          <button onclick="vote('${escapeAttr(x.id)}')">+1</button>
-        </div>
-      </div>
-    `;
+  model.enfants.forEach(e=>{
+    sel.innerHTML += `<option value="${e.id}">${e.avatar} ${e.nom}</option>`;
   });
 }
 
+/* ================= ADD ================= */
 async function add(){
-  const titreEl = document.getElementById('titre');
-  const prixEl  = document.getElementById('prix');
-  const lienEl  = document.getElementById('lien');
-
-  const titre = (titreEl ? titreEl.value : "").trim();
-  const prix  = (prixEl ? prixEl.value : "").trim();
-  const lien  = (lienEl ? lienEl.value : "").trim();
+  const titre = document.getElementById("titre").value.trim();
+  const prix  = document.getElementById("prix").value.trim();
+  const lien  = document.getElementById("lien").value.trim();
+  const userId = getSelectedUserId();
 
   if(!titre) return;
 
-  // (optionnel) si tu veux "nominatif" côté script: envoyer userId aussi
-  const userId = getSelectedUserId();
+  const res = await apiPOST({
+    action:"addProp",
+    titre,
+    prix,
+    lien,
+    userId
+  });
 
-  const res = await apiPOST({ action:"addProp", titre, prix, lien, userId });
   if(!res || !res.ok){
-    alert("Erreur addProp: " + (res && res.error ? res.error : "aucune réponse"));
+    alert(res?.error || "Erreur ajout");
     return;
   }
 
-  if(titreEl) titreEl.value = '';
-  if(prixEl)  prixEl.value  = '';
-  if(lienEl)  lienEl.value  = '';
+  document.getElementById("titre").value="";
+  document.getElementById("prix").value="";
+  document.getElementById("lien").value="";
 
-  await loadFromAPI();
+  loadFromAPI();
 }
 
-/* ✅ Vote 1 fois / personne : on envoie userId
-   -> le blocage doit être appliqué côté Apps Script (voters). */
+/* ================= VOTE ================= */
 async function vote(id){
   const userId = getSelectedUserId();
 
-  const res loadFromAPI();  const res = await apiPOST({ 
-}
-    action:"vote", 
+  const res = await apiPOST({
+    action:"vote",
     id,
     userId
   });
@@ -413,95 +349,54 @@ async function vote(id){
     return;
   }
 
-
-
-/* =========================
-   CALENDRIER (14 jours)
-========================= */
-function optionsHTML(selectedValue){
-  let html = `<option value=""></option>`;
-  model.propositions.forEach(p => {
-    const sel = (p.titre === selectedValue) ? "selected" : "";
-    html += `<option ${sel} value="${escapeAttr(p.titre)}">${escapeHtml(p.titre)}</option>`;
-  });
-  return html;
+  loadFromAPI();
 }
 
-function renderCal(){
-  const c = document.getElementById('cal');
-  if(!c) return;
+/* ================= PROPS ================= */
+function renderProps(){
+  const p = document.getElementById("props");
+  p.innerHTML = "";
 
-  c.innerHTML = '';
+  model.propositions.forEach(x=>{
+    p.innerHTML += `
+      <div class="prop">
+        <b>🎯 ${escapeHtml(x.titre)}</b><br>
+        💰 ${x.prix || "-"}<br>
+        ${x.lien ? `<a href="${x.lien}" target="_blank">voir</a><br>` : ""}
 
-  const userId = getSelectedUserId();
-
-  const baseDays = model.calendrier
-    .filter(x => !x.userId)
-    .slice(0,14);
-
-  baseDays.forEach(day => {
-    const userLine = model.calendrier.find(x => x.dateKey === day.dateKey && x.userId === userId);
-    const choice1 = userLine ? userLine.choice1 : "";
-    const choice2 = userLine ? userLine.choice2 : "";
-
-    c.innerHTML += `
-      <div class="day">
-        <b>📅 ${escapeHtml(day.dateLabel || day.dateKey)}</b>
-        <div class="options">
-          <select data-datekey="${escapeAttr(day.dateKey)}" data-slot="1">
-            ${optionsHTML(choice1)}
-          </select>
-          <select data-datekey="${escapeAttr(day.dateKey)}" data-slot="2">
-            ${optionsHTML(choice2)}
-          </select>
+        <div class="vote">
+          👍 ${x.votes || 0}
+          <button onclick="vote('${x.id}')">+1</button>
         </div>
       </div>
     `;
   });
-
-  c.querySelectorAll("select").forEach(sel => {
-    sel.onchange = () => saveChoicesForDay(sel.dataset.datekey);
-  });
 }
 
-async function saveChoicesForDay(dateKey){
-  const userId = getSelectedUserId();
-  const box = document.getElementById("cal");
+/* ================= CAL ================= */
+function renderCal(){
+  const c = document.getElementById("cal");
+  c.innerHTML = "";
 
-  const s1 = box.querySelector(`select[data-datekey="${CSS.escape(dateKey)}"][data-slot="1"]`);
-  const s2 = box.querySelector(`select[data-datekey="${CSS.escape(dateKey)}"][data-slot="2"]`);
-
-  const choice1 = s1 ? s1.value : "";
-  const choice2 = s2 ? s2.value : "";
-
-  const res = await apiPOST({ action:"setChoice", dateKey, userId, choice1, choice2 });
-  if(!res || !res.ok){
-    alert("Erreur setChoice: " + (res && res.error ? res.error : "aucune réponse"));
-    return;
-  }
-
-  await loadFromAPI();
+  model.calendrier
+    .filter(x=>!x.userId)
+    .slice(0,14)
+    .forEach(day=>{
+      c.innerHTML += `
+        <div class="day">
+          <b>📅 ${day.dateLabel}</b>
+        </div>
+      `;
+    });
 }
 
-/* =========================
-   NAV (anti-404 GitHub Pages)
-   - marche si site user (/) OU projet (/repo/)
-========================= */
+/* ================= NAV ================= */
 function goBack(){
-  const parts = window.location.pathname.split('/').filter(Boolean);
-  const base = (parts.length >= 2 && !parts[0].includes('.')) ? '/' + parts[0] : '';
-  window.location.href = window.location.origin + base + '/index.html';
+  window.location.href = "./index.html";
 }
 
-/* =========================
-   INIT
-========================= */
-window.onload = loadFromAPI;
-
-/* =========================
-   SECURITY HELPERS
-========================= */
-function escapeHtml(str){ 
+/* ================= SECURITY ================= */
+function escapeHtml(str){
   return String(str).replace(/[&<>"']/g, ch => ({
     "&":"&amp;",
     "<":"&lt;",
@@ -511,9 +406,9 @@ function escapeHtml(str){
   }[ch]));
 }
 
-function escapeAttr(str){
-  return escapeHtml(str).replace(/`/g,"&#96;");
-}
+/* ================= INIT ================= */
+window.onload = loadFromAPI;
+
 </script>
 
 </body>
