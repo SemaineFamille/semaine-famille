@@ -47,8 +47,8 @@ body{
 /* LAYOUT */
 .wrap{
   max-width:720px;
-  margin-right:6px;              /* ✅ ; manquant corrigé */
-  padding:92px 16px 16px;        /* ✅ un peu plus pour éviter tout chevauchement */
+  margin-right:6px;
+  padding:92px 16px 16px;
   box-sizing:border-box;
 }
 
@@ -63,12 +63,12 @@ body{
 /* GRID ALIGNEMENT */
 .row{
   display:flex;
-  gap:10px;                      /* ✅ petit espace constant */
+  gap:10px;
 }
 
 .col{
   flex:1;
-  min-width:0;                   /* ✅ évite les dépassements/chevauchements en flex */
+  min-width:0;
 }
 
 /* INPUT */
@@ -79,12 +79,12 @@ select,input{
   border-radius:12px;
   border:1px solid #ddd;
   font-size:18px;
-  box-sizing:border-box;         /* ✅ essentiel pour que 100% n’overflow pas */
+  box-sizing:border-box;
 }
 
 /* ✅ Menu déroulant utilisateur plus court */
 #user{
-  max-width:340px;               /* ✅ ne prend plus toute la page */
+  max-width:340px;
 }
 
 /* Si tu veux l'aligner à gauche tout en restant "court" */
@@ -213,46 +213,65 @@ select,input{
 </div>
 
 <script>
-/** 🔌 URL de ton Apps Script déployé (Web App) */
+/** 🔌 URL Apps Script WebApp */
 const API_URL = "https://script.google.com/macros/s/AKfycbzUKrmzXep1WFNasSbZcQvYpfmybypxWwS_GAecMYPRE0_f0ipQRfT7j9xNZtiZs0ED/exec";
-console.log("VACANCES chargé, API_URL =", API_URL);
 
-/** Modèle local, alimenté par l’API */
+/** Modèle local */
 let model = {
   enfants: [],
   propositions: [],
-  calendrier: [] // {dateKey, dateLabel, userId, choice1, choice2}
+  calendrier: []
 };
 
-/* =========================
-   API HELPERS
-========================= */
-async function apiGET(action){
-  const r = await fetch(`${API_URL}?action=${encodeURIComponent(action)}`, { redirect: "follow" });
-  return await r.json();
-}
+/* =========================================================
+   JSONP helper (pour GitHub Pages -> évite CORS)
+   Apps Script peut servir du JSONP via ContentService (callback/prefix). [1](https://developers.google.com/apps-script/guides/content)[6](https://developers.google.com/apps-script/reference/content/)[2](https://developers.google.com/apps-script/guides/content?hl=fr)
+========================================================= */
+function jsonpCall(params){
+  return new Promise((resolve, reject) => {
+    const cbName = "cb_" + Date.now() + "_" + Math.floor(Math.random()*100000);
+    params.callback = cbName;
 
-// ✅ IMPORTANT : text/plain pour éviter le preflight CORS avec Apps Script WebApp [1](https://stackoverflow.com/questions/53433938/how-do-i-allow-a-cors-requests-in-my-google-script)[2](https://www.linkedin.com/pulse/from-cors-code-how-i-solved-tricky-google-apps-script-petar-%C5%A1krbi%C4%87-lwptf)
-async function apiPOST(payload){
-  const r = await fetch(API_URL, {
-    method: "POST",
-    redirect: "follow",
-    headers: { "Content-Type":"text/plain;charset=utf-8" },
-    body: JSON.stringify(payload)
+    const qs = new URLSearchParams(params).toString();
+    const url = `${API_URL}?${qs}`;
+
+    const s = document.createElement("script");
+    s.src = url;
+    s.async = true;
+
+    window[cbName] = (data) => {
+      try { delete window[cbName]; } catch(e) { window[cbName] = undefined; }
+      s.remove();
+      resolve(data);
+    };
+
+    s.onerror = () => {
+      try { delete window[cbName]; } catch(e) { window[cbName] = undefined; }
+      s.remove();
+      reject(new Error("JSONP failed"));
+    };
+
+    document.head.appendChild(s);
   });
-  return await r.json();
+}
+
+async function apiGET(action){
+  return await jsonpCall({ action });
+}
+
+async function apiPOST(payload){
+  // On garde le nom apiPOST pour ne pas toucher au reste,
+  // mais en GitHub Pages on passe en GET JSONP (pas de CORS).
+  return await jsonpCall(payload);
 }
 
 /* =========================
-   LOAD DATA FROM SHEETS
+   LOAD DATA
 ========================= */
 async function loadFromAPI(){
-  console.log("Appel API getAll...");
   const res = await apiGET("getAll");
-
-  if(!res.ok) {
-    console.error("Erreur API:", res.error);
-    alert("Erreur API: " + res.error);
+  if(!res || !res.ok){
+    alert("Erreur API: " + (res && res.error ? res.error : "aucune réponse"));
     return;
   }
 
@@ -269,7 +288,10 @@ async function loadFromAPI(){
     titre: String(p.titre || ""),
     prix: String(p.prix || ""),
     lien: String(p.lien || ""),
-    votes: Number(p.votes || 0)
+    votes: Number(p.votes || 0),
+    // facultatif si ton script renvoie "auteur" / "voters"
+    auteur: String(p.auteur || ""),
+    voters: String(p.voters || "")
   }));
 
   model.calendrier = (data.calendrier || []).map(c => ({
@@ -286,7 +308,7 @@ async function loadFromAPI(){
 }
 
 /* =========================
-   UI : USERS
+   USERS
 ========================= */
 function getSelectedUserId(){
   const sel = document.getElementById("user");
@@ -298,7 +320,6 @@ function fillUsers(){
   if(!sel) return;
 
   sel.innerHTML = '';
-
   model.enfants.forEach(e => {
     sel.innerHTML += `<option value="${escapeAttr(e.id)}">${escapeHtml(e.avatar)} ${escapeHtml(e.nom)}</option>`;
   });
@@ -307,7 +328,7 @@ function fillUsers(){
 }
 
 /* =========================
-   UI : PROPOSITIONS
+   PROPOSITIONS
 ========================= */
 function renderProps(){
   const p = document.getElementById('props');
@@ -332,8 +353,6 @@ function renderProps(){
 }
 
 async function add(){
-  console.log("CLICK AJOUTER");
-
   const titreEl = document.getElementById('titre');
   const prixEl  = document.getElementById('prix');
   const lienEl  = document.getElementById('lien');
@@ -344,11 +363,12 @@ async function add(){
 
   if(!titre) return;
 
-  const res = await apiPOST({ action:"addProp", titre, prix, lien });
-  console.log("REPONSE addProp =", res);
+  // (optionnel) si tu veux "nominatif" côté script: envoyer userId aussi
+  const userId = getSelectedUserId();
 
-  if(!res.ok){
-    alert("Erreur addProp: " + res.error);
+  const res = await apiPOST({ action:"addProp", titre, prix, lien, userId });
+  if(!res || !res.ok){
+    alert("Erreur addProp: " + (res && res.error ? res.error : "aucune réponse"));
     return;
   }
 
@@ -359,31 +379,21 @@ async function add(){
   await loadFromAPI();
 }
 
+/* ✅ Vote 1 fois / personne : on envoie userId
+   -> le blocage doit être appliqué côté Apps Script (voters). */
 async function vote(id){
-  const userId = getSelectedUserId.ok){  const userId = getSelectedUserId();
-    alert(res.error); // ex: "déjà voté"
-    return;
-  }
+  const userId = getSelectedUserId();
+  const res = await apiPOST({ action:"vote", id, userId });
 
-  await loadFromAPI();
-}
-
-  const res = await apiPOST({ 
-    action:"vote", 
-    id,
-    userId   // ✅ ajouté
-  });
-
-
-  if(!res.ok){
-    alert("Erreur vote: " + res.error);
+  if(!res || !res.ok){
+    alert((res && res.error) ? res.error : "Erreur vote");
     return;
   }
   await loadFromAPI();
 }
 
 /* =========================
-   UI : CALENDRIER (14 jours)
+   CALENDRIER (14 jours)
 ========================= */
 function optionsHTML(selectedValue){
   let html = `<option value=""></option>`;
@@ -403,7 +413,7 @@ function renderCal(){
   const userId = getSelectedUserId();
 
   const baseDays = model.calendrier
-    .filter(x => !x.userId) // lignes de base
+    .filter(x => !x.userId)
     .slice(0,14);
 
   baseDays.forEach(day => {
@@ -442,23 +452,23 @@ async function saveChoicesForDay(dateKey){
   const choice2 = s2 ? s2.value : "";
 
   const res = await apiPOST({ action:"setChoice", dateKey, userId, choice1, choice2 });
-  if(!res.ok){
-    alert("Erreur setChoice: " + res.error);
+  if(!res || !res.ok){
+    alert("Erreur setChoice: " + (res && res.error ? res.error : "aucune réponse"));
     return;
   }
+
   await loadFromAPI();
 }
 
 /* =========================
-   NAV
+   NAV (anti-404 GitHub Pages)
+   - marche si site user (/) OU projet (/repo/)
 ========================= */
-
-
 function goBack(){
-  window.location.href = window.location.origin + "/index.html";
+  const parts = window.location.pathname.split('/').filter(Boolean);
+  const base = (parts.length >= 2 && !parts[0].includes('.')) ? '/' + parts[0] : '';
+  window.location.href = window.location.origin + base + '/index.html';
 }
-
-
 
 /* =========================
    INIT
@@ -466,8 +476,7 @@ function goBack(){
 window.onload = loadFromAPI;
 
 /* =========================
-   SECURITY HELPERS (anti injection)
-   On échappe les caractères spéciaux &, <, >, ", '  [3](https://www.geeksforgeeks.org/javascript/how-to-escape-unescape-html-characters-in-string-in-javascript/)[4](https://www.30secondsofcode.org/js/s/escape-unescape-html/)
+   SECURITY HELPERS
 ========================= */
 function escapeHtml(str){
   return String(str).replace(/[&<>"']/g, ch => ({
@@ -480,7 +489,6 @@ function escapeHtml(str){
 }
 
 function escapeAttr(str){
-  // Suffisant pour valeur d'attribut
   return escapeHtml(str).replace(/`/g,"&#96;");
 }
 </script>
