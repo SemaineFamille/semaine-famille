@@ -74,7 +74,9 @@
     byId('parentTools').style.display = isParent() ? 'block' : 'none';
     renderCalendar(); // car parents ont les dropdown actifs
   }
-
+function goBack(){
+  window.location.href = '?page=index'; // adapte selon ton app
+}
   function renderProps(){
     const cont = byId('props');
     cont.innerHTML = '';
