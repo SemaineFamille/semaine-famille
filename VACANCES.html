@@ -9,7 +9,7 @@ body{
   margin:0;
   background:linear-gradient(135deg,#7b1fa2,#f06292);
   color:white;
-  font-size:20px;
+  font-size:22px; /* 🔥 PLUS GROS */
 }
 
 /* TOPBAR */
@@ -18,65 +18,83 @@ body{
   justify-content:flex-end;
   padding:12px;
 }
+
+/* NE PAS TOUCHER TON STYLE RETOUR */
 .btn{
   border:none;
-  border-radius:16px;
-  padding:14px 16px;
-  font-size:18px;
+  border-radius:18px;
+  padding:16px;
+  font-size:20px;
   font-weight:bold;
 }
-.back{background:#000;color:white}
 
-.wrap{padding:10px;}
+.wrap{padding:12px;}
 
 .card{
   background:white;
   color:black;
-  border-radius:20px;
-  padding:16px;
-  margin-bottom:14px;
+  border-radius:22px;
+  padding:18px;
+  margin-bottom:16px;
 }
 
 /* INPUT */
 select,input{
   width:100%;
-  padding:16px;
+  padding:18px;
   font-size:20px;
-  border-radius:14px;
+  border-radius:16px;
   margin-top:10px;
 }
 
 /* CALENDRIER */
 .calendar{
   display:grid;
-  grid-template-columns:repeat(2,1fr); /* 2 colonnes mobile */
-  gap:10px;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
 }
 
 .day{
   background:white;
   color:black;
-  border-radius:18px;
-  padding:12px;
+  border-radius:20px;
+  padding:14px;
   text-align:center;
+  font-size:16px;
 }
 
 .dayTitle{
-  font-weight:bold;
   font-size:18px;
+  font-weight:bold;
   margin-bottom:8px;
 }
 
-select{
-  font-size:16px;
+.slot{
+  margin-top:8px;
 }
 
 /* PROPOSITIONS */
 .prop{
   background:#f3e5f5;
-  border-radius:14px;
-  padding:12px;
-  margin-top:10px;
+  border-radius:18px;
+  padding:14px;
+  margin-top:12px;
+}
+
+.vote{
+  margin-top:8px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.vote button{
+  font-size:18px;
+  padding:8px 12px;
+  border-radius:12px;
+  border:none;
+  background:#9C27B0;
+  color:white;
 }
 </style>
 
@@ -94,18 +112,19 @@ let model={
   ],
 
   propositions:[
-    {id:'1',titre:'Cinéma 🎬'},
-    {id:'2',titre:'Piscine 🏊'},
-    {id:'3',titre:'Bowling 🎳'}
+    {id:'1',titre:'Cinéma 🎬',prix:'15 CHF',lien:'',votes:0},
+    {id:'2',titre:'Piscine 🏊',prix:'5 CHF',lien:'',votes:2}
   ],
 
   calendrier:[]
 };
 
-/******** INIT CALENDRIER ********/
+/******** CALENDRIER ********/
 function generateCalendar(){
+  if(model.calendrier.length) return;
+
   const start=new Date();
-  for(let i=0;i<10;i++){ // 10 jours exemple
+  for(let i=0;i<10;i++){
     let d=new Date(start);
     d.setDate(d.getDate()+i);
 
@@ -130,7 +149,7 @@ function fillUsers(){
   });
 }
 
-/******** PROPS ********/
+/******** PROPOSITIONS ********/
 function renderProps(){
   const cont=document.getElementById('props');
   cont.innerHTML='';
@@ -138,13 +157,30 @@ function renderProps(){
   model.propositions.forEach(p=>{
     const div=document.createElement('div');
     div.className='prop';
-    div.innerHTML="🎯 "+p.titre;
+
+    div.innerHTML=`
+      <div>🎯 <b>${p.titre}</b></div>
+      <div>💰 ${p.prix || '-'}</div>
+      ${p.lien ? `<div>🔗 <a href="${p.lien}" target="_blank">ouvrir</a></div>`:''}
+
+      <div class="vote">
+        <span>👍 ${p.votes}</span>
+        <button onclick="vote('${p.id}')">Voter</button>
+      </div>
+    `;
+
     cont.appendChild(div);
   });
 }
 
+function vote(id){
+  const p=model.propositions.find(x=>x.id==id);
+  p.votes++;
+  renderProps();
+}
+
 /******** CALENDAR ********/
-function buildOptions(selected){
+function buildOptions(){
   let html=`<option value="">--</option>`;
   model.propositions.forEach(p=>{
     html+=`<option>${p.titre}</option>`;
@@ -163,14 +199,14 @@ function renderCalendar(){
     div.innerHTML=`
       <div class="dayTitle">📅 ${day.date}</div>
 
-      <div>
+      <div class="slot">
         🌤
-        <select>${buildOptions(day.c1)}</select>
+        <select>${buildOptions()}</select>
       </div>
 
-      <div>
+      <div class="slot">
         🌆
-        <select>${buildOptions(day.c2)}</select>
+        <select>${buildOptions()}</select>
       </div>
     `;
 
@@ -181,11 +217,17 @@ function renderCalendar(){
 /******** ADD ********/
 function add(){
   const titre=document.getElementById('titre').value;
+  const prix=document.getElementById('prix').value;
+  const lien=document.getElementById('lien').value;
+
   if(!titre) return;
 
   model.propositions.push({
     id:Date.now(),
-    titre:titre
+    titre,
+    prix,
+    lien,
+    votes:0
   });
 
   renderProps();
@@ -205,6 +247,7 @@ window.onload=load;
 function goBack(){
   window.location.href='?page=index';
 }
+
 </script>
 
 </head>
@@ -231,6 +274,8 @@ function goBack(){
   <h2>💡 Ajouter une idée</h2>
 
   <input id="titre" placeholder="Escape game 🔐 / Karting 🏎">
+  <input id="prix" placeholder="prix (CHF / EUR)">
+  <input id="lien" placeholder="site internet">
 
   <button class="btn" style="background:#00E5FF;color:black" onclick="add()">Ajouter</button>
 
