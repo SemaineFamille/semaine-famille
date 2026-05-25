@@ -188,7 +188,7 @@ select,input{
     
 
 <b id="vacTitle" onclick="toggleCal()" style="cursor:pointer;">
-  🌴 Vacances ⛱️ ⬇
+  🌴 Vacances ⛱️ ⬇️
 </b>
 
 
@@ -234,7 +234,7 @@ function toggleCal(){
   cal.style.display = calVisible ? "grid" : "none";
 
   const title = document.getElementById("vacTitle");
-  if(title) title.innerHTML = calVisible ? "🌴 Vacances ⛱️⬆️" : "🌴 Vacances ⛱️⬇️";
+  if(title) title.innerHTML = calVisible ? "🌴 Vacances ⛱️ ⬆️" : "🌴 Vacances ⛱️ ⬇️";
 }
 function formatDateFR(dateStr){
   if(!dateStr) return "";
