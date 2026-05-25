@@ -519,8 +519,7 @@ function renderCal(){
     // IMPORTANT : on retire ton filter(!x.userId) qui pouvait masquer tous les jours
     .slice(0,14)
     .forEach(day=>{
-      const dateLabel = day.dateLabel || day.date || "";
-
+      const dateLabel = day.dateLabel || day.updatedAt || day.dateKey || "";
       // Valeurs remote (si l'API renvoie déjà des slots)
       const remote1 = getDayRemoteSlot(day, 1);
       const remote2 = getDayRemoteSlot(day, 2);
