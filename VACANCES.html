@@ -453,12 +453,21 @@ function renderProps(){
   const p = document.getElementById("props");
   p.innerHTML = "";
 
-  model.propositions.forEach(x=>{
+  const byId = enfantsById();
+
+  (model.propositions || []).forEach(x=>{
+    const authorId =
+      x.userId ?? x.auteurId ?? x.authorId ?? x.createdBy ?? "";
+
+    const author = byId.get(String(authorId));
+    const who = author ? `${author.avatar || "👤"} ${escapeHtml(author.nom || "")}` : "—";
+
     p.innerHTML += `
       <div class="prop">
         <b>🎯 ${escapeHtml(x.titre)}</b><br>
-        💰 ${x.prix || "-"}<br>
-        ${x.lien ? `<a href="${x.lien}" target="_blank">voir</a><br>` : ""}
+        <span style="opacity:.8">👤 Proposé par : ${who}</span><br>
+        💰 ${escapeHtml(x.prix || "-")}<br>
+        ${x.lien ? `<a href="${x.lien}" target="_blank" rel="noopener">voir</a><br>` : ""}
 
         <div class="vote">
           👍 ${x.votes || 0}
@@ -468,7 +477,6 @@ function renderProps(){
     `;
   });
 }
-
 /* ================= CAL ================= */
 function renderCal(){
   const c = document.getElementById("cal");
