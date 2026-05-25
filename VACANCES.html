@@ -234,7 +234,37 @@ function toggleCal(){
   if(title) title.innerHTML = calVisible ? "🌴 Vacances ⬆" : "🌴 Vacances ⬇";
 }
 
+/* ================= CAL SAVE ================= */
+async function saveCal(dateLabel, slot, propId){
+  const userId = getSelectedUserId();
 
+  if(!userId){
+    alert("Choisis d’abord qui tu es (menu 👤) pour remplir le calendrier.");
+    return;
+  }
+
+  // secours immédiat côté navigateur
+  setLocalCal(dateLabel, slot, propId);
+
+  // tentative de sauvegarde API (si ton back-end a l'action)
+  const res = await apiPOST({
+    action: "setCal",     // <-- si ton Apps Script utilise un autre nom, change ici
+    dateLabel,
+    slot,
+    propId,
+    userId
+  });
+
+  if(!res || !res.ok){
+    // On garde la valeur locale ; on prévient juste.
+    console.warn("Sauvegarde calendrier API impossible:", res?.error);
+    // optionnel : alert douce
+    // alert(res?.error || "Le calendrier a été enregistré localement (API indisponible).");
+    return;
+  }
+
+  loadFromAPI();
+}
 /* ================= MODEL ================= */
 let model = {
   enfants: [],
@@ -478,21 +508,44 @@ function renderProps(){
   });
 }
 /* ================= CAL ================= */
+
 function renderCal(){
   const c = document.getElementById("cal");
   c.innerHTML = "";
 
-  model.calendrier
-    .filter(x=>!x.userId)
+  const local = getLocalCal();
+
+  (model.calendrier || [])
+    // IMPORTANT : on retire ton filter(!x.userId) qui pouvait masquer tous les jours
     .slice(0,14)
     .forEach(day=>{
+      const dateLabel = day.dateLabel || day.date || "";
+
+      // Valeurs remote (si l'API renvoie déjà des slots)
+      const remote1 = getDayRemoteSlot(day, 1);
+      const remote2 = getDayRemoteSlot(day, 2);
+
+      // Valeurs locales (prioritaires si définies)
+      const localDay = local[dateLabel] || {};
+      const v1 = localDay.slot1 ?? remote1 ?? "";
+      const v2 = localDay.slot2 ?? remote2 ?? "";
+
       c.innerHTML += `
         <div class="day">
-          <b>📅 ${day.dateLabel}</b>
+          <b>📅 ${escapeHtml(dateLabel)}</b>
+          <div class="options">
+            <select onchange="saveCal('${escapeHtml(dateLabel)}', 1, this.value)">
+              ${buildPropOptions(v1)}
+            </select>
+            <select onchange="saveCal('${escapeHtml(dateLabel)}', 2, this.value)">
+              ${buildPropOptions(v2)}
+            </select>
+          </div>
         </div>
       `;
     });
 }
+
 
 /* ================= NAV ================= */
 function goBack(){
