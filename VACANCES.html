@@ -506,22 +506,21 @@ async function vote(id){
 }
 
 /* ================= PROPS ================= */
+
 function renderProps(){
   const p = document.getElementById("props");
   p.innerHTML = "";
 
-  const byId = enfantsById();
+  const byId = new Map();
+  (model.enfants || []).forEach(e => byId.set(String(e.id), e));
 
   (model.propositions || []).forEach(x=>{
-    const authorId =
-      x.userId ?? x.auteurId ?? x.authorId ?? x.createdBy ?? "";
-
-    const author = byId.get(String(authorId));
+    const author = byId.get(String(x.userId || ""));
     const who = author ? `${author.avatar || "👤"} ${escapeHtml(author.nom || "")}` : "—";
 
     p.innerHTML += `
       <div class="prop">
-        <b>🎯 ${escapeHtml(x.titre)}</b><br>
+        <b>🎯 ${escapeHtml(x.titre || "")}</b><br>
         <span style="opacity:.8">👤 Proposé par : ${who}</span><br>
         💰 ${escapeHtml(x.prix || "-")}<br>
         ${x.lien ? `<a href="${x.lien}" target="_blank" rel="noopener">voir</a><br>` : ""}
@@ -534,6 +533,7 @@ function renderProps(){
     `;
   });
 }
+
 /* ================= CAL ================= */
 
 function renderCal(){
