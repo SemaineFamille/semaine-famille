@@ -400,6 +400,11 @@ async function add(){
 
   if(!titre) return;
 
+  if(!userId){
+    alert("Choisis d’abord qui tu es (menu 👤).");
+    return;
+  }
+
   const res = await apiPOST({
     action:"addProp",
     titre,
@@ -423,6 +428,11 @@ async function add(){
 /* ================= VOTE ================= */
 async function vote(id){
   const userId = getSelectedUserId();
+
+  if(!userId){
+    alert("Choisis d’abord qui tu es (menu 👤) avant de voter.");
+    return;
+  }
 
   const res = await apiPOST({
     action:"vote",
