@@ -236,12 +236,21 @@ function toggleCal(){
 function formatDateFR(dateStr){
   if(!dateStr) return "";
 
-  // gestion format "25.06.2026"
   let d;
-  if(dateStr.includes(".")){
+
+  // Cas ISO (ton problème actuel)
+  if(dateStr.includes("T")){
+    d = new Date(dateStr);
+
+    // ✅ correction fuseau (très important)
+    d = new Date(d.getTime() + (d.getTimezoneOffset() * 60000));
+  }
+  // Cas "25.06.2026"
+  else if(dateStr.includes(".")){
     const [day, month, year] = dateStr.split(".");
-    d = new Date(`${year}-${month}-${day}`);
-  } else {
+    d = new Date(year, month - 1, day);
+  }
+  else{
     d = new Date(dateStr);
   }
 
