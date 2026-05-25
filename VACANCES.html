@@ -549,7 +549,7 @@ function renderCal(){
 
       c.innerHTML += `
         <div class="day">
-          <b>📅 ${escapeHtml(dateLabel)}</b>
+         <b>📅 ${formatDateFR(dateLabel)}</b>
           <div class="options">
             <select onchange="saveCal('${escapeHtml(dateLabel)}', 1, this.value)">
               ${buildPropOptions(v1)}
