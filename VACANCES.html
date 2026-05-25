@@ -183,9 +183,11 @@ select,input{
 
   <div class="card">
     
-<b onclick="toggleCal()" style="cursor:pointer;">
+
+<b id="vacTitle" onclick="toggleCal()" style="cursor:pointer;">
   🌴 Vacances ⬇
 </b>
+
 
     <div id="cal" class="calendar" style="display:none;"></div>
   </div>
@@ -222,15 +224,16 @@ const API_URL = "https://script.google.com/macros/s/AKfycbzUKrmzXep1WFNasSbZcQvY
 /* ================= CAL (toggle) ================= */
 let calVisible = false;
 
+
 function toggleCal(){
   const cal = document.getElementById("cal");
-
   calVisible = !calVisible;
   cal.style.display = calVisible ? "grid" : "none";
 
-  const title = document.querySelector(".card b");
-  title.innerHTML = calVisible ? "🌴 Vacances ⬆" : "🌴 Vacances ⬇";
+  const title = document.getElementById("vacTitle");
+  if(title) title.innerHTML = calVisible ? "🌴 Vacances ⬆" : "🌴 Vacances ⬇";
 }
+
 
 /* ================= MODEL ================= */
 let model = {
@@ -238,7 +241,66 @@ let model = {
   propositions: [],
   calendrier: []
 };
+/* ================= HELPERS (maps + localStorage) ================= */
+function enfantsById(){
+  const m = new Map();
+  (model.enfants || []).forEach(e => m.set(String(e.id), e));
+  return m;
+}
 
+const LS_USER_KEY = "fam_userId";
+const LS_CAL_KEY  = "fam_calSelections"; // secours local si API calendrier pas prête
+
+function getSavedUserId(){
+  return localStorage.getItem(LS_USER_KEY) || "";
+}
+
+function saveUserId(id){
+  if(id) localStorage.setItem(LS_USER_KEY, id);
+}
+
+function getLocalCal(){
+  try { return JSON.parse(localStorage.getItem(LS_CAL_KEY) || "{}"); }
+  catch(e){ return {}; }
+}
+
+function setLocalCal(dateLabel, slot, propId){
+  const cal = getLocalCal();
+  if(!cal[dateLabel]) cal[dateLabel] = { slot1:"", slot2:"" };
+  cal[dateLabel]["slot"+slot] = propId || "";
+  localStorage.setItem(LS_CAL_KEY, JSON.stringify(cal));
+}
+
+function getDayRemoteSlot(day, slot){
+  // Supporte plusieurs noms possibles sans casser si l'API change
+  const keys1 = ["slot1","activite1","a1","am"];
+  const keys2 = ["slot2","activite2","a2","pm"];
+  const keys = slot === 1 ? keys1 : keys2;
+
+  for(const k of keys){
+    if(day && day[k] != null && String(day[k]).trim() !== "") return String(day[k]);
+  }
+  return "";
+}
+
+function buildPropOptions(selectedId){
+  const sel = String(selectedId || "");
+  const list = (model.propositions || []).slice();
+
+  // Trier par votes décroissants (optionnel mais pratique)
+  list.sort((a,b) => (Number(b.votes||0) - Number(a.votes||0)));
+
+  const base = [`<option value="">— Choisir une activité —</option>`];
+
+  list.forEach(p => {
+    const id = String(p.id);
+    const votes = Number(p.votes || 0);
+    const label = `${escapeHtml(p.titre || "-")} (${votes} 👍)`;
+    base.push(`<option value="${id}" ${id===sel ? "selected":""}>${label}</option>`);
+  });
+
+  return base.join("");
+}
 /* ================= API ================= */
 function jsonpCall(params){
   return new Promise((resolve, reject) => {
@@ -291,19 +353,43 @@ async function loadFromAPI(){
 }
 
 /* ================= USERS ================= */
+
 function getSelectedUserId(){
   const sel = document.getElementById("user");
-  return sel ? sel.value : "";
+  return sel ? String(sel.value || "") : "";
 }
 
 function fillUsers(){
   const sel = document.getElementById("user");
   sel.innerHTML = "";
 
+  if(!model.enfants || model.enfants.length === 0){
+    sel.innerHTML = `<option value="">— Aucun utilisateur —</option>`;
+    return;
+  }
+
   model.enfants.forEach(e=>{
-    sel.innerHTML += `<option value="${e.id}">${e.avatar} ${e.nom}</option>`;
+    sel.innerHTML += `<option value="${e.id}">${e.avatar || "👤"} ${e.nom || ""}</option>`;
   });
+
+  // Restaure le dernier user choisi si possible
+  const saved = getSavedUserId();
+  if(saved && model.enfants.some(e => String(e.id) === String(saved))){
+    sel.value = saved;
+  }
+
+  // Sauvegarde au changement + re-render
+  sel.onchange = () => {
+    const id = getSelectedUserId();
+    saveUserId(id);
+    renderProps();
+    renderCal();
+  };
+
+  // Sauvegarde aussi au chargement (cas où le premier est auto-sélectionné)
+  saveUserId(getSelectedUserId());
 }
+
 
 /* ================= ADD ================= */
 async function add(){
