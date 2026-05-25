@@ -234,7 +234,7 @@ function toggleCal(){
   cal.style.display = calVisible ? "grid" : "none";
 
   const title = document.getElementById("vacTitle");
-  if(title) title.innerHTML = calVisible ? "🌴 Vacances ⬆" : "🌴 Vacances ⬇";
+  if(title) title.innerHTML = calVisible ? "🌴 Vacances ⛱️⬆️" : "🌴 Vacances ⛱️⬇️";
 }
 function formatDateFR(dateStr){
   if(!dateStr) return "";
@@ -523,7 +523,7 @@ function renderProps(){
 
     p.innerHTML += `
       <div class="prop">
-        <b>🎯 ${escapeHtml(x.titre || "")}</b><br>
+        <b>📌 ${escapeHtml(x.titre || "")}</b><br>
         <span style="opacity:.8">🌀 Proposé par : ${who}</span><br>
         💰 ${escapeHtml(x.prix || "-")}<br>
         ${x.lien ? `<a href="${x.lien}" target="_blank" rel="noopener">voir</a><br>` : ""}
