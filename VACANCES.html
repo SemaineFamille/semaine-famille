@@ -562,15 +562,21 @@ function renderCal(){
       c.innerHTML += `
         <div class="day">
          <b>📅 ${formatDateFR(dateLabel)}</b>
-          <div class="options">
-            <select onchange="saveCal('${escapeHtml(dateLabel)}', 1, this.value)">
-              ${buildPropOptions(v1)}
-            </select>
-            <select onchange="saveCal('${escapeHtml(dateLabel)}', 2, this.value)">
-              ${buildPropOptions(v2)}
-            </select>
-          </div>
-        </div>
+         <div class="options">
+  <div>
+    <span style="font-size:12px;opacity:.6">Option 1</span>
+    <select onchange="saveCal('${escapeHtml(dateLabel)}', 1, this.value)">
+      ${buildPropOptions(v1)}
+    </select>
+  </div>
+
+  <div>
+    <span style="font-size:12px;opacity:.6">Option 2</span>
+    <select onchange="saveCal('${escapeHtml(dateLabel)}', 2, this.value)">
+      ${buildPropOptions(v2)}
+    </select>
+  </div>
+</div>
       `;
     });
 }
