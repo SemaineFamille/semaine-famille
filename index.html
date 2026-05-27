@@ -740,12 +740,15 @@ const TACHES_PARENTS = [
   { label:'Laver linges et serviettes', icon:'🧺', type:'mercredi' },
 ];
  
-function isTacheParentActive(tache) {
-  const today = new Date();
-  const dow = today.getDay();
-  const jour = today.getDate();
-  if(tache.type === 'premier_du_mois') return jour === 1;
-  if(tache.type === 'mercredi') return dow === 3;
+
+function isTacheParentActiveForDate(tache, dateStr) {
+  const d = new Date((dateStr || formatDateYYYYMMDD()) + 'T00:00:00');
+  const dow = d.getDay();
+  const jour = d.getDate();
+
+  if (tache.type === 'premier_du_mois') return jour === 1;
+  if (tache.type === 'mercredi') return dow === 3;
+
   return false;
 }
  
