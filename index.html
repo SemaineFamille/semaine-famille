@@ -340,36 +340,38 @@ input[type="text"]:focus,select:focus{outline:none;border-color:var(--violet);}
   box-shadow:0 2px 6px rgba(0,0,0,0.3);
 }
 </style>
- <script>
-
-
-
+<script>
 document.addEventListener("DOMContentLoaded", () => {
-  const lastChild = localStorage.getItem("lastChild"); // persiste entre sessions [1](https://developer.mozilla.org/fr/docs/Web/API/Window/localStorage)
+  const lastChild = localStorage.getItem("lastChild");
   if (lastChild) {
-    openChild(lastChild);     // votre fonction qui ouvre la page Alessia
-    showScreen("child");      // votre logique d'UI (ex: masquer accueil)
+    openChild(lastChild);
+    showScreen("child");
   } else {
     showScreen("home");
   }
+
+  // ✅ charge les pastilles au démarrage
+  loadBadges();
 });
 
 function showScreen(name) {
-  document.getElementById("homeScreen").style.display  = (name === "home"  ? "block" : "none");
-  document.getElementById("childScreen").style.display = (name === "child" ? "block" : "none");
+  const home = document.getElementById("homeScreen");
+  const child = document.getElementById("childScreen");
+
+  if (home) home.style.display = (name === "home" ? "block" : "none");
+  if (child) child.style.display = (name === "child" ? "block" : "none");
 }
 
 function openChild(childNameOrId) {
-  // Exemple : mettre à jour un titre, charger les tâches du Google Sheet, etc.
-  document.getElementById("childTitle").textContent = childNameOrId;
-  // TODO: chargeTasks(childNameOrId);
+  const title = document.getElementById("childTitle");
+  if (title) title.textContent = childNameOrId;
 }
 
-  
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("/semaine-famille/sw.js");
 }
 </script>
+
 </head>
 <body>
 
@@ -946,9 +948,9 @@ function logout(){
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-accueil').classList.add('active');
 
-  loadLoginReminders(); // ✅ recharge les rappels visibles sur l'écran de login
+  // ✅ recharge les pastilles
+  loadBadges();
 }
-
  
 function requestAdmin(){
   if(document.getElementById('page-admin').classList.contains('unlocked')){
@@ -2266,31 +2268,33 @@ function selectChild(childNameOrId) {
   showScreen("child");
 
 }
- function updateBadges(counts){
-  const map = {
-    'Alessia':'badge_alessia',
-    'Antonin':'badge_antonin',
-    'Clément':'badge_clement',
-    'Diego':'badge_diego',
-    'Jérémie':'badge_jeremie',
-    'Mél & Yann':'badge_parents'
+function updateBadges(counts){
+ function updateBadges    'Antonin': 'badge_antonin',
+    'Clément': 'badge_clement',
+    'Diego': 'badge_diego',
+    'Jérémie': 'badge_jeremie',
+    'Mél & Yann': 'badge_parents'
   };
 
-  Object.entries(map).forEach(([nom, id])=>{
+  Object.entries(map).forEach(([nom, id]) => {
     const el = document.getElementById(id);
     if(!el) return;
 
     const n = counts[nom] || 0;
 
     if(n > 0){
-      el.textContent = n > 9 ? '9+' : n;
+      el.textContent = n > 9 ? '9+' : String(n);
       el.style.display = 'flex';
     } else {
+      el.textContent = '';
       el.style.display = 'none';
-     window.addEventListener('DOMContentLoaded', loadBadges);
     }
   });
 }
+
+  const map = {
+    'Alessia': 'badge_alessia',
+
 
 </script>
 
