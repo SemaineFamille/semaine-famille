@@ -967,6 +967,7 @@ function closeAdminModal(){
  
 function showToast(msg){
   const t=document.getElementById('toast');
+
   t.textContent=msg;t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2500);
 }
@@ -1852,7 +1853,111 @@ async function saveTachePonctuelle(){
   showToast('📌 Tâche ponctuelle ajoutée !');
   loadPonctuelles();
 }
- 
+ async function loadLoginReminders(){
+  const board = document.getElementById('loginReminderBoard');
+  if(!board) return;
+
+  board.innerHTML = `<div class="loading">Chargement des rappels...</div>`;
+
+  const [cText, tText, pText] = await Promise.all([
+    apiCall({action:'lire', sheet:'TACHES_CONFIG'}),
+    apiCall({action:'lire', sheet:'TACHES'}),
+    apiCall({action:'lire', sheet:'TACHES_PONCTUELLES'})
+  ]);
+
+  // recharge les données globales
+  tachesConfig = [];
+  parseLines(cText).forEach(line => {
+    const c = line.split('|');
+    if(c.length >= 10){
+      tachesConfig.push({
+        tache:c[0], enfant:c[1],
+        lundi:c[2], mardi:c[3], mercredi:c[4], jeudi:c[5],
+        vendredi:c[6], samedi:c[7], dimanche:c[8],
+        active:c[9]?.trim()
+      });
+    }
+  });
+
+  tachesData = [];
+  parseLines(tText).forEach(line => {
+    const c = line.split('|');
+    if(c.length >= 4){
+      tachesData.push({
+        tache:c[0],
+        enfant:c[1],
+        jour:c[2],
+        etat:c[3]?.trim()
+      });
+    }
+  });
+
+  tachesPonctuelles = [];
+  parseLines(pText).forEach(line => {
+    const c = line.split('|');
+    if(c.length >= 3){
+      tachesPonctuelles.push({
+        tache:c[0],
+        enfant:c[1],
+        date:c[2].trim(),
+        icon:'📌'
+      });
+    }
+  });
+
+  const todayStr = formatDateYYYYMMDD(new Date());
+  const { jour } = getJourFromYMD(todayStr);
+
+  const profils = ['Alessia','Antonin','Clément','Diego','Jérémie','Mél & Yann'];
+
+  const phrases = {
+    'Alessia':  'Alessia, tes petites missions du jour t’attendent 🌟',
+    'Antonin':  'Antonin, mission contrôle des tâches aujourd’hui 👀',
+    'Clément':  'Clément, un petit coup d’œil à tes tâches ? ✅',
+    'Diego':    'Diego, pense à vérifier ce qu’il y a à faire 🎯',
+    'Jérémie':  'Jérémie, tes tâches du jour sont prêtes 🚀',
+    'Mél & Yann':'Parents, petit check des tâches du jour 🏠'
+  };
+
+  const cards = profils.map(nom => {
+    const taches = getToutesLesTachesEnfant(nom, jour, todayStr);
+
+    const nonFaites = taches.filter(t => {
+      const etat = tachesData.find(td =>
+        td.tache === t.tache &&
+        td.enfant === nom &&
+        td.jour === t.jourReel &&
+        (td.etat || '').trim() === 'Fait'
+      );
+      return !etat;
+    });
+
+    if(!nonFaites.length) return '';
+
+    return `
+      <div class="login-reminder-card">
+        <div class="login-reminder-title">${nom}</div>
+        <div class="login-reminder-text">
+          ${phrases[nom]}<br>
+          <strong>${nonFaites.length}</strong> tâche${nonFaites.length > 1 ? 's' : ''} à faire aujourd’hui.
+        </div>
+      </div>
+    `;
+  }).filter(Boolean);
+
+  if(!cards.length){
+    board.innerHTML = `
+      <div class="login-reminder-card">
+        <div class="login-reminder-title">✨ Aujourd’hui</div>
+        <div class="login-reminder-text">Aucune tâche en attente pour le moment.</div>
+      </div>
+    `;
+    return;
+  }
+
+  board.innerHTML = cards.join('');
+}
+
 async function loadPonctuelles(){
   const text=await apiCall({action:'lire',sheet:'TACHES_PONCTUELLES'});
   const items=[];
