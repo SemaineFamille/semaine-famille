@@ -1016,7 +1016,65 @@ async function apiCall(params){
     return await r.text();
   }catch(e){console.error(e);return '';}
 }
- 
+ async function loadBadges(){
+  const [cText, tText, pText] = await Promise.all([
+    apiCall({action:'lire', sheet:'TACHES_CONFIG'}),
+    apiCall({action:'lire', sheet:'TACHES'}),
+    apiCall({action:'lire', sheet:'TACHES_PONCTUELLES'})
+  ]);
+
+  tachesConfig = [];
+  parseLines(cText).forEach(l=>{
+    const c=l.split('|');
+    if(c.length>=10){
+      tachesConfig.push({
+        tache:c[0], enfant:c[1],
+        lundi:c[2], mardi:c[3], mercredi:c[4],
+        jeudi:c[5], vendredi:c[6], samedi:c[7], dimanche:c[8]
+      });
+    }
+  });
+
+  tachesData = [];
+  parseLines(tText).forEach(l=>{
+    const c=l.split('|');
+    if(c.length>=4){
+      tachesData.push({tache:c[0], enfant:c[1], jour:c[2], etat:c[3]});
+    }
+  });
+
+  tachesPonctuelles = [];
+  parseLines(pText).forEach(l=>{
+    const c=l.split('|');
+    if(c.length>=3){
+      tachesPonctuelles.push({tache:c[0], enfant:c[1], date:c[2]});
+    }
+  });
+
+  const today = formatDateYYYYMMDD(new Date());
+  const {jour} = getJourFromYMD(today);
+
+  const profils = ['Alessia','Antonin','Clément','Diego','Jérémie','Mél & Yann'];
+  const counts = {};
+
+  profils.forEach(nom=>{
+    const taches = getToutesLesTachesEnfant(nom, jour, today);
+
+    const nonFaites = taches.filter(t=>{
+      const fait = tachesData.find(td =>
+        td.tache===t.tache &&
+        td.enfant===nom &&
+        td.jour===t.jourReel &&
+        (td.etat||'').trim()==='Fait'
+      );
+      return !fait;
+    });
+
+    counts[nom] = nonFaites.length;
+  });
+
+  updateBadges(counts);
+}
 function parseLines(text){
   if(!text||text.trim()==='ok'||text.trim()==='') return [];
   return text.split('~~~~').map(l=>l.trim()).filter(l=>l.length>0);
