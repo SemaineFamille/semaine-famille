@@ -1411,52 +1411,62 @@ function getToutesLesTachesEnfant(enfant, jour, dateYMD) {
   const dow = dateObj.getDay(); // 0=dim, 4=jeu, 5=ven
   const taches = [];
 
- // 1) Tâches fixes configurées (par jour de semaine)
-tachesConfig
-  .filter(t => t.enfant === enfant && t[jour] === 'TRUE')
-  .forEach(t => {
-    taches.push({
-      tache: t.tache,
-      icon: getTacheIcon(t.tache),
-      source: 'fixe',
-      // ✅ on stocke maintenant la vraie date du jour
-      jourReel: dateStr,
-      dueDate: dateStr
-    });
-  });
-
-  // 2) Tâches récurrentes (jeudi/ vendredi) — on décide selon la date ciblée
- 
-if(dow === 4 || dow === 5){
-  TACHES_RECURRENTES
-    .filter(t => t.personne === enfant)
+  // 1) Tâches fixes configurées (par jour de semaine)
+  tachesConfig
+    .filter(t => t.enfant === enfant && t[jour] === 'TRUE')
     .forEach(t => {
-      if(isTacheRecurrenteActive(t, dateStr)){
-
-        const vendredi = new Date(dateStr + "T00:00:00");
-        if(dow === 4) vendredi.setDate(vendredi.getDate() + 1);
-
-        const dueDate = formatDateYYYYMMDD(vendredi);
-
-        if(!taches.find(x => x.tache === t.tache)){
-          taches.push({
-            tache: t.tache,
-            icon: t.icon,
-            source: 'recurrente',
-            jourReel: dueDate,   // ✅ PLUS DE BUG ici
-            dueDate: dueDate,
-            badge: dow === 4 ? '⏰ Demain' : ''
-          });
-        }
-      }
+      taches.push({
+        tache: t.tache,
+        icon: getTacheIcon(t.tache),
+        source: 'fixe',
+        jourReel: dateStr,
+        dueDate: dateStr
+      });
     });
-}
 
+  // 1bis) Tâches spéciales parents
+  if (enfant === 'Mél & Yann') {
+    TACHES_PARENTS
+      .filter(t => isTacheParentActiveForDate(t, dateStr))
+      .forEach(t => {
+        taches.push({
+          tache: t.label,
+          icon: t.icon,
+          source: 'parent',
+          jourReel: dateStr,
+          dueDate: dateStr
+        });
+      });
+  }
 
-  // 3) Tâches ponctuelles EXACTEMENT pour la date ciblée (pas aujourd'hui par défaut)
-  // Parents: la sheet peut contenir "Mél & Yann" OU "Mélanie"/"Yann"
+  // 2) Tâches récurrentes
+  if (dow === 4 || dow === 5) {
+    TACHES_RECURRENTES
+      .filter(t => t.personne === enfant)
+      .forEach(t => {
+        if (isTacheRecurrenteActive(t, dateStr)) {
+          const vendredi = new Date(dateStr + "T00:00:00");
+          if (dow === 4) vendredi.setDate(vendredi.getDate() + 1);
+
+          const dueDate = formatDateYYYYMMDD(vendredi);
+
+          if (!taches.find(x => x.tache === t.tache)) {
+            taches.push({
+              tache: t.tache,
+              icon: t.icon,
+              source: 'recurrente',
+              jourReel: dueDate,
+              dueDate: dueDate,
+              badge: dow === 4 ? '⏰ Demain' : ''
+            });
+          }
+        }
+      });
+  }
+
+  // 3) Tâches ponctuelles
   const enfantsPonct = (enfant === 'Mél & Yann')
-    ? ['Mél & Yann','Mélanie','Yann']
+    ? ['Mél & Yann', 'Mélanie', 'Yann']
     : [enfant];
 
   tachesPonctuelles
@@ -1466,7 +1476,6 @@ if(dow === 4 || dow === 5){
         tache: t.tache,
         icon: '📌',
         source: 'ponctuelle',
-        // ✅ IMPORTANT : pour les ponctuelles, on enregistre l'état avec la DATE, pas "mardi"
         jourReel: dateStr,
         dueDate: dateStr,
         enfantReel: t.enfant
@@ -2042,48 +2051,90 @@ function showPreviewEnfant(enfant,btn){
 }
  
 function renderPreviewParents(){
-  const today=new Date();
-  const dow=today.getDay();
-  const jourIdx=dow===0?6:dow-1;
-  const jour=JOURS[jourIdx];
-  const dateStr=formatDateYYYYMMDD(today);
-  const tachesActives=TACHES_PARENTS.filter(t=>isTacheParentActive(t));
-  const ponctParents=tachesPonctuelles.filter(t=>(t.enfant==='Mél & Yann'||['Mélanie','Yann'].includes(t.enfant))&&t.date===dateStr);
-  if(!tachesActives.length&&!ponctParents.length){
-    document.getElementById('preview-content').innerHTML=`<div class="all-done"><span class="big-icon">😊</span><p>Aucune tâche pour Mélanie & Yann aujourd'hui !</p></div>`;
+  const today = new Date();
+  const dow = today.getDay();
+  const jourIdx = dow === 0 ? 6 : dow - 1;
+  const jour = JOURS[jourIdx];
+  const dateStr = formatDateYYYYMMDD(today);
+
+  const enfant = 'Mél & Yann';
+  const toutesLesTaches = getToutesLesTachesEnfant(enfant, jour, dateStr);
+
+  if(!toutesLesTaches.length){
+    document.getElementById('preview-content').innerHTML = `
+      <div class="all-done">
+        <span class="big-icon">😊</span>
+        <p>Aucune tâche pour Mélanie & Yann aujourd'hui !</p>
+      </div>`;
     return;
   }
-  const toutesLesTaches=[
-    ...tachesActives.map(t=>({tache:t.label,icon:t.icon,jourReel:jour})),
-    ...ponctParents.map(t=>({tache:t.tache,icon:'📌',jourReel:jour,sous:t.enfant}))
-  ];
-  const faites=toutesLesTaches.filter(t=>{
-    const etat=tachesData.find(td=>td.tache===t.tache&&td.enfant==='Mél & Yann'&&td.jour===t.jourReel);
-    return etat&&etat.etat?.trim()==='Fait';
+
+  const faites = toutesLesTaches.filter(t => {
+    const etat = tachesData.find(td =>
+      td.tache === t.tache &&
+      td.enfant === enfant &&
+      td.jour === t.jourReel
+    );
+    return etat && etat.etat?.trim() === 'Fait';
   });
-  const nonFaites=toutesLesTaches.filter(t=>{
-    const etat=tachesData.find(td=>td.tache===t.tache&&td.enfant==='Mél & Yann'&&td.jour===t.jourReel);
-    return !etat||etat.etat?.trim()!=='Fait';
+
+  const nonFaites = toutesLesTaches.filter(t => {
+    const etat = tachesData.find(td =>
+      td.tache === t.tache &&
+      td.enfant === enfant &&
+      td.jour === t.jourReel
+    );
+    return !etat || etat.etat?.trim() !== 'Fait';
   });
-  let html=`<p style="font-size:0.85rem;color:var(--text-light);font-weight:600;margin-bottom:12px">${JOURS_LABEL[jourIdx]} — ${faites.length}/${toutesLesTaches.length} faite${faites.length>1?'s':''}</p>`;
+
+  let html = `
+    <p style="font-size:0.85rem;color:var(--text-light);font-weight:600;margin-bottom:12px">
+      ${JOURS_LABEL[jourIdx]} — ${faites.length}/${toutesLesTaches.length} faite${faites.length>1?'s':''}
+    </p>`;
+
   if(!nonFaites.length){
-    html+=`<div class="all-done"><span class="big-icon">🌟</span><p>Tout est fait !</p></div>`;
+    html += `
+      <div class="all-done">
+        <span class="big-icon">🌟</span>
+        <p>Tout est fait !</p>
+      </div>`;
   } else {
-    html+=`<p style="font-size:0.8rem;font-weight:700;color:var(--rose);margin-bottom:8px">⬜ À faire :</p>`;
-    nonFaites.forEach(t=>{
-      const sous=t.sous?`<span style="font-size:0.75rem;color:var(--text-light)">(${t.sous})</span>`:'';
-      html+=`<div class="tache-item"><div class="tache-info"><span class="tache-icon">${t.icon}</span><span class="tache-name">${t.tache} ${sous}</span></div><span class="tache-toggle non-fait" style="cursor:default">⬜ À faire</span></div>`;
+    html += `<p style="font-size:0.8rem;font-weight:700;color:var(--rose);margin-bottom:8px">⬜ À faire :</p>`;
+    nonFaites.forEach(t => {
+      const sous = t.enfantReel
+        ? `<span style="font-size:0.75rem;color:var(--text-light)">(${t.enfantReel})</span>`
+        : '';
+      html += `
+        <div class="tache-item">
+          <div class="tache-info">
+            <span class="tache-icon">${t.icon}</span>
+            <span class="tache-name">${t.tache} ${sous}</span>
+          </div>
+          <span class="tache-toggle non-fait" style="cursor:default">⬜ À faire</span>
+        </div>`;
     });
   }
+
   if(faites.length){
-    html+=`<p style="font-size:0.8rem;font-weight:700;color:#4CAF50;margin:12px 0 8px">✅ Déjà fait :</p>`;
-    faites.forEach(t=>{
-      const sous=t.sous?`<span style="font-size:0.75rem;color:var(--text-light)">(${t.sous})</span>`:'';
-      html+=`<div class="tache-item" style="opacity:0.6"><div class="tache-info"><span class="tache-icon">${t.icon}</span><span class="tache-name" style="text-decoration:line-through">${t.tache} ${sous}</span></div><span class="tache-toggle fait" style="cursor:default">✅ Fait</span></div>`;
+    html += `<p style="font-size:0.8rem;font-weight:700;color:#4CAF50;margin:12px 0 8px">✅ Déjà fait :</p>`;
+    faites.forEach(t => {
+      const sous = t.enfantReel
+        ? `<span style="font-size:0.75rem;color:var(--text-light)">(${t.enfantReel})</span>`
+        : '';
+      html += `
+        <div class="tache-item" style="opacity:0.6">
+          <div class="tache-info">
+            <span class="tache-icon">${t.icon}</span>
+            <span class="tache-name" style="text-decoration:line-through">${t.tache} ${sous}</span>
+          </div>
+          <span class="tache-toggle fait" style="cursor:default">✅ Fait</span>
+        </div>`;
     });
   }
-  document.getElementById('preview-content').innerHTML=html;
+
+  document.getElementById('preview-content').innerHTML = html;
 }
+
  
 function renderPreview(enfant){
   const today=new Date();
