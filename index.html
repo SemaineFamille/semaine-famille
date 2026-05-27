@@ -910,15 +910,18 @@ function login(user){
   if(!isParent) loadTaches();
 }
  
+
 function logout(){
-  currentUser=null;
-  isParent=false;
+  currentUser = null;
+  isParent = false;
   document.getElementById('loginScreen').classList.remove('hidden');
-  document.getElementById('mainNav').style.display='none';
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('mainNav').style.display = 'none';
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-accueil').classList.add('active');
 
+  loadLoginReminders(); // ✅ recharge les rappels visibles sur l'écran de login
 }
+
  
 function requestAdmin(){
   if(document.getElementById('page-admin').classList.contains('unlocked')){
