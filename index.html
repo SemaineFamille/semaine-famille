@@ -996,6 +996,7 @@ function login(user){
 }
  
 
+
 function logout(){
   currentUser = null;
   isParent = false;
@@ -1004,8 +1005,9 @@ function logout(){
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-accueil').classList.add('active');
 
-  loadLoginReminders(); // ✅ recharge les rappels visibles sur l'écran de login
+  loadLoginBadges();
 }
+
 
  
 function requestAdmin(){
