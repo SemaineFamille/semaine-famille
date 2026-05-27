@@ -314,6 +314,31 @@ input[type="text"]:focus,select:focus{outline:none;border-color:var(--violet);}
   cursor: pointer;
   width: 100%; /* important pour que tous aient la même taille */
 }
+ .login-btn{
+  position:relative; /* important pour placer la pastille */
+}
+
+.badge{
+  position:absolute;
+  top:6px;
+  right:6px;
+  min-width:20px;
+  height:20px;
+  padding:0 6px;
+
+  background:#ff2d55;
+  color:white;
+  font-size:0.75rem;
+  font-weight:800;
+
+  border-radius:999px;
+
+  display:none;
+  align-items:center;
+  justify-content:center;
+
+  box-shadow:0 2px 6px rgba(0,0,0,0.3);
+}
 </style>
  <script>
 
@@ -362,23 +387,28 @@ if ("serviceWorker" in navigator) {
   </button>
 
   <button class="login-btn" style="background:linear-gradient(135deg,#2196F3,#00BCD4);color:white" onclick="login('Antonin')">
-    <span class="avatar">👦🎸</span>Antonin
+    <span class="badge" id="badge_antonin"></span>
+   <span class="avatar">👦🎸</span>Antonin
   </button>
 
   <button class="login-btn" style="background:linear-gradient(135deg,#4CAF50,#8BC34A);color:white" onclick="login('Clément')">
-    <span class="avatar">👦🥋</span>Clément
+   <span class="badge" id="badge_clement"></span> 
+   <span class="avatar">👦🥋</span>Clément
   </button>
 
   <button class="login-btn" style="background:linear-gradient(135deg,#FF9800,#FF5722);color:white" onclick="login('Diego')">
-    <span class="avatar">👦⚽</span>Diego
+    <span class="badge" id="badge_diego"></span>
+   <span class="avatar">👦⚽</span>Diego
   </button>
 
   <button class="login-btn" style="background:linear-gradient(135deg,#9C27B0,#673AB7);color:white" onclick="login('Jérémie')">
-    <span class="avatar">👦🥐</span>Jérémie
+   <span class="badge" id="badge_jeremie"></span>
+   <span class="avatar">👦🥐</span>Jérémie
   </button>
 
   <button class="login-btn" style="background:linear-gradient(135deg,#FF5722,#E64A19);color:white" onclick="login('parent')">
-    <span class="avatar">👩🏻‍🤝‍👨🏼🚑</span>Mélanie & Yann
+   <span class="badge" id="badge_parents"></span> 
+   <span class="avatar">👩🏻‍🤝‍👨🏼🚑</span>Mélanie & Yann
   </button>
  
   </div>
