@@ -303,6 +303,80 @@ input[type="text"]:focus,select:focus{outline:none;border-color:var(--violet);}
   color:#555;
 }
 
+.login-screen{
+  inset:0;  position:fixed;
+  background:linear-gradient(135deg,var(--violet),var(--rose));
+  z-index:500;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+}
+
+.login-screen.hidden{display:none;}
+
+.login-logo{font-size:4rem;margin-bottom:12px;}
+.login-title{font-size:2rem;font-weight:900;color:white;margin-bottom:6px;}
+.login-sub{color:rgba(255,255,255,0.8);font-weight:600;margin-bottom:24px;font-size:1rem;}
+
+.login-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+  width:100%;
+  max-width:340px;
+}
+
+.login-btn{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:15px;
+  border-radius:16px;
+  border:none;
+  font-family:'Nunito',sans-serif;
+  font-weight:800;
+  font-size:1rem;
+  cursor:pointer;
+  transition:all 0.2s;
+  box-shadow:0 4px 12px rgba(0,0,0,0.2);
+  width:100%;
+  min-height:98px;
+}
+
+.login-btn:hover{transform:translateY(-2px);}
+.login-btn:active{transform:scale(0.97);}
+
+.login-btn .avatar{
+  font-size:2rem;
+  display:block;
+  margin-bottom:6px;
+}
+
+.login-btn.parent{
+  grid-column:span 2;
+}
+
+/* Badge rouge */
+.login-badge{
+  position:absolute;
+  top:8px;
+  right:8px;
+  min-width:24px;
+  height:24px;
+  padding:0 7px;
+  border-radius:999px;
+  background:#ff2d55;
+  color:white;
+  font-size:0.78rem;
+  font-weight:900;
+  display:none;
+  align-items:center;
+ 
+
 .login-btn {
   display: flex;
   flex-direction: column;
@@ -358,35 +432,43 @@ if ("serviceWorker" in navigator) {
   
   <div class="login-grid">
    
-  <button class="login-btn" style="background:linear-gradient(135deg,#E91E63,#9C27B0);color:white" onclick="login('Alessia')">
-    <span class="avatar">👧🦄</span>Alessia
-  </button>
+    <button class="login-btn" style="background:linear-gradient(135deg,#E91E63,#9C27B0);color:white" onclick="login('Alessia')">
+      <span class="login-badge" id="badge_alessia"></span>
+      <span class="avatar">👧🦄</span>
+      <span>Alessia</span>
+    </button>
 
-  <button class="login-btn" style="background:linear-gradient(135deg,#2196F3,#00BCD4);color:white" onclick="login('Antonin')">
-    <span class="avatar">👦🎸</span>Antonin
-  </button>
+    <button class="login-btn" style="background:linear-gradient(135deg,#2196F3,#00BCD4);color:white" onclick="login('Antonin')">
+      <span class="login-badge" id="badge_antonin"></span>
+      <span class="avatar">👦🎸</span>
+      <span>Antonin</span>
+    </button>
 
-  <button class="login-btn" style="background:linear-gradient(135deg,#4CAF50,#8BC34A);color:white" onclick="login('Clément')">
-    <span class="avatar">👦🥋</span>Clément
-  </button>
+    <button class="login-btn" style="background:linear-gradient(135deg,#4CAF50,#8BC34A);color:white" onclick="login('Clément')">
+      <span class="login-badge" id="badge_clement"></span>
+      <span class="avatar">👦🥋</span>
+      <span>Clément</span>
+    </button>
 
-  <button class="login-btn" style="background:linear-gradient(135deg,#FF9800,#FF5722);color:white" onclick="login('Diego')">
-    <span class="avatar">👦⚽</span>Diego
-  </button>
+    <button class="login-btn" style="background:linear-gradient(135deg,#FF9800,#FF5722);color:white" onclick="login('Diego')">
+      <span class="login-badge" id="badge_diego"></span>
+      <span class="avatar">👦⚽</span>
+      <span>Diego</span>
+    </button>
 
-  <button class="login-btn" style="background:linear-gradient(135deg,#9C27B0,#673AB7);color:white" onclick="login('Jérémie')">
-    <span class="avatar">👦🥐</span>Jérémie
-  </button>
+    <button class="login-btn" style="background:linear-gradient(135deg,#9C27B0,#673AB7);color:white" onclick="login('Jérémie')">
+      <span class="login-badge" id="badge_jeremie"></span>
+      <span class="avatar">👦🥐</span>
+      <span>Jérémie</span>
+    </button>
 
-  <button class="login-btn" style="background:linear-gradient(135deg,#FF5722,#E64A19);color:white" onclick="login('parent')">
-    <span class="avatar">👩🏻‍🤝‍👨🏼🚑</span>Mélanie & Yann
-  </button>
-   <div id="loginReminderBoard" class="login-reminder-board"></div>
-
-
+    <button class="login-btn parent" style="background:linear-gradient(135deg,#FF5722,#E64A19);color:white" onclick="login('parent')">
+      <span class="login-badge" id="badge_parents"></span>
+      <span class="avatar">👩🏻‍🤝‍👨🏼🚑</span>
+      <span>Mélanie &amp; Yann</span>
+    </button>
   </div>
 </div>
-
 <!-- MODAL CODE ADMIN -->
 <div class="admin-modal" id="adminModal">
   <div class="admin-modal-box">
