@@ -278,30 +278,7 @@ input[type="text"]:focus,select:focus{outline:none;border-color:var(--violet);}
   font-size: 18px;
   cursor: pointer;
 }
-.login-reminder-board{
-  margin:16px 0 20px;
-  display:grid;
-  gap:10px;
-}
 
-.login-reminder-card{
-  background:linear-gradient(135deg,#fff7fb,#fffaf0);
-  border:1px solid #f3d7e6;
-  border-radius:18px;
-  padding:12px 14px;
-  box-shadow:0 6px 14px rgba(0,0,0,0.06);
-}
-
-.login-reminder-title{
-  font-weight:800;
-  color:#d81b60;
-  margin-bottom:4px;
-}
-
-.login-reminder-text{
-  font-size:0.92rem;
-  color:#555;
-}
 
 .login-screen{
   inset:0;  position:fixed;
@@ -392,7 +369,7 @@ input[type="text"]:focus,select:focus{outline:none;border-color:var(--violet);}
  <script>
 
 window.addEventListener('DOMContentLoaded', () => {
-  loadLoginReminders();
+  loadLoginBadges();
 });
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -416,10 +393,36 @@ function openChild(childNameOrId) {
   // TODO: chargeTasks(childNameOrId);
 }
 
-  
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("/semaine-famille/sw.js");
 }
+  
+function updateLoginBadges(counts){
+  const map = {
+    'Alessia': 'badge_alessia',
+    'Antonin': 'badge_antonin',
+    'Clément': 'badge_clement',
+    'Diego': 'badge_diego',
+    'Jérémie': 'badge_jeremie',
+    'Mél & Yann': 'badge_parents'
+  };
+
+  Object.entries(map).forEach(([nom, id]) => {
+    const el = document.getElementById(id);
+    if(!el) return;
+
+    const count = counts[nom] || 0;
+
+    if(count > 0){
+      el.textContent = count > 9 ? '9+' : String(count);
+      el.style.display = 'inline-flex';
+    } else {
+      el.textContent = '';
+      el.style.display = 'none';
+    }
+  });
+}
+
 </script>
 </head>
 <body>
