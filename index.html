@@ -2207,8 +2207,33 @@ function selectChild(childNameOrId) {
   openChild(childNameOrId);
   showScreen("child");
 
-
 }
+ function updateBadges(counts){
+  const map = {
+    'Alessia':'badge_alessia',
+    'Antonin':'badge_antonin',
+    'Clément':'badge_clement',
+    'Diego':'badge_diego',
+    'Jérémie':'badge_jeremie',
+    'Mél & Yann':'badge_parents'
+  };
+
+  Object.entries(map).forEach(([nom, id])=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+
+    const n = counts[nom] || 0;
+
+    if(n > 0){
+      el.textContent = n > 9 ? '9+' : n;
+      el.style.display = 'flex';
+    } else {
+      el.style.display = 'none';
+     window.addEventListener('DOMContentLoaded', loadBadges);
+    }
+  });
+}
+
 </script>
 
 
