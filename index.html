@@ -24,6 +24,65 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
+
+ <script>
+window.addEventListener('DOMContentLoaded', () => {
+  loadLoginBadges();
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  const lastChild = localStorage.getItem("lastChild");
+  if (lastChild) {
+    openChild(lastChild);
+    showScreen("child");
+  } else {
+    showScreen("home");
+  }
+});
+
+function showScreen(name) {
+  const home = document.getElementById("homeScreen");
+  const child = document.getElementById("childScreen");
+
+  if (home) home.style.display = (name === "home" ? "block" : "none");
+  if (child) child.style.display = (name === "child" ? "block" : "none");
+}
+
+function openChild(childNameOrId) {
+  const title = document.getElementById("childTitle");
+  if (title) title.textContent = childNameOrId;
+}
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/semaine-famille/sw.js");
+}
+
+function updateLoginBadges(counts){
+  const map = {
+    'Alessia': 'badge_alessia',
+    'Antonin': 'badge_antonin',
+    'Clément': 'badge_clement',
+    'Diego': 'badge_diego',
+    'Jérémie': 'badge_jeremie',
+    'Mél & Yann': 'badge_parents'
+  };
+
+  Object.entries(map).forEach(([nom, id]) => {
+    const el = document.getElementById(id);
+    if(!el) return;
+
+    const count = counts[nom] || 0;
+
+    if(count > 0){
+      el.textContent = count > 9 ? '9+' : String(count);
+      el.style.display = 'inline-flex';
+    } else {
+      el.textContent = '';
+      el.style.display = 'none';
+    }
+  });
+}
+</script>
   
 :root {
   --violet:#9C27B0; --rose:#F50870; --rose-dark:#C2185B;
@@ -279,9 +338,9 @@ input[type="text"]:focus,select:focus{outline:none;border-color:var(--violet);}
   cursor: pointer;
 }
 
-
 .login-screen{
-  inset:0;  position:fixed;
+  position:fixed;
+  inset:0;
   background:linear-gradient(135deg,var(--violet),var(--rose));
   z-index:500;
   display:flex;
@@ -333,9 +392,33 @@ input[type="text"]:focus,select:focus{outline:none;border-color:var(--violet);}
   margin-bottom:6px;
 }
 
+/* Le bouton parents est de taille normale, à côté de Jérémie */
 .login-btn.parent{
-  grid-column:span 2;
+  grid-column:auto;
 }
+
+/* Badge rouge */
+.login-badge{
+  position:absolute;
+  top:8px;
+  right:8px;
+  min-width:24px;
+  height:24px;
+  padding:0 7px;
+  border-radius:999px;
+  background:#ff2d55;
+  color:white;
+  font-size:0.78rem;
+  font-weight:900;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 4px 10px rgba(0,0,0,0.25);
+  border:2px solid rgba(255,255,255,0.9);
+  z-index:2;
+}
+
+
 
 /* Badge rouge */
 .login-badge{
@@ -432,9 +515,8 @@ function updateLoginBadges(counts){
   <div class="login-logo">⭐</div>
   <div class="login-title">Semaine Famille</div>
   <div class="login-sub">Qui es-tu ?</div>
-  
+
   <div class="login-grid">
-   
     <button class="login-btn" style="background:linear-gradient(135deg,#E91E63,#9C27B0);color:white" onclick="login('Alessia')">
       <span class="login-badge" id="badge_alessia"></span>
       <span class="avatar">👧🦄</span>
@@ -472,6 +554,7 @@ function updateLoginBadges(counts){
     </button>
   </div>
 </div>
+
 <!-- MODAL CODE ADMIN -->
 <div class="admin-modal" id="adminModal">
   <div class="admin-modal-box">
@@ -1131,7 +1214,7 @@ function openMAGICPASS() {
   location.href = 'magicpass.html';
 }
 function chargerVACANCES() {
-  fetch(API + '?sheet=VACANCES&action=model&userId=' + userId).then(r=>r.json())
+  fetch(SCRIPT_URL + '?sheet=VACANCES&action=model&userId=' + userId).then(r=>r.json())
     .then(data => {
       let lignes = data.split("~~~~");
       let html = "";
@@ -1498,10 +1581,10 @@ function getTacheIcon(label){return TACHES_FIXES.find(t=>t.label===label)?.icon|
 function getToutesLesTachesEnfant(enfant, jour, dateYMD) {
   const dateStr = dateYMD || formatDateYYYYMMDD(new Date());
   const dateObj = new Date(dateStr + 'T00:00:00');
-  const dow = dateObj.getDay(); // 0=dim, 4=jeu, 5=ven
+  const dow = dateObj.getDay();
   const taches = [];
 
-  // 1) Tâches fixes configurées (par jour de semaine)
+  // 1) Tâches fixes configurées
   tachesConfig
     .filter(t => t.enfant === enfant && t[jour] === 'TRUE')
     .forEach(t => {
@@ -1514,7 +1597,7 @@ function getToutesLesTachesEnfant(enfant, jour, dateYMD) {
       });
     });
 
-  // 1bis) Tâches spéciales parents
+  // 2) Tâches parents
   if (enfant === 'Mél & Yann') {
     TACHES_PARENTS
       .filter(t => isTacheParentActiveForDate(t, dateStr))
@@ -1529,7 +1612,7 @@ function getToutesLesTachesEnfant(enfant, jour, dateYMD) {
       });
   }
 
-  // 2) Tâches récurrentes
+  // 3) Tâches récurrentes
   if (dow === 4 || dow === 5) {
     TACHES_RECURRENTES
       .filter(t => t.personne === enfant)
@@ -1554,7 +1637,7 @@ function getToutesLesTachesEnfant(enfant, jour, dateYMD) {
       });
   }
 
-  // 3) Tâches ponctuelles
+  // 4) Tâches ponctuelles
   const enfantsPonct = (enfant === 'Mél & Yann')
     ? ['Mél & Yann', 'Mélanie', 'Yann']
     : [enfant];
@@ -1611,12 +1694,10 @@ function getPonctuellesEnRetard(enfant){
     ? ['Mél & Yann','Mélanie','Yann']
     : [enfant];
 
-  // Ponctuelles dont la date est passée
   const overdue = tachesPonctuelles.filter(t =>
     enfantsPonct.includes(t.enfant) && t.date < todayStr
   );
 
-  // On garde uniquement celles non validées (etat "Fait" enregistré avec jour = date)
   return overdue.filter(t => {
     const done = tachesData.find(td =>
       td.tache === t.tache &&
@@ -1629,8 +1710,8 @@ function getPonctuellesEnRetard(enfant){
     tache: t.tache,
     icon: '📌',
     source: 'ponctuelle',
-    jourReel: t.date,      // clé d'enregistrement
-    dueDate: t.date,       // affichage
+    jourReel: t.date,
+    dueDate: t.date,
     enfantReel: t.enfant
   }));
 }
@@ -1968,7 +2049,6 @@ async function loadLoginBadges(){
     apiCall({action:'lire', sheet:'TACHES_PONCTUELLES'})
   ]);
 
-  // recharge les données globales
   tachesConfig = [];
   parseLines(cText).forEach(line => {
     const c = line.split('|');
@@ -2196,7 +2276,7 @@ async function ajouter(){
     montant
   });
 
-  const res = await fetch(API, { method:"POST", body }).then(r => r.text());
+  const res = await fetch(SCRIPT_URL, { method:"POST", body }).then(r => r.text());
 
   if (res.trim() !== "ok") {
     alert(res);
