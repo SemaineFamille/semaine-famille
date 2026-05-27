@@ -317,6 +317,10 @@ input[type="text"]:focus,select:focus{outline:none;border-color:var(--violet);}
 </style>
  <script>
 
+window.addEventListener('DOMContentLoaded', () => {
+  loadLoginReminders();
+});
+
 document.addEventListener("DOMContentLoaded", () => {
   const lastChild = localStorage.getItem("lastChild"); // persiste entre sessions [1](https://developer.mozilla.org/fr/docs/Web/API/Window/localStorage)
   if (lastChild) {
