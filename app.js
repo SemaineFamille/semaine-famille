@@ -686,19 +686,64 @@ function buildPresencesUI(){
           `;
         } else {
           // ✅ Cas parent / lecture seule : checkbox comme avant
-          const checked = (value === 'TRUE');
 
-          html += `
-            <label class="checkbox-item" style="${canEdit ? '' : 'opacity:0.55;'}">
-              <input type="checkbox"
-                id="cb_${key}_${m}"
-                data-key="${key}"
-                ${checked ? 'checked' : ''}
-                ${canEdit ? '' : 'disabled'}
-                onchange="updateTotal(this.dataset.key)">
-              <span>${MEMBRES_LABEL[mi]}</span>
-            </label>
-          `;
+if(!isParent && canEdit){
+  html += `
+    <div class="presence-choice-wrap">
+      <div class="presence-choice-name">${MEMBRES_LABEL[mi]}</div>
+
+      <input type="hidden" id="presence_${key}_${m}" value="${value}">
+
+      <div class="presence-choice-buttons">
+        <button type="button"
+          class="presence-btn present ${value === 'TRUE' ? 'active' : ''}"
+          id="btn_present_${key}_${m}"
+          onclick="setPresenceChoice('${key}','${m}','TRUE')">
+          ✅ Présent
+        </button>
+
+        <button type="button"
+          class="presence-btn absent ${value === 'FALSE' ? 'active' : ''}"
+          id="btn_absent_${key}_${m}"
+          onclick="setPresenceChoice('${key}','${m}','FALSE')">
+          ❌ Absent
+        </button>
+      </div>
+
+      <div id="status_${key}_${m}" class="presence-status ${
+        value === 'TRUE' ? 'present' : value === 'FALSE' ? 'absent' : 'pending'
+      }">
+        ${
+          value === 'TRUE'
+            ? '✅ Présent'
+            : value === 'FALSE'
+            ? '❌ Absent'
+            : '⏳ Pas encore répondu'
+        }
+      </div>
+    </div>
+  `;
+} else {
+  let icone = '';
+  if (value === 'TRUE') icone = '✅';
+  else if (value === 'FALSE') icone = '❌';
+
+  html += `
+    <div class="checkbox-item" style="${canEdit ? '' : 'opacity:0.75;'}">
+      ${
+        canEdit
+          ? `<input type="checkbox"
+              id="cb_${key}_${m}"
+              data-key="${key}"
+              ${value === 'TRUE' ? 'checked' : ''}
+              onchange="updateTotal(this.dataset.key)">`
+          : `<span class="presence-parent-icon">${icone}</span>`
+      }
+      <span>${MEMBRES_LABEL[mi]}</span>
+    </div>
+  `;
+}
+
         }
       });
 
