@@ -137,54 +137,85 @@ body {
   flex-shrink:0;
 }
 
+.presence-choice-wrap{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  padding:6px 8px;
+  border-radius:10px;
+  background:transparent;
+}
+
+/* Nom enfant */
+.presence-choice-name{
+  font-size:0.85rem;
+  font-weight:700;
+  color:var(--text);
+}
+
+/* Conteneur boutons */
+.presence-choice-buttons{
+  display:flex;
+  gap:6px;
+}
+
+/* Boutons base */
 .presence-btn{
   flex:1;
   border:none;
-  border-radius:10px;
-  padding:8px 10px;
+  border-radius:20px;
+  padding:6px 8px;
+
   font-family:'Nunito',sans-serif;
-  font-size:0.9rem;
+  font-size:0.8rem;
   font-weight:800;
+
   cursor:pointer;
   transition:all 0.2s;
-  background:white;
+
+  background:rgba(156,39,176,0.08); /* violet très léger */
   color:var(--text-light);
-  border:2px solid #e0d0e8;
 }
 
+/* Petit effet hover */
 .presence-btn:hover{
   transform:translateY(-1px);
 }
 
+/* ✅ Présent */
 .presence-btn.present.active{
-  background:#4CAF50;
+  background:linear-gradient(135deg, var(--violet), var(--rose));
   color:white;
-  border-color:#4CAF50;
+  box-shadow:0 2px 8px rgba(156,39,176,0.3);
 }
 
+/* ❌ Absent */
 .presence-btn.absent.active{
-  background:#f44336;
-  color:white;
-  border-color:#f44336;
+  background:#f3e5f5; /* même base couleur app */
+  color:#8e24aa;
+  border:2px solid #e1bee7;
 }
 
+/* Texte statut (plus discret) */
 .presence-status{
-  font-size:0.78rem;
+  font-size:0.7rem;
   font-weight:700;
-  color:var(--text-light);
+  opacity:0.7;
 }
 
+/* Couleurs texte */
 .presence-status.present{
-  color:#2e7d32;
+  color:var(--violet);
 }
 
 .presence-status.absent{
-  color:#c62828;
+  color:#8e24aa;
 }
 
 .presence-status.pending{
-  color:#999;
+  color:#bbb;
 }
+
 
 .total-badge{background:var(--violet);color:white;padding:2px 10px;border-radius:20px;font-size:0.8rem;font-weight:700;display:inline-block;}
 .divider{height:2px;background:var(--bg);margin:10px 0;border-radius:2px;}
