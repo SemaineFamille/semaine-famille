@@ -590,6 +590,36 @@ function showPage(name){
 }
  
 
+function setPresenceChoice(key, member, value){
+  const hidden = document.getElementById(`presence_${key}_${member}`);
+  if(!hidden) return;
+
+  hidden.value = value;
+
+  const btnPresent = document.getElementById(`btn_present_${key}_${member}`);
+  const btnAbsent  = document.getElementById(`btn_absent_${key}_${member}`);
+  const status     = document.getElementById(`status_${key}_${member}`);
+
+  if(btnPresent) btnPresent.classList.toggle('active', value === 'TRUE');
+  if(btnAbsent)  btnAbsent.classList.toggle('active', value === 'FALSE');
+
+  if(status){
+    status.className = 'presence-status';
+    if(value === 'TRUE'){
+      status.textContent = '✅ Présent';
+      status.classList.add('present');
+    } else if(value === 'FALSE'){
+      status.textContent = '❌ Absent';
+      status.classList.add('absent');
+    } else {
+      status.textContent = '⏳ Pas encore répondu';
+      status.classList.add('pending');
+    }
+  }
+
+  updateTotal(key);
+}
+
 function buildPresencesUI(){
   const { visible, editable } = getPresenceAccess();
   const dates = rollingDates(7);
