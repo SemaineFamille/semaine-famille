@@ -1,3 +1,9 @@
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
 :root {
   --violet:#9C27B0; --rose:#F50870; --rose-dark:#C2185B;
   --cyan:#00BCD4; --orange:#FF5722; --yellow:#FEEA3B;
