@@ -160,22 +160,19 @@ body {
 }
 
 /* Boutons base */
+
 .presence-btn{
   flex:1;
-  border:none;
-  border-radius:20px;
-  padding:6px 8px;
+  border-radius:30px;
+  padding:6px 0;
 
-  font-family:'Nunito',sans-serif;
-  font-size:0.8rem;
-  font-weight:800;
+  font-size:0.9rem;
+  font-weight:900;
 
-  cursor:pointer;
-  transition:all 0.2s;
-
-  background:rgba(156,39,176,0.08); /* violet très léger */
-  color:var(--text-light);
+  background:rgba(0,0,0,0.05);
+  color:#aaa;
 }
+
 
 /* Petit effet hover */
 .presence-btn:hover{
