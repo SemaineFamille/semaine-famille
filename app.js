@@ -773,13 +773,13 @@ async function savePresences(){
       // Pour chaque membre :
       // - si modifiable -> on lit la checkbox
       // - sinon -> on garde la valeur déjà en mémoire (presencesData)
-      MEMBRES.forEach(m => {
-        if(editableSet.has(m)){
-          p[m] = getPresenceValue(key, m);   // checkbox -> TRUE/FALSE
-        } else {
-          p[m] = presencesData?.[key]?.[m] || 'FALSE'; // on ne change pas les autres
-        }
-      });
+MEMBRES.forEach(m => {
+  if(editableSet.has(m)){
+    p[m] = getPresenceValue(key, m); // '' | TRUE | FALSE
+  } else {
+    p[m] = presencesData?.[key]?.[m] ?? '';
+  }
+});
 
       await apiCall(p);
     }
