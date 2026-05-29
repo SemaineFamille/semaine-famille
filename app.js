@@ -111,11 +111,17 @@ function getPresenceAccess(){
 }
 
 // Lire la valeur actuelle d'un membre (depuis checkbox si visible, sinon depuis presencesData)
+
 function getPresenceValue(key, member){
+  const hidden = document.getElementById(`presence_${key}_${member}`);
+  if(hidden) return hidden.value; // '' | 'TRUE' | 'FALSE'
+
   const cb = document.getElementById(`cb_${key}_${member}`);
   if(cb) return cb.checked ? 'TRUE' : 'FALSE';
-  return presencesData?.[key]?.[member] || 'FALSE';
+
+  return presencesData?.[key]?.[member] ?? '';
 }
+
 
  
 const TACHES_RECURRENTES = [
