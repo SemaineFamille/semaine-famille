@@ -604,13 +604,13 @@ function setPresenceChoice(key, member, value){
   if(btnAbsent)  btnAbsent.classList.toggle('active', value === 'FALSE');
 
   if(status){
-    status.className = 'presence-status';
+  
     if(value === 'TRUE'){
       status.textContent = '✅';
-      status.classList.add('present');
+    
     } else if(value === 'FALSE'){
       status.textContent = '❌ ';
-      status.classList.add('absent');
+   
     } else {
       status.textContent = '⏳ Pas encore répondu';
       status.classList.add('pending');
@@ -676,9 +676,9 @@ function buildPresencesUI(){
               }">
                 ${
                   value === 'TRUE'
-                    ? '✅ Présent'
+                    ? '✅'
                     : value === 'FALSE'
-                    ? '❌ Absent'
+                    ? '❌'
                     : '⏳ Pas encore répondu'
                 }
               </div>
@@ -699,14 +699,14 @@ if(!isParent && canEdit){
           class="presence-btn present ${value === 'TRUE' ? 'active' : ''}"
           id="btn_present_${key}_${m}"
           onclick="setPresenceChoice('${key}','${m}','TRUE')">
-          ✅ Présent
+          ✅
         </button>
 
         <button type="button"
           class="presence-btn absent ${value === 'FALSE' ? 'active' : ''}"
           id="btn_absent_${key}_${m}"
           onclick="setPresenceChoice('${key}','${m}','FALSE')">
-          ❌ Absent
+          ❌
         </button>
       </div>
 
@@ -715,9 +715,9 @@ if(!isParent && canEdit){
       }">
         ${
           value === 'TRUE'
-            ? '✅ Présent'
+            ? '✅'
             : value === 'FALSE'
-            ? '❌ Absent'
+            ? '❌'
             : '⏳ Pas encore répondu'
         }
       </div>
