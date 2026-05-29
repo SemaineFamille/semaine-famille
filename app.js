@@ -620,11 +620,13 @@ function setPresenceChoice(key, member, value){
   updateTotal(key);
 }
 
+
 function buildPresencesUI(){
   const { visible, editable } = getPresenceAccess();
   const dates = rollingDates(7);
 
   let html = '';
+
   dates.forEach(({label, date}) => {
     html += `<div class="jour-header">${label}</div>`;
 
@@ -632,7 +634,6 @@ function buildPresencesUI(){
       const key = `${date}_${repas}`;
       const data = presencesData[key] || {};
 
-      // Total = toujours sur tous les membres (même si l'enfant ne voit que lui)
       const count = MEMBRES.filter(m => getPresenceValue(key, m) === 'TRUE').length;
 
       html += `<div class="repas-label">${repas.toUpperCase()}
@@ -640,24 +641,65 @@ function buildPresencesUI(){
       </div>
       <div class="checkboxes-grid">`;
 
-      // Affichage selon droits
       MEMBRES.forEach((m, mi) => {
         if(!visible.includes(m)) return;
 
         const canEdit = editable.includes(m);
-        const checked = (data[m] === 'TRUE');
+        const value = (data[m] ?? '').trim();
 
-        html += `
-          <label class="checkbox-item" style="${canEdit ? '' : 'opacity:0.55;'}">
-            <input type="checkbox"
-              id="cb_${key}_${m}"
-              data-key="${key}"
-              ${checked ? 'checked' : ''}
-              ${canEdit ? '' : 'disabled'}
-              onchange="updateTotal(this.dataset.key)">
-            <span>${MEMBRES_LABEL[mi]}</span>
-          </label>
-        `;
+        // ✅ Cas enfant : boutons Présent / Absent
+        if(!isParent && canEdit){
+          html += `
+            <div class="presence-choice-wrap">
+              <div class="presence-choice-name">${MEMBRES_LABEL[mi]}</div>
+
+              <input type="hidden" id="presence_${key}_${m}" value="${value}">
+
+              <div class="presence-choice-buttons">
+                <button type="button"
+                  class="presence-btn present ${value === 'TRUE' ? 'active' : ''}"
+                  id="btn_present_${key}_${m}"
+                  onclick="setPresenceChoice('${key}','${m}','TRUE')">
+                  ✅ Présent
+                </button>
+
+                <button type="button"
+                  class="presence-btn absent ${value === 'FALSE' ? 'active' : ''}"
+                  id="btn_absent_${key}_${m}"
+                  onclick="setPresenceChoice('${key}','${m}','FALSE')">
+                  ❌ Absent
+                </button>
+              </div>
+
+              <div id="status_${key}_${m}" class="presence-status ${
+                value === 'TRUE' ? 'present' : value === 'FALSE' ? 'absent' : 'pending'
+              }">
+                ${
+                  value === 'TRUE'
+                    ? '✅ Présent'
+                    : value === 'FALSE'
+                    ? '❌ Absent'
+                    : '⏳ Pas encore répondu'
+                }
+              </div>
+            </div>
+          `;
+        } else {
+          // ✅ Cas parent / lecture seule : checkbox comme avant
+          const checked = (value === 'TRUE');
+
+          html += `
+            <label class="checkbox-item" style="${canEdit ? '' : 'opacity:0.55;'}">
+              <input type="checkbox"
+                id="cb_${key}_${m}"
+                data-key="${key}"
+                ${checked ? 'checked' : ''}
+                ${canEdit ? '' : 'disabled'}
+                onchange="updateTotal(this.dataset.key)">
+              <span>${MEMBRES_LABEL[mi]}</span>
+            </label>
+          `;
+        }
       });
 
       html += `</div><div class="divider"></div>`;
@@ -666,11 +708,12 @@ function buildPresencesUI(){
 
   document.getElementById('present-content').innerHTML = html;
 
-  // 🔒 Bonus sécurité : un enfant ne doit pas pouvoir "Tout effacer"
-  document.querySelectorAll('#page-present .btn-secondary').forEach(btn=>{
+  // Un enfant ne voit pas le bouton "Effacer"
+  document.querySelectorAll('#page-present .btn-secondary').forEach(btn => {
     btn.style.display = isParent ? '' : 'none';
   });
 }
+
 
 
  
