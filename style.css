@@ -111,39 +111,7 @@ body {
   display:flex;
   flex-direction:column;
   gap:6px;
-  padding:8px 10px;
-  border-radius:10px;
-  background:var(--bg);
-}
-
-.presence-choice-name{
-  font-size:0.9rem;
-  font-weight:700;
-  color:var(--text);
-}
-
-.presence-choice-buttons{
-  display:flex;
-  gap:8px;
-}
-
-.presence-parent-icon{
-  width:18px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  font-size:1rem;
-  font-weight:900;
-  flex-shrink:0;
-}
-
-.presence-choice-wrap{
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-  padding:6px 8px;
-  border-radius:10px;
-  background:transparent;
+  padding:6px 4px;
 }
 
 /* Nom enfant */
@@ -159,58 +127,51 @@ body {
   gap:6px;
 }
 
-/* Boutons base */
-
+/* Base bouton = cercle */
 .presence-btn{
   flex:1;
-  border-radius:30px;
-  padding:6px 0;
 
-  font-size:0.9rem;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  height:36px;
+  border-radius:50px;
+
+  font-size:1rem;
   font-weight:900;
 
-  background:rgba(0,0,0,0.05);
-  color:#aaa;
+  cursor:pointer;
+  transition:all 0.2s;
+
+  border:none;
+
+  background:rgba(0,0,0,0.05);   /* état neutre */
+  color:#bbb;                    /* grisé */
 }
 
-
-/* Petit effet hover */
+/* Hover léger */
 .presence-btn:hover{
-  transform:translateY(-1px);
+  transform:scale(1.05);
 }
 
-/* ✅ Présent */
+/* ✅ Présent actif → violet */
 .presence-btn.present.active{
   background:linear-gradient(135deg, var(--violet), var(--rose));
   color:white;
-  box-shadow:0 2px 8px rgba(156,39,176,0.3);
+  box-shadow:0 3px 8px rgba(156,39,176,0.3);
 }
 
-/* ❌ Absent */
+/* ❌ Absent actif → rose foncé */
 .presence-btn.absent.active{
-  background:#f3e5f5; /* même base couleur app */
-  color:#8e24aa;
-  border:2px solid #e1bee7;
+  background:var(--rose-dark);
+  color:white;
+  box-shadow:0 3px 8px rgba(194,24,91,0.3);
 }
 
-/* Texte statut (plus discret) */
-.presence-status{
-  font-size:0.7rem;
-  font-weight:700;
-  opacity:0.7;
-}
-
-/* Couleurs texte */
-.presence-status.present{
-  color:var(--violet);
-}
-
-.presence-status.absent{
-  color:#8e24aa;
-}
-
-.presence-status.pending{
-  color:#bbb;
+/* Option : état non sélectionné léger */
+.presence-btn:not(.active){
+  opacity:0.6;
 }
 
 
