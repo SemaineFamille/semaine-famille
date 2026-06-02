@@ -686,7 +686,8 @@ async function loadPresences(force = false) {
   if (contentEl) contentEl.style.display = 'block';
 }
 
-async function savePresences() {async function save showToast('Enregistrement...');
+async function savePresences() {
+   showToast('Enregistrement...');
 
   const { editable } = getPresenceAccess();
   const editableSet = new Set(editable);
