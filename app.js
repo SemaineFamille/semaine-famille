@@ -815,7 +815,8 @@ function renderMenuUI() {
   hideRollingWeekClearButtons();
 }
 
-async function saveMenu() {async  showToast('Enregistrement...');
+async function saveMenu() {
+   showToast('Enregistrement...');
 
   const dates = rollingDates(7);
   const items = [];
