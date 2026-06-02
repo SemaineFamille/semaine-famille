@@ -686,34 +686,41 @@ async function loadPresences(force = false) {
   if (contentEl) contentEl.style.display = 'block';
 }
 
-async function savePresences() {
-  showToast('Enregistrement...');
+async function savePresences() {async function save showToast('Enregistrement...');
 
   const { editable } = getPresenceAccess();
   const editableSet = new Set(editable);
   const dates = rollingDates(7);
+  const items = [];
 
   for (const { date } of dates) {
     for (const repas of ['midi', 'soir']) {
       const key = `${date}_${repas}`;
-      const payload = {
-        action: 'enregistrer',
-        sheet: 'PRESENCES',
+
+      const row = {
         jour: date,
         repas
       };
 
       MEMBRES.forEach(m => {
         if (editableSet.has(m)) {
-          payload[m] = getPresenceValue(key, m);
+          row[m] = getPresenceValue(key, m);
         } else {
-          payload[m] = presencesData?.[key]?.[m] ?? '';
+          row[m] = presencesData?.[key]?.[m] ?? '';
         }
       });
 
-      await apiCall(payload);
+      items.push(row);
     }
   }
+
+  const payload = { items };
+
+  await apiCall({
+    action: 'enregistrer_batch',
+    sheet: 'PRESENCES',
+    payload: JSON.stringify(payload)
+  });
 
   APP_CACHE.pagesLoaded.present = false;
   APP_CACHE.presencesLoadedAt = 0;
@@ -721,6 +728,7 @@ async function savePresences() {
   await loadPresences(true);
   showToast('✅ Présences enregistrées !');
 }
+
 
 /* on garde la fonction mais elle ne sera plus utilisée par l’UI */
 async function clearPresences() {
@@ -806,18 +814,16 @@ function renderMenuUI() {
   hideRollingWeekClearButtons();
 }
 
-async function saveMenu() {
-  showToast('Enregistrement...');
+async function saveMenu() {async  showToast('Enregistrement...');
 
   const dates = rollingDates(7);
+  const items = [];
 
   for (const { date } of dates) {
     for (const repas of ['midi', 'soir']) {
       const plat = document.getElementById(`menu_${date}_${repas}`)?.value?.trim() || '-';
 
-      await apiCall({
-        action: 'enregistrer',
-        sheet: 'MENU',
+      items.push({
         jour: date,
         repas,
         plat
@@ -825,12 +831,22 @@ async function saveMenu() {
     }
   }
 
+  const payload = { items };
+
+  await apiCall({
+    action: 'enregistrer_batch',
+    sheet: 'MENU',
+    payload: JSON.stringify(payload)
+  });
+
   APP_CACHE.pagesLoaded.menu = false;
   APP_CACHE.menuLoadedAt = 0;
 
   await loadMenu(true);
   showToast('✅ Menu enregistré !');
 }
+
+
 
 /* on garde la fonction mais elle ne sera plus utilisée par l’UI */
 async function clearMenu() {
