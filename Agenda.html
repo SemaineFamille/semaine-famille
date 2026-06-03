@@ -1,459 +1,278 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import {
-  CalendarDays,
-  Clock3,
-  MessageSquare,
-  Plus,
-  RefreshCw,
-  Trash2,
-} from "lucide-react";
-import { motion } from "framer-motion";
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agenda familial</title>
 
-/**
- * CONFIGURATION
- * Colle ici l'URL du déploiement Web App de TON Apps Script dédié
- * lié à TON nouveau Google Sheet.
- */
-const APPS_SCRIPT_URL = "";
-const ENABLE_REMOTE_SYNC = Boolean(APPS_SCRIPT_URL);
-
-const demoEntries = [
-  {
-    id: 1,
-    date: "2026-06-05",
-    startTime: "08:15",
-    endTime: "09:00",
-    activity: "Départ pour l'école",
-    comment: "Prévoir les affaires de sport.",
-  },
-  {
-    id: 2,
-    date: "2026-06-06",
-    startTime: "14:00",
-    endTime: "17:00",
-    activity: "Sortie en famille",
-    comment: "Prendre les gourdes et les vestes.",
-  },
-  {
-    id: 3,
-    date: "2026-06-08",
-    startTime: "18:30",
-    endTime: "20:00",
-    activity: "Repas chez Mamie",
-    comment: "Apporter le dessert.",
-  },
-];
-
-function formatDate(dateString) {
-  if (!dateString) return "Date à définir";
-  return new Date(`${dateString}T12:00:00`).toLocaleDateString("fr-FR", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f8fafc;
+  margin: 0;
+  padding: 20px;
+  color: #0f172a;
 }
 
-function formatTimeRange(startTime, endTime) {
-  if (!startTime && !endTime) return "Horaire non défini";
-  if (startTime && endTime) return `${startTime} – ${endTime}`;
-  return startTime || endTime;
+.container {
+  max-width: 1100px;
+  margin: auto;
 }
 
-function getEndDateTime(entry) {
-  const fallbackEnd = entry.endTime || entry.startTime || "23:59";
-  return new Date(`${entry.date}T${fallbackEnd}:00`);
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid #e2e8f0;
 }
 
-function isUpcoming(entry) {
-  return getEndDateTime(entry).getTime() >= Date.now();
+h1 {
+  margin: 0;
 }
 
-async function callAppsScript(action, payload = {}) {
-  if (!APPS_SCRIPT_URL) {
-    throw new Error("APPS_SCRIPT_URL manquante");
-  }
-
-  const response = await fetch(APPS_SCRIPT_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "text/plain;charset=utf-8",
-    },
-    body: JSON.stringify({ action, ...payload }),
-  });
-
-  if (!response.ok) {
-    throw new Error("Impossible de joindre le script Google Apps Script");
-  }
-
-  return response.json();
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 20px;
 }
 
-export default function AgendaFamilialBaseApp() {
-  const [entries, setEntries] = useState(demoEntries);
-  const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [form, setForm] = useState({
-    date: "",
-    startTime: "",
-    endTime: "",
-    activity: "",
-    comment: "",
-  });
+input, textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  font-size: 14px;
+}
 
-  const visibleEntries = useMemo(() => {
-    return [...entries]
-      .filter(isUpcoming)
-      .filter((entry) => {
-        const haystack =
-          `${entry.activity} ${entry.comment} ${entry.date} ${entry.startTime} ${entry.endTime}`.toLowerCase();
-        return haystack.includes(search.toLowerCase());
-      })
-      .sort((a, b) => {
-        const aTime = new Date(`${a.date}T${a.startTime || "00:00"}:00`).getTime();
-        const bTime = new Date(`${b.date}T${b.startTime || "00:00"}:00`).getTime();
-        return aTime - bTime;
-      });
-  }, [entries, search]);
+textarea {
+  min-height: 80px;
+}
 
-  const todayEntries = useMemo(() => {
-    const today = new Date().toISOString().slice(0, 10);
-    return visibleEntries.filter((entry) => entry.date === today);
-  }, [visibleEntries]);
+.button {
+  margin-top: 15px;
+  width: 100%;
+  padding: 12px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+}
 
-  const upcomingCount = visibleEntries.length;
+.item {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
 
-  const loadEntries = async () => {
-    if (!ENABLE_REMOTE_SYNC) return;
+.badge {
+  background: #e2e8f0;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  margin-right: 6px;
+}
 
-    try {
-      setLoading(true);
-      setError("");
-      const result = await callAppsScript("list");
-      if (Array.isArray(result?.items)) {
-        setEntries(result.items);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur de chargement");
-    } finally {
-      setLoading(false);
-    }
-  };
+.badge-outline {
+  border: 1px solid #cbd5e1;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+}
 
-  useEffect(() => {
-    loadEntries();
-  }, []);
+.delete {
+  background: none;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 6px 10px;
+}
+</style>
 
-  const addEntry = async () => {
-    if (!form.date || !form.startTime || !form.endTime || !form.activity.trim()) return;
+</head>
+<body>
 
-    const newEntry = {
-      id: Date.now(),
-      date: form.date,
-      startTime: form.startTime,
-      endTime: form.endTime,
-      activity: form.activity.trim(),
-      comment: form.comment.trim(),
-    };
+<div class="container">
 
-    if (!isUpcoming(newEntry)) {
-      setError("L'activité est déjà passée. Choisis une date ou une heure future.");
-      return;
-    }
+  <div class="card">
+    <h1>Agenda familial</h1>
+    <p>Ajoute une date, un créneau horaire, une activité et un commentaire.</p>
+  </div>
 
-    if (ENABLE_REMOTE_SYNC) {
-      try {
-        setLoading(true);
-        setError("");
-        await callAppsScript("create", { item: newEntry });
-        await loadEntries();
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Erreur lors de l'enregistrement");
-      } finally {
-        setLoading(false);
-      }
-    } else {
-      setEntries((prev) => [...prev, newEntry]);
-    }
+  <div class="grid">
 
-    setForm({
-      date: "",
-      startTime: "",
-      endTime: "",
-      activity: "",
-      comment: "",
-    });
-  };
+    <!-- FORMULAIRE -->
+    <div class="card">
 
-  const deleteEntry = async (id) => {
-    if (ENABLE_REMOTE_SYNC) {
-      try {
-        setLoading(true);
-        setError("");
-        await callAppsScript("delete", { id });
-        await loadEntries();
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Erreur lors de la suppression");
-      } finally {
-        setLoading(false);
-      }
-    } else {
-      setEntries((prev) => prev.filter((entry) => entry.id !== id));
-    }
-  };
+      <h2>Ajouter une activité</h2>
 
-  return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="mx-auto max-w-7xl px-4 py-6 md:px-8 md:py-8">
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="mb-6"
-        >
-          <Card className="rounded-3xl border shadow-sm">
-            <CardContent className="p-6 md:p-8">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                <div>
-                  <div className="mb-3 flex items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
-                      <CalendarDays className="h-6 w-6" />
-                    </div>
-                    <div>
-                      <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
-                        Agenda familial
-                      </h1>
-                      <p className="mt-1 text-base text-muted-foreground md:text-lg">
-                        Une vue simple pour ajouter une date, un créneau horaire,
-                        une activité et un commentaire.
-                      </p>
-                    </div>
-                  </div>
+      <label>Date</label>
+      <input type="date" id="date">
 
-                  <div className="flex flex-wrap gap-2">
-                    <Badge variant="secondary" className="rounded-full px-4 py-1 text-sm">
-                      Style aligné sur l'app
-                    </Badge>
-                    <Badge variant="outline" className="rounded-full px-4 py-1 text-sm">
-                      Google Sheet dédiée
-                    </Badge>
-                    <Badge variant="outline" className="rounded-full px-4 py-1 text-sm">
-                      Les activités passées disparaissent automatiquement
-                    </Badge>
-                  </div>
-                </div>
+      <div style="display:flex; gap:10px;">
+        <div style="flex:1;">
+          <label>Début</label>
+          <input type="time" id="start">
+        </div>
 
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                  <Card className="rounded-2xl border bg-muted/40 shadow-none">
-                    <CardContent className="p-4">
-                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                        À venir
-                      </p>
-                      <p className="mt-1 text-3xl font-bold">{upcomingCount}</p>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="rounded-2xl border bg-muted/40 shadow-none">
-                    <CardContent className="p-4">
-                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                        Aujourd'hui
-                      </p>
-                      <p className="mt-1 text-3xl font-bold">{todayEntries.length}</p>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="rounded-2xl border bg-muted/40 shadow-none col-span-2 sm:col-span-1">
-                    <CardContent className="p-4 flex h-full items-center justify-between gap-3">
-                      <div>
-                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          Synchronisation
-                        </p>
-                        <p className="mt-1 text-sm font-semibold">
-                          {ENABLE_REMOTE_SYNC ? "Google Sheet dédiée" : "Mode local"}
-                        </p>
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="rounded-xl"
-                        onClick={loadEntries}
-                        disabled={!ENABLE_REMOTE_SYNC || loading}
-                      >
-                        <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-          <motion.div
-            initial={{ opacity: 0, x: -12 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, delay: 0.05 }}
-            className="xl:col-span-1"
-          >
-            <Card className="rounded-3xl border shadow-sm">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-2xl">
-                  <Plus className="h-5 w-5" /> Ajouter une activité
-                </CardTitle>
-              </CardHeader>
-
-              <CardContent className="space-y-4">
-                <div>
-                  <label className="mb-2 block text-base font-medium">Date</label>
-                  <Input
-                    type="date"
-                    className="h-12 rounded-2xl text-lg"
-                    value={form.date}
-                    onChange={(e) => setForm({ ...form, date: e.target.value })}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="mb-2 block text-base font-medium">Début</label>
-                    <Input
-                      type="time"
-                      className="h-12 rounded-2xl text-lg"
-                      value={form.startTime}
-                      onChange={(e) => setForm({ ...form, startTime: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-2 block text-base font-medium">Fin</label>
-                    <Input
-                      type="time"
-                      className="h-12 rounded-2xl text-lg"
-                      value={form.endTime}
-                      onChange={(e) => setForm({ ...form, endTime: e.target.value })}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-base font-medium">Activité</label>
-                  <Input
-                    placeholder="Ex. Réunion école, train, visite, sport"
-                    className="h-12 rounded-2xl text-lg"
-                    value={form.activity}
-                    onChange={(e) => setForm({ ...form, activity: e.target.value })}
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-base font-medium">Commentaire</label>
-                  <Textarea
-                    placeholder="Informations utiles, lieu, ce qu'il faut prendre..."
-                    className="min-h-[120px] rounded-2xl text-lg"
-                    value={form.comment}
-                    onChange={(e) => setForm({ ...form, comment: e.target.value })}
-                  />
-                </div>
-
-                {error ? (
-                  <div className="rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-                    {error}
-                  </div>
-                ) : null}
-
-                <Button
-                  onClick={addEntry}
-                  disabled={loading}
-                  className="h-14 w-full rounded-2xl text-lg font-semibold"
-                >
-                  <Plus className="mr-2 h-5 w-5" /> Enregistrer
-                </Button>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 12 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, delay: 0.08 }}
-            className="xl:col-span-2"
-          >
-            <Card className="rounded-3xl border shadow-sm">
-              <CardHeader className="gap-4">
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                  <CardTitle className="flex items-center gap-2 text-2xl">
-                    <Clock3 className="h-5 w-5" /> Activités à venir
-                  </CardTitle>
-
-                  <Input
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Rechercher une activité ou un commentaire"
-                    className="h-12 max-w-xl rounded-2xl text-lg"
-                  />
-                </div>
-              </CardHeader>
-
-              <CardContent>
-                <div className="space-y-4">
-                  {visibleEntries.length === 0 ? (
-                    <div className="rounded-3xl border border-dashed bg-muted/30 p-10 text-center">
-                      <p className="text-xl font-semibold">Aucune activité future</p>
-                      <p className="mt-2 text-base text-muted-foreground">
-                        Les activités disparaissent dès que leur créneau horaire est passé.
-                      </p>
-                    </div>
-                  ) : (
-                    visibleEntries.map((entry) => (
-                      <div key={entry.id} className="rounded-3xl border bg-card">
-                        <div className="flex flex-col gap-4 p-5 md:flex-row md:items-start md:justify-between md:p-6">
-                          <div className="min-w-0 flex-1">
-                            <div className="mb-3 flex flex-wrap items-center gap-2">
-                              <Badge className="rounded-full px-3 py-1 text-sm">
-                                {formatDate(entry.date)}
-                              </Badge>
-                              <Badge variant="outline" className="rounded-full px-3 py-1 text-sm">
-                                {formatTimeRange(entry.startTime, entry.endTime)}
-                              </Badge>
-                            </div>
-
-                            <h3 className="text-2xl font-semibold leading-tight">
-                              {entry.activity}
-                            </h3>
-
-                            {entry.comment ? (
-                              <div className="mt-3 flex items-start gap-2 text-base text-muted-foreground">
-                                <MessageSquare className="mt-0.5 h-4 w-4 shrink-0" />
-                                <p className="whitespace-pre-line">{entry.comment}</p>
-                              </div>
-                            ) : null}
-                          </div>
-
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-12 w-12 rounded-2xl"
-                            onClick={() => deleteEntry(entry.id)}
-                            disabled={loading}
-                          >
-                            <Trash2 className="h-5 w-5" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+        <div style="flex:1;">
+          <label>Fin</label>
+          <input type="time" id="end">
         </div>
       </div>
+
+      <label>Activité</label>
+      <input type="text" id="activity" placeholder="Ex: école, train, sport">
+
+      <label>Commentaire</label>
+      <textarea id="comment"></textarea>
+
+      <div id="error" style="color:red; margin-top:10px;"></div>
+
+      <button class="button" onclick="addActivity()">Ajouter</button>
+
     </div>
-  );
+
+    <!-- LISTE -->
+    <div class="card">
+
+      <h2>Activités à venir</h2>
+
+      <input type="text" id="search" placeholder="Rechercher..." onkeyup="render()">
+
+      <div id="list"></div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+let activities = [];
+
+function formatDate(date) {
+  return new Date(date).toLocaleDateString("fr-FR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long"
+  });
 }
+
+function isFuture(item) {
+  let end = item.end || item.start || "23:59";
+  let date = new Date(item.date + "T" + end);
+  return date.getTime() >= Date.now();
+}
+
+function addActivity() {
+  let date = document.getElementById("date").value;
+  let start = document.getElementById("start").value;
+  let end = document.getElementById("end").value;
+  let activity = document.getElementById("activity").value;
+  let comment = document.getElementById("comment").value;
+  let error = document.getElementById("error");
+
+  error.innerText = "";
+
+  if (!date || !start || !end || !activity) {
+    error.innerText = "Merci de remplir tous les champs obligatoires.";
+    return;
+  }
+
+  if (end <= start) {
+    error.innerText = "Heure de fin invalide.";
+    return;
+  }
+
+  let item = {
+    id: Date.now(),
+    date,
+    start,
+    end,
+    activity,
+    comment
+  };
+
+  if (!isFuture(item)) {
+    error.innerText = "Activité déjà passée.";
+    return;
+  }
+
+  activities.push(item);
+  clearForm();
+  render();
+}
+
+function clearForm() {
+  document.getElementById("date").value = "";
+  document.getElementById("start").value = "";
+  document.getElementById("end").value = "";
+  document.getElementById("activity").value = "";
+  document.getElementById("comment").value = "";
+}
+
+function deleteActivity(id) {
+  activities = activities.filter(a => a.id !== id);
+  render();
+}
+
+function render() {
+  let list = document.getElementById("list");
+  let search = document.getElementById("search").value.toLowerCase();
+
+  let filtered = activities
+    .filter(isFuture)
+    .filter(a => (
+      (a.activity + a.comment).toLowerCase().includes(search)
+    ))
+    .sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start));
+
+  list.innerHTML = "";
+
+  if (filtered.length === 0) {
+    list.innerHTML = "<p>Aucune activité à venir.</p>";
+    return;
+  }
+
+  filtered.forEach(a => {
+    let div = document.createElement("div");
+    div.className = "item";
+
+    div.innerHTML = `
+      <div>
+        <div>
+          <span class="badge">${formatDate(a.date)}</span>
+          <span class="badge-outline">${a.start} - ${a.end}</span>
+        </div>
+        <div style="font-weight:bold; font-size:18px; margin-top:5px;">
+          ${a.activity}
+        </div>
+        <div style="color:#475569;">
+          ${a.comment || ""}
+        </div>
+      </div>
+
+      <button class="delete" onclick="deleteActivity(${a.id})">
+        ✕
+      </button>
+    `;
+
+    list.appendChild(div);
+  });
+}
+
+render();
+
+</script>
+
+</body>
+</html>
