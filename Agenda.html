@@ -482,14 +482,11 @@ async function deleteActivity(id){
 /* ================= RENDER ================= */
 function renderAgenda(){
   const list = document.getElementById("agendaList");
-  const search = document.getElementById("search").value.trim().toLowerCase();
+const search = "";
 
   const items = (model.activities || [])
     .filter(isFuture)
-    .filter(x => {
-      const txt = `${x.activity || ""} ${x.comment || ""} ${x.date || ""} ${x.start || ""} ${x.end || ""}`.toLowerCase();
-      return txt.includes(search);
-    })
+    .filter(x => true)
     .sort(sortAgenda);
 
   document.getElementById("countUpcoming").textContent = items.length;
