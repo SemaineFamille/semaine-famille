@@ -215,6 +215,12 @@ function escapeHtml(value) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 }
+function escapeJsString(value) {
+  return String(value ?? '')
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'");
+}
+
 
 /* =========================================================
    Constantes globales
@@ -1397,7 +1403,8 @@ function renderTaches() {
             <span class="tache-icon">${t.icon}</span>
             <span class="tache-name">${escapeHtml(t.tache)}</span>
           </div>
-          <button class="tache-toggle non-fait" onclick="toggleTache(${JSON.stringify(t.tache)}, ${JSON.stringify(t.jourReel)}, false, ${JSON.stringify(enfant)})">
+          <button class="tache-toggle non-fait"
+            onclick="toggleTache('${escapeJsString(t.tache)}','${escapeJsString(t.jourReel)}',false,'${escapeJsString(enfant)}')">
             ⬜ À faire
           </button>
         </div>
@@ -1430,7 +1437,8 @@ function renderTaches() {
               <span class="tache-name">${escapeHtml(t.tache)}</span>${badge}
             </div>
           </div>
-          <button class="tache-toggle non-fait" onclick="toggleTache(${JSON.stringify(t.tache)}, ${JSON.stringify(t.jourReel)}, false, ${JSON.stringify(enfant)})">
+          <button class="tache-toggle non-fait"
+            onclick="toggleTache('${escapeJsString(t.tache)}','${escapeJsString(t.jourReel)}',false,'${escapeJsString(enfant)}')">
             ⬜ À faire
           </button>
         </div>
@@ -1443,6 +1451,7 @@ function renderTaches() {
   container.innerHTML = html;
 }
 
+
 function renderTachesParentSelf(jour, jourIdx) {
   const enfant = 'Mél & Yann';
   const dateStr = formatDateYYYYMMDD(new Date());
@@ -1452,9 +1461,10 @@ function renderTachesParentSelf(jour, jourIdx) {
   const enRetard = [...enRetardPonct, ...enRetardFixes];
 
   const nonFaites = toutesLesTaches.filter(t => {
+    const enfantValidation = t.enfantReel || enfant;
     const etat = tachesData.find(td =>
       td.tache === t.tache &&
-      td.enfant === enfant &&
+      td.enfant === enfantValidation &&
       td.jour === t.jourReel
     );
     return !etat || (etat.etat || '').trim() !== 'Fait';
@@ -1500,13 +1510,16 @@ function renderTachesParentSelf(jour, jourIdx) {
 
     enRetard.forEach(t => {
       const idSafe = 'retard_' + t.tache.replace(/[^a-z0-9]/gi, '_');
+      const enfantClic = t.enfantReel || enfant;
+
       html += `
         <div class="tache-item" id="${idSafe}">
           <div class="tache-info">
             <span class="tache-icon">${t.icon}</span>
             <span class="tache-name">${escapeHtml(t.tache)}</span>
           </div>
-          <button class="tache-toggle non-fait" onclick="toggleTache(${JSON.stringify(t.tache)}, ${JSON.stringify(t.jourReel)}, false, ${JSON.stringify(enfant)})">
+          <button class="tache-toggle non-fait"
+            onclick="toggleTache('${escapeJsString(t.tache)}','${escapeJsString(t.jourReel)}',false,'${escapeJsString(enfantClic)}')">
             ⬜ À faire
           </button>
         </div>
@@ -1530,6 +1543,7 @@ function renderTachesParentSelf(jour, jourIdx) {
       const sous = t.enfantReel
         ? `<span style="display:block;font-size:0.78rem;color:var(--text-light)">${escapeHtml(t.enfantReel)}</span>`
         : '';
+      const enfantClic = t.enfantReel || enfant;
 
       html += `
         <div class="tache-item" id="tache_${idSafe}">
@@ -1539,7 +1553,8 @@ function renderTachesParentSelf(jour, jourIdx) {
               <span class="tache-name">${escapeHtml(t.tache)}</span>${sous}
             </div>
           </div>
-          <button class="tache-toggle non-fait" onclick="toggleTache(${JSON.stringify(t.tache)}, ${JSON.stringify(t.jourReel)}, false, ${JSON.stringify(enfant)})">
+          <button class="tache-toggle non-fait"
+            onclick="toggleTache('${escapeJsString(t.tache)}','${escapeJsString(t.jourReel)}',false,'${escapeJsString(enfantClic)}')">
             ⬜ À faire
           </button>
         </div>
@@ -1551,6 +1566,7 @@ function renderTachesParentSelf(jour, jourIdx) {
 
   container.innerHTML = html;
 }
+
 
 async function toggleTache(tache, jour, estFait, enfant) {
   const id = 'tache_' + String(tache).replace(/[^a-z0-9]/gi, '_');
