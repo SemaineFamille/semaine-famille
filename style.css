@@ -35,8 +35,21 @@ body {
   vertical-align: middle;
 }  
 
+
 /* Contour jaune = jour */
-.cal-jour {
+.cal-jour {.nav-tab{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+}
+
+.iconTab{
+  width:28px;
+  height:28px;
+  object-fit:contain;
+}
   border: 3px solid #FFD600;
 }
 
