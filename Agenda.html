@@ -1,277 +1,541 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Agenda familial</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background: #f8fafc;
-  margin: 0;
-  padding: 20px;
-  color: #0f172a;
+:root{
+  --accent:#F50870;
+  --accent2:#9C27B0;
+  --txt:#fff;
 }
 
-.container {
-  max-width: 1100px;
-  margin: auto;
+/* 🌈 FOND identique à VACANCES */
+body{
+  margin:0;
+  font-family:system-ui;
+  color:var(--txt);
+
+  background:
+    radial-gradient(700px 500px at 10% 0%, rgba(255,255,255,.2), transparent),
+    radial-gradient(700px 500px at 90% 0%, rgba(255,255,255,.2), transparent),
+    linear-gradient(135deg,#F8BBD0,#E1BEE7,#CE93D8);
 }
 
-.card {
-  background: white;
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 20px;
-  border: 1px solid #e2e8f0;
+/* HEADER */
+.topbar{
+  position:fixed;
+  top:0;
+  width:100%;
+  display:flex;
+  justify-content:flex-end;
+  box-sizing:border-box;
+  z-index:10;
+  padding:12px 26px;
 }
 
-h1 {
-  margin: 0;
+.backbtn{
+  background:linear-gradient(135deg,var(--accent2),var(--accent));
+  border:none;
+  padding:12px 16px;
+  border-radius:14px;
+  font-weight:900;
+  color:white;
+  cursor:pointer;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 20px;
+/* LAYOUT */
+.wrap{
+  max-width:720px;
+  margin-right:6px;
+  padding:92px 16px 16px;
+  box-sizing:border-box;
 }
 
-input, textarea {
-  width: 100%;
-  padding: 10px;
-  margin-top: 6px;
-  border-radius: 10px;
-  border: 1px solid #cbd5e1;
-  font-size: 14px;
+.card{
+  background:rgba(255,255,255,.85);
+  color:black;
+  border-radius:16px;
+  padding:16px;
+  margin-bottom:16px;
 }
 
-textarea {
-  min-height: 80px;
+/* GRID ALIGNEMENT */
+.row{
+  display:flex;
+  gap:10px;
 }
 
-.button {
-  margin-top: 15px;
-  width: 100%;
-  padding: 12px;
-  background: #2563eb;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  font-weight: bold;
-  cursor: pointer;
+.col{
+  flex:1;
+  min-width:0;
 }
 
-.item {
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 15px;
-  margin-bottom: 10px;
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
+/* INPUT */
+select,input,textarea{
+  width:100%;
+  box-sizing:border-box;
+  border-radius:12px;
+  border:1px solid #ddd;
+  font-size:18px;
+  font-family:inherit;
 }
 
-.badge {
-  background: #e2e8f0;
-  padding: 4px 8px;
-  border-radius: 999px;
-  font-size: 12px;
-  margin-right: 6px;
+input, select{
+  height:48px;
+  padding:0 12px;
 }
 
-.badge-outline {
-  border: 1px solid #cbd5e1;
-  padding: 4px 8px;
-  border-radius: 999px;
-  font-size: 12px;
+textarea{
+  padding:12px;
+  min-height:96px;
+  resize:vertical;
 }
 
-.delete {
-  background: none;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  cursor: pointer;
-  padding: 6px 10px;
+/* BOUTON */
+.primary{
+  width:100%;
+  margin-top:10px;
+  padding:14px;
+  border-radius:14px;
+  border:none;
+  font-weight:900;
+  font-size:18px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:white;
+  cursor:pointer;
+}
+
+/* RECHERCHE */
+#search{
+  margin-top:10px;
+}
+
+/* BLOCS INFO */
+.statRow{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+  margin-top:12px;
+}
+
+.stat{
+  background:white;
+  border-radius:12px;
+  padding:12px;
+}
+
+.stat small{
+  display:block;
+  opacity:.7;
+  margin-bottom:4px;
+}
+
+.stat b{
+  font-size:24px;
+}
+
+/* LISTE AGENDA */
+.item{
+  background:#f3e5f5;
+  border-radius:12px;
+  padding:12px;
+  margin-top:10px;
+}
+
+.badges{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:8px;
+}
+
+.badge{
+  background:white;
+  border-radius:999px;
+  padding:6px 10px;
+  font-size:13px;
+  font-weight:700;
+}
+
+.title{
+  font-size:20px;
+  font-weight:900;
+  margin-bottom:6px;
+}
+
+.comment{
+  opacity:.8;
+  white-space:pre-line;
+}
+
+.actions{
+  display:flex;
+  justify-content:flex-end;
+  margin-top:10px;
+}
+
+.deleteBtn{
+  border:none;
+  padding:8px 12px;
+  border-radius:10px;
+  background:var(--accent);
+  color:white;
+  font-weight:700;
+  cursor:pointer;
+}
+
+/* MESSAGES */
+.msg{
+  margin-top:10px;
+  padding:10px;
+  border-radius:12px;
+  font-weight:700;
+}
+
+.msg.error{
+  background:#ffe3e3;
+  color:#b00020;
+}
+
+.msg.ok{
+  background:#e8f5e9;
+  color:#1b5e20;
+}
+
+.empty{
+  margin-top:10px;
+  background:white;
+  border-radius:12px;
+  padding:14px;
+  opacity:.75;
+}
+
+/* MOBILE */
+@media (max-width: 380px){
+  .row{
+    flex-wrap:wrap;
+  }
+  .row .col{
+    flex-basis:100%;
+  }
 }
 </style>
-
 </head>
+
 <body>
 
-<div class="container">
+<div class="topbar">
+  <button class="backbtn" onclick="goBack()">🔙 Retour</button>
+</div>
+
+<div class="wrap">
 
   <div class="card">
-    <h1>Agenda familial</h1>
-    <p>Ajoute une date, un créneau horaire, une activité et un commentaire.</p>
+    <b style="font-size:22px;">📅 Agenda familial</b>
+    <div style="margin-top:6px; opacity:.8;">
+      Ajoute une date, un créneau horaire, une activité et un commentaire.
+      Les activités passées disparaissent automatiquement.
+    </div>
+
+    <div class="statRow">
+      <div class="stat">
+        <small>À venir</small>
+        <b id="countUpcoming">0</b>
+      </div>
+      <div class="stat">
+        <small>Aujourd’hui</small>
+        <b id="countToday">0</b>
+      </div>
+    </div>
   </div>
 
-  <div class="grid">
+  <div class="card">
+    <b>➕ Ajouter une activité</b>
 
-    <!-- FORMULAIRE -->
-    <div class="card">
-
-      <h2>Ajouter une activité</h2>
-
-      <label>Date</label>
-      <input type="date" id="date">
-
-      <div style="display:flex; gap:10px;">
-        <div style="flex:1;">
-          <label>Début</label>
-          <input type="time" id="start">
-        </div>
-
-        <div style="flex:1;">
-          <label>Fin</label>
-          <input type="time" id="end">
-        </div>
+    <div class="row" style="margin-top:10px;">
+      <div class="col">
+        <input id="date" type="date">
       </div>
-
-      <label>Activité</label>
-      <input type="text" id="activity" placeholder="Ex: école, train, sport">
-
-      <label>Commentaire</label>
-      <textarea id="comment"></textarea>
-
-      <div id="error" style="color:red; margin-top:10px;"></div>
-
-      <button class="button" onclick="addActivity()">Ajouter</button>
-
     </div>
 
-    <!-- LISTE -->
-    <div class="card">
-
-      <h2>Activités à venir</h2>
-
-      <input type="text" id="search" placeholder="Rechercher..." onkeyup="render()">
-
-      <div id="list"></div>
-
+    <div class="row" style="margin-top:10px;">
+      <div class="col">
+        <input id="start" type="time">
+      </div>
+      <div class="col">
+        <input id="end" type="time">
+      </div>
     </div>
 
+    <div class="row" style="margin-top:10px;">
+      <div class="col">
+        <input id="activity" placeholder="Ex : dentiste / train / école / repas">
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:10px;">
+      <div class="col">
+        <textarea id="comment" placeholder="Commentaire, infos pratiques, lieu, ce qu'il faut prendre..."></textarea>
+      </div>
+    </div>
+
+    <button class="primary" onclick="addActivity()">💾 Enregistrer</button>
+
+    <div id="message"></div>
+  </div>
+
+  <div class="card">
+    <b>📋 Activités à venir</b>
+    <input id="search" placeholder="Rechercher une activité ou un commentaire..." oninput="renderAgenda()">
+    <div id="agendaList"></div>
   </div>
 
 </div>
 
 <script>
+const API_URL = "https://script.google.com/macros/s/AKfycbyRo9pvPZ6nI0R19W6nqiELagcVwrsdAjVr3s__Wb8jlGVlguXmDj2IF1oATr1s85ne/exec";
 
-let activities = [];
+/* ================= MODEL ================= */
+let model = {
+  activities: []
+};
 
-function formatDate(date) {
-  return new Date(date).toLocaleDateString("fr-FR", {
-    weekday: "long",
-    day: "numeric",
-    month: "long"
+/* ================= API JSONP ================= */
+function jsonpCall(params){
+  return new Promise((resolve, reject) => {
+    const cb = "cb_" + Date.now() + "_" + Math.floor(Math.random() * 99999);
+    params.callback = cb;
+
+    const url = API_URL + "?" + new URLSearchParams(params);
+    const s = document.createElement("script");
+    s.src = url;
+
+    window[cb] = (data) => {
+      try { delete window[cb]; } catch(e){}
+      s.remove();
+      resolve(data);
+    };
+
+    s.onerror = () => {
+      try { delete window[cb]; } catch(e){}
+      s.remove();
+      reject(new Error("Erreur API"));
+    };
+
+    document.body.appendChild(s);
   });
 }
 
-function isFuture(item) {
-  let end = item.end || item.start || "23:59";
-  let date = new Date(item.date + "T" + end);
-  return date.getTime() >= Date.now();
+async function apiGET(action, extra = {}){
+  return await jsonpCall({ action, ...extra });
 }
 
-function addActivity() {
-  let date = document.getElementById("date").value;
-  let start = document.getElementById("start").value;
-  let end = document.getElementById("end").value;
-  let activity = document.getElementById("activity").value;
-  let comment = document.getElementById("comment").value;
-  let error = document.getElementById("error");
+/* ================= HELPERS ================= */
+function escapeHtml(str){
+  return String(str || "").replace(/[&<>"']/g, ch => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    "\"":"&quot;",
+    "'":"&#39;"
+  }[ch]));
+}
 
-  error.innerText = "";
+function setMessage(type, text){
+  const el = document.getElementById("message");
+  if(!text){
+    el.innerHTML = "";
+    return;
+  }
+  el.innerHTML = `<div class="msg ${type}">${escapeHtml(text)}</div>`;
+}
 
-  if (!date || !start || !end || !activity) {
-    error.innerText = "Merci de remplir tous les champs obligatoires.";
+function formatDateFR(dateStr){
+  if(!dateStr) return "";
+
+  const d = new Date(dateStr + "T12:00:00");
+  if(isNaN(d)) return dateStr;
+
+  const jours = ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
+  const mois = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+
+  return `${jours[d.getDay()]} ${d.getDate()} ${mois[d.getMonth()]}`;
+}
+
+function getEndDateTime(item){
+  const end = item.end || item.start || "23:59";
+  return new Date(item.date + "T" + end + ":00");
+}
+
+function isFuture(item){
+  return getEndDateTime(item).getTime() >= Date.now();
+}
+
+function isToday(item){
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const dd = String(now.getDate()).padStart(2, "0");
+  const today = `${yyyy}-${mm}-${dd}`;
+  return item.date === today && isFuture(item);
+}
+
+function sortAgenda(a, b){
+  return (a.date + a.start).localeCompare(b.date + b.start);
+}
+
+/* ================= LOAD ================= */
+async function loadFromAPI(){
+  try{
+    const res = await apiGET("getAll");
+
+    if(!res || !res.ok){
+      setMessage("error", res?.error || "Erreur API");
+      return;
+    }
+
+    model.activities = (res.data && res.data.activities) ? res.data.activities : [];
+    renderAgenda();
+  }catch(err){
+    setMessage("error", "Impossible de charger l’agenda.");
+    console.error(err);
+  }
+}
+
+/* ================= ADD ================= */
+async function addActivity(){
+  const date = document.getElementById("date").value.trim();
+  const start = document.getElementById("start").value.trim();
+  const end = document.getElementById("end").value.trim();
+  const activity = document.getElementById("activity").value.trim();
+  const comment = document.getElementById("comment").value.trim();
+
+  setMessage("", "");
+
+  if(!date || !start || !end || !activity){
+    setMessage("error", "Merci de remplir la date, l’heure de début, l’heure de fin et l’activité.");
     return;
   }
 
-  if (end <= start) {
-    error.innerText = "Heure de fin invalide.";
+  if(end <= start){
+    setMessage("error", "L’heure de fin doit être après l’heure de début.");
     return;
   }
 
-  let item = {
-    id: Date.now(),
-    date,
-    start,
-    end,
-    activity,
-    comment
-  };
-
-  if (!isFuture(item)) {
-    error.innerText = "Activité déjà passée.";
+  const candidate = { date, start, end, activity, comment };
+  if(!isFuture(candidate)){
+    setMessage("error", "Cette activité est déjà passée.");
     return;
   }
 
-  activities.push(item);
-  clearForm();
-  render();
+  try{
+    const res = await apiGET("addActivity", {
+      date,
+      start,
+      end,
+      activity,
+      comment
+    });
+
+    if(!res || !res.ok){
+      setMessage("error", res?.error || "Erreur lors de l’enregistrement.");
+      return;
+    }
+
+    document.getElementById("date").value = "";
+    document.getElementById("start").value = "";
+    document.getElementById("end").value = "";
+    document.getElementById("activity").value = "";
+    document.getElementById("comment").value = "";
+
+    setMessage("ok", "Activité enregistrée.");
+    loadFromAPI();
+  }catch(err){
+    setMessage("error", "Impossible d’enregistrer l’activité.");
+    console.error(err);
+  }
 }
 
-function clearForm() {
-  document.getElementById("date").value = "";
-  document.getElementById("start").value = "";
-  document.getElementById("end").value = "";
-  document.getElementById("activity").value = "";
-  document.getElementById("comment").value = "";
+/* ================= DELETE ================= */
+async function deleteActivity(id){
+  if(!confirm("Supprimer cette activité ?")) return;
+
+  try{
+    const res = await apiGET("deleteActivity", { id });
+
+    if(!res || !res.ok){
+      alert(res?.error || "Erreur suppression");
+      return;
+    }
+
+    loadFromAPI();
+  }catch(err){
+    alert("Impossible de supprimer l’activité.");
+    console.error(err);
+  }
 }
 
-function deleteActivity(id) {
-  activities = activities.filter(a => a.id !== id);
-  render();
-}
+/* ================= RENDER ================= */
+function renderAgenda(){
+  const list = document.getElementById("agendaList");
+  const search = document.getElementById("search").value.trim().toLowerCase();
 
-function render() {
-  let list = document.getElementById("list");
-  let search = document.getElementById("search").value.toLowerCase();
-
-  let filtered = activities
+  const items = (model.activities || [])
     .filter(isFuture)
-    .filter(a => (
-      (a.activity + a.comment).toLowerCase().includes(search)
-    ))
-    .sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start));
+    .filter(x => {
+      const txt = `${x.activity || ""} ${x.comment || ""} ${x.date || ""} ${x.start || ""} ${x.end || ""}`.toLowerCase();
+      return txt.includes(search);
+    })
+    .sort(sortAgenda);
+
+  document.getElementById("countUpcoming").textContent = items.length;
+  document.getElementById("countToday").textContent = items.filter(isToday).length;
 
   list.innerHTML = "";
 
-  if (filtered.length === 0) {
-    list.innerHTML = "<p>Aucune activité à venir.</p>";
+  if(items.length === 0){
+    list.innerHTML = `<div class="empty">Aucune activité à venir.</div>`;
     return;
   }
 
-  filtered.forEach(a => {
-    let div = document.createElement("div");
+  items.forEach(x => {
+    const div = document.createElement("div");
     div.className = "item";
 
     div.innerHTML = `
-      <div>
-        <div>
-          <span class="badge">${formatDate(a.date)}</span>
-          <span class="badge-outline">${a.start} - ${a.end}</span>
-        </div>
-        <div style="font-weight:bold; font-size:18px; margin-top:5px;">
-          ${a.activity}
-        </div>
-        <div style="color:#475569;">
-          ${a.comment || ""}
-        </div>
+      <div class="badges">
+        <div class="badge">📅 ${escapeHtml(formatDateFR(x.date))}</div>
+        <div class="badge">⏰ ${escapeHtml(x.start)} - ${escapeHtml(x.end)}</div>
       </div>
-
-      <button class="delete" onclick="deleteActivity(${a.id})">
-        ✕
-      </button>
+      <div class="title">${escapeHtml(x.activity)}</div>
+      ${x.comment ? `<div class="comment">💬 ${escapeHtml(x.comment)}</div>` : ""}
+      <div class="actions">
+        <button class="deleteBtn">🗑️ Supprimer</button>
+      </div>
     `;
+
+    div.querySelector(".deleteBtn").addEventListener("click", () => {
+      deleteActivity(x.id);
+    });
 
     list.appendChild(div);
   });
 }
 
-render();
+/* ================= NAV ================= */
+function goBack(){
+  window.location.href = "./index.html";
+}
 
+/* ================= INIT ================= */
+window.onload = () => {
+  loadFromAPI();
+
+  /* rafraîchit l’affichage régulièrement pour faire disparaître
+     automatiquement les activités passées sans recharger la page */
+  setInterval(renderAgenda, 30000);
+};
 </script>
 
 </body>
