@@ -21,6 +21,22 @@ body{
     radial-gradient(700px 500px at 90% 0%, rgba(255,255,255,.2), transparent),
     linear-gradient(135deg,#F8BBD0,#E1BEE7,#CE93D8);
 }
+  .dateBig{
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: white;
+  border-radius: 14px;
+  padding: 10px 14px;
+  font-size: 20px;
+  font-weight: 900;
+  display: inline-block;
+}
+
+.timeSmall{
+  font-size: 14px;
+  opacity: 0.8;
+  margin-left: 6px;
+}
+
 
 /* HEADER */
 .topbar{
@@ -494,10 +510,15 @@ function renderAgenda(){
     div.className = "item";
 
     div.innerHTML = `
-      <div class="badges">
-        <div class="badge">📅 ${escapeHtml(formatDateFR(x.date))}</div>
-        <div class="badge">⏰ ${escapeHtml(x.start)} - ${escapeHtml(x.end)}</div>
-      </div>
+     <div style="margin-bottom:10px;">
+  <div class="dateBig">
+    📅 ${escapeHtml(formatDateFR(x.date))}
+  </div>
+  <span class="timeSmall">
+    ⏰ ${escapeHtml(x.start)} - ${escapeHtml(x.end)}
+  </span>
+</div>
+
       <div class="title">${escapeHtml(x.activity)}</div>
       ${x.comment ? `<div class="comment">💬 ${escapeHtml(x.comment)}</div>` : ""}
       <div class="actions">
