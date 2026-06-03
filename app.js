@@ -455,6 +455,7 @@ function login(user) {
         <button class="quick-btn" onclick="location.href='CFF.html'"><span class="icon">🚆</span>CFF</button>
         <button class="quick-btn" onclick="location.href='magicpass.html'"><span class="icon">✨🏔️</span>MAGIC</button>
         <button class="quick-btn" onclick="location.href='VACANCES.html'"><span class="icon">🌴</span>VACANCES</button>
+        <button class="quick-btn" onclick="location.href='Agenda.html'"><span class="icon">👀</span>Agenda</button>
         <button class="quick-btn" onclick="requestAdmin()" style="background:linear-gradient(135deg,#FF5722,#FF9800)"><span class="icon">⚙️</span>Admin</button>
       `;
     } else {
@@ -467,6 +468,7 @@ function login(user) {
         <button class="quick-btn" onclick="location.href='CFF.html'"><span class="icon">🚆</span>CFF</button>
         <button class="quick-btn" onclick="location.href='magicpass.html'"><span class="icon">✨🏔️</span>MAGIC</button>
         <button class="quick-btn" onclick="location.href='VACANCES.html'"><span class="icon">🌴</span>VACANCES</button>
+        <button class="quick-btn" onclick="location.href='Agenda.html'"><span class="icon">👀</span>Agenda</button>
       `;
     }
   }
