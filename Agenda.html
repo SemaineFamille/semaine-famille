@@ -302,33 +302,22 @@ let model = {
 };
 
 /* ================= API JSONP ================= */
-function jsonpCall(params){
-  return new Promise((resolve, reject) => {
-    const cb = "cb_" + Date.now() + "_" + Math.floor(Math.random() * 99999);
-    params.callback = cb;
+async function apiGET(action, params = {}) {
+  const url = new URL(API_URL);
 
-    const url = API_URL + "?" + new URLSearchParams(params);
-    const s = document.createElement("script");
-    s.src = url;
+  url.searchParams.set("action", action);
 
-    window[cb] = (data) => {
-      try { delete window[cb]; } catch(e){}
-      s.remove();
-      resolve(data);
-    };
-
-    s.onerror = () => {
-      try { delete window[cb]; } catch(e){}
-      s.remove();
-      reject(new Error("Erreur API"));
-    };
-
-    document.body.appendChild(s);
+  Object.entries(params).forEach(([k, v]) => {
+    url.searchParams.set(k, v);
   });
-}
 
-async function apiGET(action, extra = {}){
-  return await jsonpCall({ action, ...extra });
+  const response = await fetch(url.toString());
+
+  if (!response.ok) {
+    throw new Error("Erreur réseau " + response.status);
+  }
+
+  return await response.json();
 }
 
 /* ================= HELPERS ================= */
