@@ -232,11 +232,6 @@ const MEMBRES = ['alessia', 'antonin', 'clement', 'diego', 'jeremie', 'melanie',
 const MEMBRES_LABEL = ['Alessia', 'Antonin', 'Clément', 'Diego', 'Jérémie', 'Mélanie', 'Yann'];
 const MOIS_NOMS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
 
-const TACHES_FIXES = [
-  { id: 'lessive', label: 'Monter ta lessive', icon: '👕' },
-  { id: 'vaisselle', label: 'Vider le lave-vaisselle', icon: '🍽️' },
-  { id: 'aspirateur', label: "Passer l'aspirateur", icon: '🧹' }
-];
 
 const TACHES_RECURRENTES = [
   { personne: 'Alessia', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-06-05', frequence: 4 },
@@ -244,7 +239,11 @@ const TACHES_RECURRENTES = [
   { personne: 'Clément', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-05-29', frequence: 3 },
   { personne: 'Antonin', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-05-29', frequence: 3 },
   { personne: 'Jérémie', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-05-15', frequence: 3 },
-  { personne: 'Mél & Yann', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-05-15', frequence: 2 }
+  { personne: 'Mél & Yann', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-05-15', frequence: 2 },
+  { personne: 'Alessia', tache: 'Monter ta lessive', icon: '👕', dateDebut: '2026-06-04', frequence: 1 },
+   { personne: 'Clément', tache: 'Monter ta lessive', icon: '👕', dateDebut: '2026-06-04', frequence: 1 },
+   { personne: 'Antonin', tache: 'Mettre ta lessive à la buanderie', icon: '👕', dateDebut: '2026-06-04', frequence: 1 },
+   { personne: 'Jérémie', tache: 'Monter ta lessive', icon: '👕', dateDebut: '2026-06-04', frequence: 1 }
 ];
 
 const TACHES_PARENTS = [
