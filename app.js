@@ -239,17 +239,18 @@ const TACHES_FIXES = [
 ];
 
 const TACHES_RECURRENTES = [
-  { personne: 'Alessia', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-05-15', frequence: 3 },
-  { personne: 'Diego', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-05-15', frequence: 3 },
+  { personne: 'Alessia', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-06-05', frequence: 4 },
+  { personne: 'Diego', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-06-05', frequence: 4 },
   { personne: 'Clément', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-05-29', frequence: 3 },
   { personne: 'Antonin', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-05-29', frequence: 3 },
-  { personne: 'Jérémie', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-05-15', frequence: 2 },
+  { personne: 'Jérémie', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-05-15', frequence: 3 },
   { personne: 'Mél & Yann', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-05-15', frequence: 2 }
 ];
 
 const TACHES_PARENTS = [
   { label: 'Laver tapis salle de bain', icon: '🛁', type: 'premier_du_mois' },
-  { label: 'Laver linges et serviettes', icon: '🧺', type: 'mercredi' }
+  { label: 'Laver linges et serviettes', icon: '🧺', type: 'mercredi' },
+   { label: 'Sortir le panier de légumes', icon: 'vue🍆🍅🫜🫑', type: 'mardi' }
 ];
 
 const ANNIVERSAIRES = [
