@@ -238,7 +238,7 @@ const TACHES_RECURRENTES = [
   { personne: 'Diego', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-06-05', frequence: 4 },
   { personne: 'Clément', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-05-29', frequence: 3 },
   { personne: 'Antonin', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-05-29', frequence: 3 },
-  { personne: 'Jérémie', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-05-15', frequence: 3 },
+  { personne: 'Jérémie', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-05-29', frequence: 3 },
   { personne: 'Mél & Yann', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-05-15', frequence: 2 },
   { personne: 'Alessia', tache: 'Monter ta lessive', icon: '👕', dateDebut: '2026-06-04', frequence: 1 },
    { personne: 'Clément', tache: 'Monter ta lessive', icon: '👕', dateDebut: '2026-06-04', frequence: 1 },
