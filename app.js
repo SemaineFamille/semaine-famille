@@ -947,10 +947,7 @@ function renderCourses(liste) {
   container.innerHTML = coursesData[liste].map((item, i) => `
     <div class="course-item" id="ci_${i}">
       <span>${escapeHtml(item)}</span>
-      <button class="btn-delete"
-        onclick="deleteCourse(${i})">
-  ✕
-</button>
+      <button class="btn-delete" onclick="deleteCourse(${i})">✕</button>
     </div>
   `).join('');
 }
