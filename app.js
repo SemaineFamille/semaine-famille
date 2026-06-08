@@ -947,7 +947,10 @@ function renderCourses(liste) {
   container.innerHTML = coursesData[liste].map((item, i) => `
     <div class="course-item" id="ci_${i}">
       <span>${escapeHtml(item)}</span>
-      <button class="btn-delete" onclick="deleteCourse(${i}, ${JSON.stringify(item)})">✕</button>
+      <button class="btn-delete"
+        onclick="deleteCourse(${i})">
+  ✕
+</button>
     </div>
   `).join('');
 }
@@ -971,7 +974,10 @@ async function addCourse() {
   await loadCourses(currentListe);
 }
 
-async function deleteCourse(idx, ingredient) {
+async function deleteCourse(idx) {
+
+  const ingredient = coursesData[currentListe][idx];
+
   await apiCall({
     action: 'supprimer',
     sheet: 'COURSES',
@@ -979,9 +985,7 @@ async function deleteCourse(idx, ingredient) {
     liste: currentListe
   });
 
-  if (coursesData[currentListe]) {
-    coursesData[currentListe].splice(idx, 1);
-  }
+  coursesData[currentListe].splice(idx, 1);
 
   renderCourses(currentListe);
   showToast('🗑️ Supprimé');
