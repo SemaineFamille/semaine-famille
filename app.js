@@ -2101,7 +2101,104 @@ function closeModal() {
   const modal = document.getElementById('jobModal');
   if (modal) modal.classList.remove('show');
 }
+/* =========================================================
+   ADMIN CONFIG
+========================================================= */
+function showAdminEnfant(enfant, btn) {
+  currentAdminEnfant = enfant;
+  document.querySelectorAll('#admin-tabs .inner-tab').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderAdminForm();
+}
 
+function renderAdminForm() {
+  let html = '';
+
+  TACHES_FIXES.forEach(tache => {
+    const ex = tachesConfig.find(t => t.tache === tache.label && t.enfant === currentAdminEnfant);
+
+    html += `
+      <div class="admin-tache-block">
+        <div class="admin-tache-header">
+          <span>${tache.icon}</span>${escapeHtml(tache.label)}
+        </div>
+        <div class="admin-days-grid">
+    `;
+
+    JOURS.forEach((jour, ji) => {
+      const checked = ex && ex[jour] === 'TRUE' ? 'checked' : '';
+      html += `
+        <div class="day-check">
+          <label for="a_${tache.id}_${jour}">${JOURS_COURTS[ji]}</label>
+          <input type="checkbox" id="a_${tache.id}_${jour}" ${checked}>
+        </div>
+      `;
+    });
+
+    html += `</div></div>`;
+  });
+
+  const form = document.getElementById('admin-taches-form');
+  if (form) form.innerHTML = html;
+}
+
+async function loadAdminConfig() {
+  const text = await apiCall({ action: 'lire', sheet: 'TACHES_CONFIG' });
+
+  tachesConfig = [];
+  parseLines(text).forEach(line => {
+    const c = line.split('|');
+    if (c.length >= 10) {
+      tachesConfig.push({
+        tache: c[0],
+        enfant: c[1],
+        lundi: c[2],
+        mardi: c[3],
+        mercredi: c[4],
+        jeudi: c[5],
+        vendredi: c[6],
+        samedi: c[7],
+        dimanche: c[8],
+        active: (c[9] || '').trim()
+      });
+    }
+  });
+
+  renderAdminForm();
+  renderPreview(currentPreviewEnfant);
+  await loadPonctuelles();
+
+  const today = formatDateYYYYMMDD();
+  const d = document.getElementById('ponct-date');
+  if (d) d.value = today;
+}
+
+async function saveAdminConfig() {
+  showToast('Enregistrement...');
+
+  for (const tache of TACHES_FIXES) {
+    const p = {
+      action: 'enregistrer',
+      sheet: 'TACHES_CONFIG',
+      tache: tache.label,
+      enfant: currentAdminEnfant,
+      active: 'TRUE'
+    };
+
+    JOURS.forEach(jour => {
+      p[jour] = document.getElementById(`a_${tache.id}_${jour}`)?.checked ? 'TRUE' : 'FALSE';
+    });
+
+    await apiCall(p);
+  }
+
+  APP_CACHE.pagesLoaded.taches = false;
+  APP_CACHE.badgesPromise = null;
+
+  showToast('✅ Configuration enregistrée !');
+  await loadAdminConfig();
+  await loadBadges();
+}
 
 
 /* =========================================================
