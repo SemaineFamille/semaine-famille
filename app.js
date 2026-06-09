@@ -1672,15 +1672,15 @@ async function loadLoginReminders() {
   const cards = profils.map(nom => {
     const taches = getToutesLesTachesEnfant(nom, jour, todayStr);
 
-    const nonFaites = taches.filter(t => {
-      const etat = tachesData.find(td =>
-        td.tache === t.tache &&
-        td.enfant === nom &&
-        td.jour === t.jourReel &&
-        (td.etat || '').trim() === 'Fait'
-      );
-      return !etat;
-    });
+const nonFaites = toutesLesTaches.filter(t => {
+  const etat = tachesData.find(td =>
+    td.tache === t.tache &&
+    td.jour === t.jourReel &&
+    (td.enfant === enfant || enfant.includes(td.enfant) || td.enfant.includes(enfant))
+  );
+
+  return !etat || (etat.etat || '').trim() !== 'Fait';
+});
 
     if (!nonFaites.length) return '';
 
