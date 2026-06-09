@@ -2115,25 +2115,7 @@ function showAdminEnfant(enfant, btn) {
 function renderAdminForm() {
   let html = '';
 
-  TACHES_FIXES.forEach(tache => {
-    const ex = tachesConfig.find(t => t.tache === tache.label && t.enfant === currentAdminEnfant);
 
-    html += `
-      <div class="admin-tache-block">
-        <div class="admin-tache-header">
-          <span>${tache.icon}</span>${escapeHtml(tache.label)}
-        </div>
-        <div class="admin-days-grid">
-    `;
-
-    JOURS.forEach((jour, ji) => {
-      const checked = ex && ex[jour] === 'TRUE' ? 'checked' : '';
-      html += `
-        <div class="day-check">
-          <label for="a_${tache.id}_${jour}">${JOURS_COURTS[ji]}</label>
-          <input type="checkbox" id="a_${tache.id}_${jour}" ${checked}>
-        </div>
-      `;
     });
 
     html += `</div></div>`;
@@ -2165,26 +2147,7 @@ async function loadAdminConfig() {
     }
   });
 
-  renderAdminForm();
-  renderPreview(currentPreviewEnfant);
-  await loadPonctuelles();
 
-  const today = formatDateYYYYMMDD();
-  const d = document.getElementById('ponct-date');
-  if (d) d.value = today;
-}
-
-async function saveAdminConfig() {
-  showToast('Enregistrement...');
-
-  for (const tache of TACHES_FIXES) {
-    const p = {
-      action: 'enregistrer',
-      sheet: 'TACHES_CONFIG',
-      tache: tache.label,
-      enfant: currentAdminEnfant,
-      active: 'TRUE'
-    };
 
     JOURS.forEach(jour => {
       p[jour] = document.getElementById(`a_${tache.id}_${jour}`)?.checked ? 'TRUE' : 'FALSE';
