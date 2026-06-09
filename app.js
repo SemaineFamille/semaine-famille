@@ -2102,67 +2102,7 @@ function closeModal() {
   if (modal) modal.classList.remove('show');
 }
 
-/* =========================================================
-   ADMIN CONFIG
-========================================================= */
-function showAdminEnfant(enfant, btn) {
-  currentAdminEnfant = enfant;
-  document.querySelectorAll('#admin-tabs .inner-tab').forEach(t => t.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  renderAdminForm();
-}
 
-function renderAdminForm() {
-  let html = '';
-
-
-    });
-
-    html += `</div></div>`;
-  });
-
-  const form = document.getElementById('admin-taches-form');
-  if (form) form.innerHTML = html;
-}
-
-async function loadAdminConfig() {
-  const text = await apiCall({ action: 'lire', sheet: 'TACHES_CONFIG' });
-
-  tachesConfig = [];
-  parseLines(text).forEach(line => {
-    const c = line.split('|');
-    if (c.length >= 10) {
-      tachesConfig.push({
-        tache: c[0],
-        enfant: c[1],
-        lundi: c[2],
-        mardi: c[3],
-        mercredi: c[4],
-        jeudi: c[5],
-        vendredi: c[6],
-        samedi: c[7],
-        dimanche: c[8],
-        active: (c[9] || '').trim()
-      });
-    }
-  });
-
-
-
-    JOURS.forEach(jour => {
-      p[jour] = document.getElementById(`a_${tache.id}_${jour}`)?.checked ? 'TRUE' : 'FALSE';
-    });
-
-    await apiCall(p);
-  }
-
-  APP_CACHE.pagesLoaded.taches = false;
-  APP_CACHE.badgesPromise = null;
-
-  showToast('✅ Configuration enregistrée !');
-  await loadAdminConfig();
-  await loadBadges();
-}
 
 /* =========================================================
    TÂCHES PONCTUELLES
