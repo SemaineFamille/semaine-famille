@@ -249,7 +249,7 @@ const TACHES_RECURRENTES = [
 const TACHES_PARENTS = [
   { label: 'Laver tapis salle de bain', icon: '🛁', type: 'premier_du_mois' },
   { label: 'Laver linges et serviettes', icon: '🧺', type: 'mercredi' },
-   { label: 'Sortir le panier de légumes', icon: 'vue🍆🍅🫜🫑', type: 'mardi' }
+   { label: 'Sortir le panier de légumes', icon: '🍆🍅🫜🫑', type: 'mardi' }
 ];
 
 const ANNIVERSAIRES = [
