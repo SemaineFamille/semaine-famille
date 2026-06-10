@@ -240,16 +240,16 @@ const TACHES_RECURRENTES = [
   { personne: 'Antonin', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-05-29', frequence: 3 },
   { personne: 'Jérémie', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-05-29', frequence: 3 },
   { personne: 'Mél & Yann', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-05-15', frequence: 2 },
-  { personne: 'Alessia', tache: 'Monter ta lessive', icon: '👕', dateDebut: '2026-06-04', frequence: 1 },
-   { personne: 'Clément', tache: 'Monter ta lessive', icon: '👕', dateDebut: '2026-06-04', frequence: 1 },
-   { personne: 'Antonin', tache: 'Mettre ta lessive à la buanderie', icon: '👕', dateDebut: '2026-06-04', frequence: 1 },
-   { personne: 'Jérémie', tache: 'Monter ta lessive', icon: '👕', dateDebut: '2026-06-04', frequence: 1 }
+  { personne: 'Alessia', tache: 'Monter ta lessive', icon: '👕', dateDebut: '2026-06-11', frequence: 1 },
+   { personne: 'Clément', tache: 'Monter ta lessive', icon: '👕', dateDebut: '2026-06-11', frequence: 1 },
+   { personne: 'Antonin', tache: 'Mettre ta lessive à la buanderie', icon: '👕', dateDebut: '2026-06-11', frequence: 1 },
+   { personne: 'Jérémie', tache: 'Monter ta lessive', icon: '👕', dateDebut: '2026-06-11', frequence: 1 }
 ];
 
 const TACHES_PARENTS = [
   { label: 'Laver tapis salle de bain', icon: '🛁', type: 'premier_du_mois' },
   { label: 'Laver linges et serviettes', icon: '🧺', type: 'mercredi' },
-   { label: 'Sortir le panier de légumes', icon: '🍆🍅🫜🫑', type: 'mardi' }
+   { label: 'Sortir le panier de légumes', icon: '🍆', type: 'mardi' }
 ];
 
 const ANNIVERSAIRES = [
@@ -485,6 +485,9 @@ function login(user) {
   if (!isParent) {
     loadTaches();
   }
+   if (typeof initGamification === "function") {
+  initGamification();
+}
 }
 
 function logout() {
@@ -1065,24 +1068,47 @@ async function loadBadges() {
     const today = formatDateYYYYMMDD(new Date());
     const { jour } = getJourFromYMD(today);
 
-    const profils = ['Alessia', 'Antonin', 'Clément', 'Diego', 'Jérémie', 'Mél & Yann'];
+    const profils = [
+      'Alessia',
+      'Antonin',
+      'Clément',
+      'Diego',
+      'Jérémie',
+      'Mél & Yann'
+    ];
+
     const counts = {};
 
     profils.forEach(nom => {
-      const taches = getToutesLesTachesEnfant(nom, jour, today);
 
-      const nonFaites = taches.filter(t => {
-        const fait = tachesData.find(td =>
-          td.tache === t.tache &&
-          td.enfant === nom &&
-          td.jour === t.jourReel &&
-          (td.etat || '').trim() === 'Fait'
-        );
-        return !fait;
-      });
+  const tachesDuJour =
+    getToutesLesTachesEnfant(nom, jour, today) || [];
 
-      counts[nom] = nonFaites.length;
-    });
+  const tachesRetard =
+    getTachesEnRetard(nom) || [];
+
+  const ponctuellesRetard =
+    getPonctuellesEnRetard(nom) || [];
+
+  const toutes = [
+    ...tachesDuJour,
+    ...tachesRetard,
+    ...ponctuellesRetard
+  ];
+
+  const nonFaites = toutes.filter(t => {
+    const fait = tachesData.find(td =>
+      td.tache === t.tache &&
+      td.enfant === nom &&
+      td.jour === t.jourReel &&
+      (td.etat || '').trim() === 'Fait'
+    );
+
+    return !fait;
+  });
+
+  counts[nom] = nonFaites.length;
+});
 
     updateBadges(counts);
   })();
@@ -1098,8 +1124,29 @@ async function loadBadges() {
    HELPERS TÂCHES
 ========================================================= */
 function getTacheIcon(label) {
-  return TACHES_FIXES.find(t => t.label === label)?.icon || '📋';
+
+  const recur = TACHES_RECURRENTES.find(
+    t => t.tache === label
+  );
+
+  if (recur?.icon) return recur.icon;
+
+  const parent = TACHES_PARENTS.find(
+    t => t.label === label
+  );
+
+  if (parent?.icon) return parent.icon;
+
+  return '📋';
 }
+const ICONES_TACHES = {
+  'Défaire ton lit': '🛏️',
+  'Vider le lave-vaisselle': '🍽️',
+  'Sortir les poubelles': '🗑️',
+  'Ranger ta chambre': '🧹',
+  'Aspirateur': '🧼',
+  'Lessive': '🧺'
+};
 
 function isTacheRecurrenteActive(tache, dateStr) {
   const today = new Date((dateStr || formatDateYYYYMMDD()) + 'T00:00:00');
@@ -2107,9 +2154,21 @@ function closeModal() {
 ========================================================= */
 function showAdminEnfant(enfant, btn) {
   currentAdminEnfant = enfant;
-  document.querySelectorAll('#admin-tabs .inner-tab').forEach(t => t.classList.remove('active'));
+  currentPreviewEnfant = enfant;
+
+  document
+    .querySelectorAll('#admin-tabs .inner-tab')
+    .forEach(t => t.classList.remove('active'));
+
   if (btn) btn.classList.add('active');
+
   renderAdminForm();
+
+  if (enfant === 'Mél & Yann') {
+    renderPreviewParents();
+  } else {
+    renderPreview(enfant);
+  }
 }
 
 function renderAdminForm() {
@@ -2274,7 +2333,10 @@ async function loadPonctuelles() {
           </span>
         </div>
       </div>
-      <button class="btn-delete" onclick="deletePonctuelle(${JSON.stringify(i.tache)}, ${JSON.stringify(i.enfant)}, ${JSON.stringify(i.date)})">✕</button>
+      <button class="btn-delete"
+        onclick="deleteCourse(${i})">
+  ✕
+</button>
     </div>
   `).join('');
 }
@@ -2343,14 +2405,15 @@ function renderPreviewParents() {
     return etat && (etat.etat || '').trim() === 'Fait';
   });
 
-  const nonFaites = toutesLesTaches.filter(t => {
-    const etat = tachesData.find(td =>
-      td.tache === t.tache &&
-      td.enfant === enfant &&
-      td.jour === t.jourReel
-    );
-    return !etat || (etat.etat || '').trim() !== 'Fait';
-  });
+const nonFaites = toutesLesTaches.filter(t => {
+  const etat = tachesData.find(td =>
+    td.tache === t.tache &&
+    td.jour === t.jourReel &&
+    (td.enfant === enfant || enfant.includes(td.enfant) || td.enfant.includes(enfant))
+  );
+
+  return !etat || (etat.etat || '').trim() !== 'Fait';
+});
 
   let html = `
     <p style="font-size:0.85rem;color:var(--text-light);font-weight:600;margin-bottom:12px">
