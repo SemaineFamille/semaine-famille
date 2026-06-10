@@ -249,7 +249,7 @@ const TACHES_RECURRENTES = [
 const TACHES_PARENTS = [
   { label: 'Laver tapis salle de bain', icon: '🛁', type: 'premier_du_mois' },
   { label: 'Laver linges et serviettes', icon: '🧺', type: 'mercredi' },
-   { label: 'Sortir le panier de légumes', icon: '🍆', type: 'mardi' }
+   { label: 'Sortir le panier de légumes', icon: 'vue🍆🍅🫜🫑', type: 'mardi' }
 ];
 
 const ANNIVERSAIRES = [
@@ -1672,15 +1672,15 @@ async function loadLoginReminders() {
   const cards = profils.map(nom => {
     const taches = getToutesLesTachesEnfant(nom, jour, todayStr);
 
-const nonFaites = toutesLesTaches.filter(t => {
-  const etat = tachesData.find(td =>
-    td.tache === t.tache &&
-    td.jour === t.jourReel &&
-    (td.enfant === enfant || enfant.includes(td.enfant) || td.enfant.includes(enfant))
-  );
-
-  return !etat || (etat.etat || '').trim() !== 'Fait';
-});
+    const nonFaites = taches.filter(t => {
+      const etat = tachesData.find(td =>
+        td.tache === t.tache &&
+        td.enfant === nom &&
+        td.jour === t.jourReel &&
+        (td.etat || '').trim() === 'Fait'
+      );
+      return !etat;
+    });
 
     if (!nonFaites.length) return '';
 
@@ -2101,6 +2101,7 @@ function closeModal() {
   const modal = document.getElementById('jobModal');
   if (modal) modal.classList.remove('show');
 }
+
 /* =========================================================
    ADMIN CONFIG
 ========================================================= */
@@ -2199,7 +2200,6 @@ async function saveAdminConfig() {
   await loadAdminConfig();
   await loadBadges();
 }
-
 
 /* =========================================================
    TÂCHES PONCTUELLES
