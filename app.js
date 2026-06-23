@@ -246,11 +246,13 @@ const TACHES_RECURRENTES = [
    { personne: 'Jérémie', tache: 'Monter ta lessive', icon: '👕', dateDebut: '2026-06-11', frequence: 1 }
 ];
 
+
 const TACHES_PARENTS = [
   { label: 'Laver tapis salle de bain', icon: '🛁', type: 'premier_du_mois' },
-  { label: 'Laver linges et serviettes', icon: '🧺', type: 'mercredi' },
-   { label: 'Sortir le panier de légumes', icon: '🍆', type: 'mardi' }
+  { label: 'Laver linges et serviettes', icon: '🧺', type: 3 }, // mercredi
+  { label: 'Sortir le panier de légumes', icon: '🍆', type: 2 }  // mardi
 ];
+
 
 const ANNIVERSAIRES = [
   { nom: 'Alessia', jour: 1, mois: 1 },
