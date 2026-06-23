@@ -1170,14 +1170,33 @@ function isTacheRecurrenteActive(tache, dateStr) {
 
 function isTacheParentActiveForDate(tache, dateStr) {
   const d = new Date((dateStr || formatDateYYYYMMDD()) + 'T00:00:00');
-  const dow = d.getDay();
-  const jour = d.getDate();
+  const dow = d.getDay(); // 0=dimanche, 1=lundi, 2=mardi, ...
 
-  if (tache.type === 'premier_du_mois') return jour === 1;
-  if (tache.type === 'mercredi') return dow === 3;
+  if (tache.type === 'premier_du_mois') {
+    return d.getDate() === 1;
+  }
+
+  const joursMap = {
+    dimanche: 0,
+    lundi: 1,
+    mardi: 2,
+    mercredi: 3,
+    jeudi: 4,
+    vendredi: 5,
+    samedi: 6
+  };
+
+  if (typeof tache.type === 'number') {
+    return dow === tache.type;
+  }
+
+  if (typeof tache.type === 'string' && tache.type in joursMap) {
+    return dow === joursMap[tache.type];
+  }
 
   return false;
 }
+
 
 function getToutesLesTachesEnfant(enfant, jour, dateYMD) {
   const dateStr = dateYMD || formatDateYYYYMMDD(new Date());
