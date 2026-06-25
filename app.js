@@ -3,7 +3,7 @@
    Base + navigation + API + Présences + Menu
    Version optimisée
 ========================================================= */
-console.log("APP VERSION 25-06-2026 12h15");
+console.log("APP VERSION 25-06-2026 15h45");
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxOJEus1Fev5I4YZsSbjpIXXlgGJBY7QmFkkqZtkXYD6eEPwqmgCl8r2hfrO1X9eyqxSA/exec';
 const ADMIN_CODE = '2019';
 
@@ -1201,13 +1201,23 @@ function isTacheParentActiveForDate(tache, dateStr) {
 function getToutesLesTachesEnfant(enfant, jour, dateYMD) {
   const dateStr = dateYMD || formatDateYYYYMMDD(new Date());
   const dateObj = new Date(dateStr + 'T00:00:00');
-  const dow = dateObj.getDay(); // 0=dim, 4=jeu, 5=ven
+  const dow = dateObj.getDay();
   const taches = [];
 
-
+  // ✅ 1) Tâches fixes (config)
+  tachesConfig
+    .filter(t => t.enfant === enfant && t[jour] === 'TRUE')
+    .forEach(t => {
+      taches.push({
+        tache: t.tache,
+        icon: getTacheIcon(t.tache),
+        source: 'fixe',
+        jourReel: dateStr,
+        dueDate: dateStr
+      });
     });
 
-  // 2) Tâches spéciales parents
+  // ✅ 2) Tâches parents
   if (enfant === 'Mél & Yann') {
     TACHES_PARENTS
       .filter(t => isTacheParentActiveForDate(t, dateStr))
@@ -1222,7 +1232,7 @@ function getToutesLesTachesEnfant(enfant, jour, dateYMD) {
       });
   }
 
-  // 3) Tâches récurrentes
+  // ✅ 3) Tâches récurrentes
   if (dow === 4 || dow === 5) {
     TACHES_RECURRENTES
       .filter(t => t.personne === enfant)
@@ -1247,7 +1257,7 @@ function getToutesLesTachesEnfant(enfant, jour, dateYMD) {
       });
   }
 
-  // 4) Tâches ponctuelles
+  // ✅ 4) Tâches ponctuelles
   const enfantsPonct = (enfant === 'Mél & Yann')
     ? ['Mél & Yann', 'Mélanie', 'Yann']
     : [enfant];
