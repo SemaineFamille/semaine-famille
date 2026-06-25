@@ -3,7 +3,7 @@
    Base + navigation + API + Présences + Menu
    Version optimisée
 ========================================================= */
-console.log("APP VERSION 23-06-2026 11h45");
+console.log("APP VERSION 25-06-2026 11h55");
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxOJEus1Fev5I4YZsSbjpIXXlgGJBY7QmFkkqZtkXYD6eEPwqmgCl8r2hfrO1X9eyqxSA/exec';
 const ADMIN_CODE = '2019';
 
@@ -1204,17 +1204,7 @@ function getToutesLesTachesEnfant(enfant, jour, dateYMD) {
   const dow = dateObj.getDay(); // 0=dim, 4=jeu, 5=ven
   const taches = [];
 
-  // 1) Tâches fixes (config)
-  tachesConfig
-    .filter(t => t.enfant === enfant && t[jour] === 'TRUE')
-    .forEach(t => {
-      taches.push({
-        tache: t.tache,
-        icon: getTacheIcon(t.tache),
-        source: 'fixe',
-        jourReel: dateStr,
-        dueDate: dateStr
-      });
+
     });
 
   // 2) Tâches spéciales parents
