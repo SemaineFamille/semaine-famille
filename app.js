@@ -3,7 +3,7 @@
    Base + navigation + API + Présences + Menu
    Version optimisée
 ========================================================= */
-console.log("APP VERSION 13-07-2026 07h30");
+console.log("APP VERSION 13-07-2026 07h45");
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxOJEus1Fev5I4YZsSbjpIXXlgGJBY7QmFkkqZtkXYD6eEPwqmgCl8r2hfrO1X9eyqxSA/exec';
 const ADMIN_CODE = '2019';
 
@@ -527,7 +527,7 @@ function showPage(name) {
 
   el.classList.add('active');
 
-  const order = ['accueil', 'present', 'menu', 'courses', 'taches', 'job', 'admin'];
+  const order = ['accueil', 'present', 'menu', 'courses', 'taches', 'job','vacances', 'admin'];
   const idx = order.indexOf(name);
   const tabs = document.querySelectorAll('.nav-tab');
   if (idx >= 0 && tabs[idx]) {
@@ -542,6 +542,7 @@ function showPage(name) {
   if (name === 'taches') return loadTaches();
   if (name === 'job') return initCal();
   if (name === 'admin') return loadAdminConfig();
+   if (name === 'vacances') return loadVacances();
 }
 
 /* =========================================================
