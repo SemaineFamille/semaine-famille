@@ -671,7 +671,9 @@ function buildPresencesUI() {
 
   hideRollingWeekClearButtons();
 }
-
+function loadVacances() {
+  console.log("Vacances ouvertes");
+}
 async function loadPresences(force = false) {
   const loadingEl = document.getElementById('present-loading');
   const contentEl = document.getElementById('present-content');
