@@ -28,10 +28,10 @@ const APP_CACHE = {
   badgesPromise: null
 };
 const CHECKLIST_VACANCES = {
-  ete: {...},
-  printemps: {...},
-  automne: {...},
-  hiver: {...}
+  ete: {},
+  printemps: {},
+  automne: {},
+  hiver: {}
 };
 function buildQueryString(params) {
   return new URLSearchParams(params).toString();
