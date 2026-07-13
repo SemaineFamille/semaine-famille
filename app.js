@@ -3,7 +3,7 @@
    Base + navigation + API + Présences + Menu
    Version optimisée
 ========================================================= */
-console.log("APP VERSION 13-07-2026 08h40");
+console.log("APP VERSION 13-07-2026 08h45");
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxOJEus1Fev5I4YZsSbjpIXXlgGJBY7QmFkkqZtkXYD6eEPwqmgCl8r2hfrO1X9eyqxSA/exec';
 const ADMIN_CODE = '2019';
 
@@ -463,6 +463,7 @@ function login(user) {
         <button class="quick-btn" onclick="location.href='magicpass.html'"><span class="icon">✨🏔️</span>MAGIC</button>
         <button class="quick-btn" onclick="location.href='VACANCES.html'"><span class="icon">🌴</span>VACANCES</button>
         <button class="quick-btn" onclick="location.href='Agenda.html'"><span class="icon">👀</span>Agenda</button>
+        <button class="quick-btn" onclick="location.href='liste-vacances.html'"><span class="icon">🧳</span>Ma liste vacances</button>
         <button class="quick-btn" onclick="requestAdmin()" style="background:linear-gradient(135deg,#FF5722,#FF9800)"><span class="icon">⚙️</span>Admin</button>
       `;
     } else {
@@ -476,6 +477,7 @@ function login(user) {
         <button class="quick-btn" onclick="location.href='magicpass.html'"><span class="icon">✨🏔️</span>MAGIC</button>
         <button class="quick-btn" onclick="location.href='VACANCES.html'"><span class="icon">🌴</span>VACANCES</button>
         <button class="quick-btn" onclick="location.href='Agenda.html'"><span class="icon">👀</span>Agenda</button>
+        <button class="quick-btn" onclick="location.href='liste-vacances.html'"><span class="icon">🧳</span>Ma liste vacances</button>
       `;
     }
   }
