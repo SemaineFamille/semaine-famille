@@ -1,1 +1,301 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧳 Ma liste vacances</title>
 
+<style>
+
+body{
+  font-family:Arial,sans-serif;
+  background:#f8f5fb;
+  margin:0;
+  padding:15px;
+}
+
+h1{
+  text-align:center;
+  color:#9C27B0;
+}
+
+.saison{
+  background:white;
+  border-radius:15px;
+  margin-bottom:15px;
+  padding:10px;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+
+.saison summary{
+  font-size:1.2rem;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.categorie{
+  margin-top:10px;
+  border:1px solid #eee;
+  border-radius:10px;
+  padding:8px;
+}
+
+.categorie summary{
+  font-weight:bold;
+  cursor:pointer;
+}
+
+label{
+  display:block;
+  padding:4px 0;
+}
+
+.progress{
+  margin-top:8px;
+  font-size:0.9rem;
+  color:#666;
+}
+
+.btn-reset{
+  margin-top:10px;
+  padding:8px 12px;
+  border:none;
+  border-radius:10px;
+  background:#f44336;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.btn-retour{
+  display:block;
+  width:100%;
+  margin-bottom:15px;
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  background:#9C27B0;
+  color:white;
+  font-size:1rem;
+  font-weight:bold;
+}
+
+</style>
+</head>
+
+<body>
+
+<button class="btn-retour" onclick="history.back()">
+⬅ Retour
+</button>
+
+<h1>🧳 Ma liste vacances</h1>
+
+<!-- ETE -->
+<details class="saison" id="ete">
+<summary>☀️ Été <span id="prog-ete"></span></summary>
+
+<details class="categorie">
+<summary>🪥 Trousse de toilette</summary>
+<label><input type="checkbox"> Brosse à dents</label>
+<label><input type="checkbox"> Dentifrice</label>
+<label><input type="checkbox"> Gel douche</label>
+<label><input type="checkbox"> Shampoing</label>
+<label><input type="checkbox"> Déodorant</label>
+<label><input type="checkbox"> Brosse à cheveux</label>
+<label><input type="checkbox"> Crème solaire</label>
+</details>
+
+<details class="categorie">
+<summary>👕 Habits</summary>
+<label><input type="checkbox"> Sous-vêtements</label>
+<label><input type="checkbox"> Chaussettes</label>
+<label><input type="checkbox"> T-shirts</label>
+<label><input type="checkbox"> Shorts</label>
+<label><input type="checkbox"> Pyjama</label>
+<label><input type="checkbox"> Casquette</label>
+</details>
+
+<details class="categorie">
+<summary>🏖️ Piscine / Plage</summary>
+<label><input type="checkbox"> Maillot de bain</label>
+<label><input type="checkbox"> Serviette</label>
+<label><input type="checkbox"> Claquettes</label>
+<label><input type="checkbox"> Lunettes soleil</label>
+<label><input type="checkbox"> Gourde</label>
+</details>
+
+<details class="categorie">
+<summary>💊 Médicaments</summary>
+<label><input type="checkbox"> Dafalgan</label>
+<label><input type="checkbox"> Nurofen</label>
+<label><input type="checkbox"> Pansements</label>
+<label><input type="checkbox"> Anti-moustiques</label>
+</details>
+
+<button class="btn-reset" onclick="resetSeason('ete')">
+🗑 Effacer la saison
+</button>
+
+<div class="progress" id="txt-ete"></div>
+</details>
+
+<!-- PRINTEMPS -->
+<details class="saison" id="printemps">
+<summary>🌸 Printemps <span id="prog-printemps"></span></summary>
+
+<details class="categorie">
+<summary>🥾 Randonnée</summary>
+<label><input type="checkbox"> Chaussures marche</label>
+<label><input type="checkbox"> Sac à dos</label>
+<label><input type="checkbox"> Gourde</label>
+<label><input type="checkbox"> Casquette</label>
+<label><input type="checkbox"> Jumelles</label>
+</details>
+
+<details class="categorie">
+<summary>👕 Habits</summary>
+<label><input type="checkbox"> Pull léger</label>
+<label><input type="checkbox"> Veste légère</label>
+<label><input type="checkbox"> T-shirts</label>
+<label><input type="checkbox"> Pantalons</label>
+</details>
+
+<button class="btn-reset" onclick="resetSeason('printemps')">
+🗑 Effacer la saison
+</button>
+
+<div class="progress" id="txt-printemps"></div>
+</details>
+
+<!-- AUTOMNE -->
+<details class="saison" id="automne">
+<summary>🍂 Automne <span id="prog-automne"></span></summary>
+
+<details class="categorie">
+<summary>☔ Pluie</summary>
+<label><input type="checkbox"> Parapluie</label>
+<label><input type="checkbox"> K-way</label>
+<label><input type="checkbox"> Bottes</label>
+<label><input type="checkbox"> Pantalon pluie</label>
+</details>
+
+<details class="categorie">
+<summary>👕 Habits chauds</summary>
+<label><input type="checkbox"> Pulls</label>
+<label><input type="checkbox"> Vestes</label>
+<label><input type="checkbox"> Pantalons</label>
+</details>
+
+<button class="btn-reset" onclick="resetSeason('automne')">
+🗑 Effacer la saison
+</button>
+
+<div class="progress" id="txt-automne"></div>
+</details>
+
+<!-- HIVER -->
+<details class="saison" id="hiver">
+<summary>❄️ Hiver <span id="prog-hiver"></span></summary>
+
+<details class="categorie">
+<summary>🎿 Ski</summary>
+<label><input type="checkbox"> Veste ski</label>
+<label><input type="checkbox"> Pantalon ski</label>
+<label><input type="checkbox"> Gants</label>
+<label><input type="checkbox"> Bonnet</label>
+<label><input type="checkbox"> Tour de cou</label>
+<label><input type="checkbox"> Casque</label>
+<label><input type="checkbox"> Masque</label>
+<label><input type="checkbox"> Chaussettes ski</label>
+</details>
+
+<details class="categorie">
+<summary>⛷ Matériel</summary>
+<label><input type="checkbox"> Skis</label>
+<label><input type="checkbox"> Bâtons</label>
+<label><input type="checkbox"> Chaussures</label>
+<label><input type="checkbox"> Magic Pass</label>
+</details>
+
+<details class="categorie">
+<summary>💊 Médicaments</summary>
+<label><input type="checkbox"> Dafalgan</label>
+<label><input type="checkbox"> Nurofen</label>
+<label><input type="checkbox"> Thermomètre</label>
+</details>
+
+<button class="btn-reset" onclick="resetSeason('hiver')">
+🗑 Effacer la saison
+</button>
+
+<div class="progress" id="txt-hiver"></div>
+</details>
+
+<script>
+
+const allBoxes = document.querySelectorAll("input[type=checkbox]");
+
+allBoxes.forEach((box,index)=>{
+
+  const key = "vacances_" + index;
+
+  box.checked = localStorage.getItem(key)==="1";
+
+  box.addEventListener("change",()=>{
+    localStorage.setItem(key,box.checked ? "1":"0");
+    updateProgress();
+  });
+
+});
+
+function updateProgress(){
+
+  document.querySelectorAll(".saison").forEach(saison=>{
+
+    const boxes=saison.querySelectorAll("input[type=checkbox]");
+    const checked=saison.querySelectorAll("input[type=checkbox]:checked");
+
+    const total=boxes.length;
+    const done=checked.length;
+
+    const id=saison.id;
+
+    document.getElementById("prog-"+id).textContent=
+      `(${done}/${total})`;
+
+    document.getElementById("txt-"+id).textContent=
+      `${done} élément(s) préparé(s) sur ${total}`;
+  });
+}
+
+function resetSeason(id){
+
+  if(!confirm("Effacer toutes les coches de cette saison ?")) return;
+
+  const boxes=document
+    .getElementById(id)
+    .querySelectorAll("input[type=checkbox]");
+
+  boxes.forEach(box=>{
+    box.checked=false;
+  });
+
+  document
+    .querySelectorAll("input[type=checkbox]")
+    .forEach((box,index)=>{
+      localStorage.setItem(
+        "vacances_"+index,
+        box.checked ? "1" : "0"
+      );
+    });
+
+  updateProgress();
+}
+
+updateProgress();
+
+</script>
+
+</body>
+</html>
