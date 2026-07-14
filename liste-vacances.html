@@ -341,15 +341,6 @@ label{
 localStorage.getItem("custom_moi")
 
 
-document.getElementById("titre-vacances").innerHTML =
-  `🧳 Ma liste vacances<br>
-   <span style="
-      font-size:0.7em;
-      color:#666;
-      font-weight:600">
-      ${nomPersonne}
-   </span>`;
-
 allBoxes.forEach((box,index)=>{
 const allBoxes = document.querySelectorAll("input[type=checkbox]");
   const key = "vacances_" + index;
@@ -400,7 +391,7 @@ function resetAll(){
  function deleteCustomItem(index){
 
   const liste = JSON.parse(
-    localStorage.getItem(STORAGE_KEY) || "[]"
+    localStorage.getItem("custom_moi") || "[]"
   );
 
   liste.splice(index,1);
@@ -417,7 +408,7 @@ function resetAll(){
 function toggleCustomItem(index,value){
 
   const liste = JSON.parse(
-    localStorage.getItem(STORAGE_KEY) || "[]"
+    localStorage.getItem("custom_moi") || "[]"
   );
 
   liste[index].checked = value;
@@ -438,7 +429,7 @@ function renderCustomItems(){
   if(!container) return;
 
   const liste = JSON.parse(
-    localStorage.getItem(STORAGE_KEY) || "[]"
+    localStorage.getItem("custom_moi") || "[]"
   );
 
   container.innerHTML = "";
