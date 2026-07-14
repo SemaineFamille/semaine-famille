@@ -234,6 +234,9 @@ label{
 <div class="progress" id="txt-moi"></div>
 </details>
 
+<button class="btn-reset-all" onclick="resetAll()">🗑 Tout effacer</button>
+
+  
 <script>
 
 const allBoxes = document.querySelectorAll("input[type=checkbox]");
@@ -270,7 +273,21 @@ function updateProgress(){
       `${done} élément(s) préparé(s) sur ${total}`;
   });
 }
+function resetAll(){
 
+  if(!confirm("Effacer toutes les coches de toutes les listes ?")){
+    return;
+  }
+
+  document
+    .querySelectorAll("input[type=checkbox]")
+    .forEach((box,index)=>{
+      box.checked = false;
+      localStorage.setItem("vacances_"+index,"0");
+    });
+
+  updateProgress();
+}
 function resetSeason(id){
 
   if(!confirm("Effacer toutes les coches de cette saison ?")) return;
