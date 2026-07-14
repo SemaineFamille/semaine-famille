@@ -397,7 +397,7 @@ function resetAll(){
   liste.splice(index,1);
 
   localStorage.setItem(
-    STORAGE_KEY,
+    "custom_moi",
     JSON.stringify(liste)
   );
 
@@ -414,7 +414,7 @@ function toggleCustomItem(index,value){
   liste[index].checked = value;
 
   localStorage.setItem(
-    STORAGE_KEY,
+    "custom_moi",
     JSON.stringify(liste)
   );
 
