@@ -487,8 +487,12 @@ function addCustomItem(){
 
   input.value = "";
 
+  window.addEventListener("load", () => {
+
   renderCustomItems();
   updateProgress();
+
+});
 }
 function resetSeason(id){
 
