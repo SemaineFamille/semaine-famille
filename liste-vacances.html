@@ -249,15 +249,17 @@ label{
 
 <div id="custom-moi"></div>
 
-<div style="display:flex;gap:8px;margin-top:10px">
+<div class="input-row-custom">
   <input
     type="text"
     id="input-moi"
     placeholder="Ajouter une affaire..."
-    style="flex:1">
-    
-  <button onclick="addCustomItem()">
-    ➕ Ajouter
+    onkeypress="if(event.key==='Enter')addCustomItem()">
+
+  <button
+    class="btn-add-custom"
+    onclick="addCustomItem()">
+    + Ajouter
   </button>
 </div>
 
