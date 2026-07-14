@@ -96,7 +96,64 @@ label{
   font-size:1rem;
   font-weight:bold;
 }
+.input-row-custom{
+  display:flex;
+  gap:8px;
+  margin-top:10px;
+}
 
+.input-row-custom input{
+  flex:1;
+  padding:12px;
+  border:2px solid #e0d0e8;
+  border-radius:12px;
+  font-size:0.95rem;
+  outline:none;
+}
+
+.input-row-custom input:focus{
+  border-color:#9C27B0;
+}
+
+.btn-add-custom{
+  background:#9C27B0;
+  color:white;
+  border:none;
+  border-radius:12px;
+  padding:0 16px;
+  font-weight:bold;
+  cursor:pointer;
+  white-space:nowrap;
+}
+
+.btn-add-custom:hover{
+  opacity:.9;
+}
+.custom-item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin:6px 0;
+  padding:10px;
+  background:#f7f2fa;
+  border-radius:10px;
+}
+
+.custom-item label{
+  flex:1;
+  margin:0;
+}
+
+.custom-item button{
+  border:none;
+  background:#ffebee;
+  color:#d32f2f;
+  border-radius:8px;
+  padding:6px 8px;
+  cursor:pointer;
+}
+ 
 </style>
 </head>
 
@@ -381,7 +438,7 @@ function renderCustomItems(){
   liste.forEach((item,index)=>{
 
     container.innerHTML += `
-      <div style="display:flex;align-items:center;gap:8px;margin:4px 0">
+       <div class="custom-item">
 
         <label style="flex:1">
           <input
