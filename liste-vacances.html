@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🧳 Ma liste vacances</title>
 
+ <h1>🧳 Ma liste vacances</h1>
+
+<p id="nom-personne"
+   style="text-align:center;color:#666;font-weight:bold">
+</p> 
+
 <style>
 
 body{
@@ -267,8 +273,15 @@ label{
 
   
 <script>
+const personne =
+  (localStorage.getItem("lastChild") || "Commun")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
 
-const allBoxes = document.querySelectorAll("input[type=checkbox]");
+const STORAGE_KEY = "custom_moi_" + personne;
+
+const nomPersonne = localStorage.getItem("lastChild") || "Commun";
 
 allBoxes.forEach((box,index)=>{
 
@@ -317,39 +330,40 @@ function resetAll(){
 
   updateProgress();
 }
-  function deleteCustomItem(index){
+ function deleteCustomItem(index){
 
   const liste = JSON.parse(
-    localStorage.getItem("custom_moi") || "[]"
+    localStorage.getItem(STORAGE_KEY) || "[]"
   );
 
   liste.splice(index,1);
 
   localStorage.setItem(
-    "custom_moi",
+    STORAGE_KEY,
     JSON.stringify(liste)
   );
 
   renderCustomItems();
-
   updateProgress();
 }
-  function toggleCustomItem(index,value){
+
+function toggleCustomItem(index,value){
 
   const liste = JSON.parse(
-    localStorage.getItem("custom_moi") || "[]"
+    localStorage.getItem(STORAGE_KEY) || "[]"
   );
 
   liste[index].checked = value;
 
   localStorage.setItem(
-    "custom_moi",
+    STORAGE_KEY,
     JSON.stringify(liste)
   );
 
   updateProgress();
 }
-  function renderCustomItems(){
+
+function renderCustomItems(){
 
   const container =
     document.getElementById("custom-moi");
@@ -357,7 +371,7 @@ function resetAll(){
   if(!container) return;
 
   const liste = JSON.parse(
-    localStorage.getItem("custom_moi") || "[]"
+    localStorage.getItem(STORAGE_KEY) || "[]"
   );
 
   container.innerHTML = "";
@@ -383,7 +397,8 @@ function resetAll(){
     `;
   });
 }
-  function addCustomItem(){
+
+function addCustomItem(){
 
   const input = document.getElementById("input-moi");
   const texte = input.value.trim();
@@ -391,7 +406,7 @@ function resetAll(){
   if(!texte) return;
 
   const liste = JSON.parse(
-    localStorage.getItem("custom_moi") || "[]"
+    localStorage.getItem(STORAGE_KEY) || "[]"
   );
 
   liste.push({
@@ -400,13 +415,14 @@ function resetAll(){
   });
 
   localStorage.setItem(
-    "custom_moi",
+    STORAGE_KEY,
     JSON.stringify(liste)
   );
 
   input.value = "";
 
   renderCustomItems();
+  updateProgress();
 }
 function resetSeason(id){
 
@@ -431,6 +447,10 @@ function resetSeason(id){
 
   updateProgress();
 }
+
+document.getElementById("nom-personne").textContent =
+  "Liste personnelle : " +
+  (localStorage.getItem("lastChild") || "Commun");
 
 renderCustomItems();
 updateProgress();
