@@ -237,7 +237,25 @@ label{
 <label><input type="checkbox"> Livres </label>
 <label><input type="checkbox"> Natel + chargeur </label>
 
+<hr>
 
+<h4>➕ Mes affaires personnelles</h4>
+
+<div id="custom-moi"></div>
+
+<div style="display:flex;gap:8px;margin-top:10px">
+  <input
+    type="text"
+    id="input-moi"
+    placeholder="Ajouter une affaire..."
+    style="flex:1">
+    
+  <button onclick="addCustomItem()">
+    ➕ Ajouter
+  </button>
+</div>
+
+  
 <button class="btn-reset" onclick="resetSeason('moi')">
 🗑 Effacer ma liste
 </button>
@@ -298,6 +316,97 @@ function resetAll(){
     });
 
   updateProgress();
+}
+  function deleteCustomItem(index){
+
+  const liste = JSON.parse(
+    localStorage.getItem("custom_moi") || "[]"
+  );
+
+  liste.splice(index,1);
+
+  localStorage.setItem(
+    "custom_moi",
+    JSON.stringify(liste)
+  );
+
+  renderCustomItems();
+
+  updateProgress();
+}
+  function toggleCustomItem(index,value){
+
+  const liste = JSON.parse(
+    localStorage.getItem("custom_moi") || "[]"
+  );
+
+  liste[index].checked = value;
+
+  localStorage.setItem(
+    "custom_moi",
+    JSON.stringify(liste)
+  );
+
+  updateProgress();
+}
+  function renderCustomItems(){
+
+  const container =
+    document.getElementById("custom-moi");
+
+  if(!container) return;
+
+  const liste = JSON.parse(
+    localStorage.getItem("custom_moi") || "[]"
+  );
+
+  container.innerHTML = "";
+
+  liste.forEach((item,index)=>{
+
+    container.innerHTML += `
+      <div style="display:flex;align-items:center;gap:8px;margin:4px 0">
+
+        <label style="flex:1">
+          <input
+            type="checkbox"
+            ${item.checked ? "checked" : ""}
+            onchange="toggleCustomItem(${index},this.checked)">
+          ${item.nom}
+        </label>
+
+        <button onclick="deleteCustomItem(${index})">
+          ❌
+        </button>
+
+      </div>
+    `;
+  });
+}
+  function addCustomItem(){
+
+  const input = document.getElementById("input-moi");
+  const texte = input.value.trim();
+
+  if(!texte) return;
+
+  const liste = JSON.parse(
+    localStorage.getItem("custom_moi") || "[]"
+  );
+
+  liste.push({
+    nom: texte,
+    checked: false
+  });
+
+  localStorage.setItem(
+    "custom_moi",
+    JSON.stringify(liste)
+  );
+
+  input.value = "";
+
+  renderCustomItems();
 }
 function resetSeason(id){
 
