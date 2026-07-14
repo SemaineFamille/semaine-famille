@@ -5,11 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🧳 Ma liste vacances</title>
 
- <h1>🧳 Ma liste vacances</h1>
-
-<p id="nom-personne"
-   style="text-align:center;color:#666;font-weight:bold">
-</p> 
+<h1 id="titre-vacances">
+🧳 Ma liste vacances
+</h1>
 
 <style>
 
@@ -340,7 +338,17 @@ const personne =
 
 const STORAGE_KEY = "custom_moi_" + personne;
 
-const nomPersonne = localStorage.getItem("lastChild") || "Commun";
+const nomPersonne =
+  localStorage.getItem("lastChild") || "Commun";
+
+document.getElementById("titre-vacances").innerHTML =
+  `🧳 Ma liste vacances<br>
+   <span style="
+      font-size:0.7em;
+      color:#666;
+      font-weight:600">
+      ${nomPersonne}
+   </span>`;
 
 allBoxes.forEach((box,index)=>{
 
