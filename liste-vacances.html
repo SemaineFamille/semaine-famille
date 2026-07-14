@@ -340,9 +340,11 @@ label{
 
 localStorage.getItem("custom_moi")
 
-
+const allBoxes = document.querySelectorAll(
+  'input[type="checkbox"]'
+);
 allBoxes.forEach((box,index)=>{
-const allBoxes = document.querySelectorAll("input[type=checkbox]");
+
   const key = "vacances_" + index;
 
   box.checked = localStorage.getItem(key)==="1";
