@@ -431,6 +431,7 @@ function installApp() {
 ========================================================= */
 function login(user) {
   currentUser = user;
+   localStorage.setItem("lastChild", user);
   isParent = (user === 'parent');
 
   const loginScreen = document.getElementById('loginScreen');
