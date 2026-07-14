@@ -5,9 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🧳 Ma liste vacances</title>
 
-<h1 id="titre-vacances">
-🧳 Ma liste vacances
-</h1>
+
 
 <style>
 
@@ -162,7 +160,9 @@ label{
 <button class="btn-retour" onclick="history.back()">
 ⬅ Retour
 </button>
-
+<h1 id="titre-vacances">
+🧳 Ma liste vacances
+</h1>
 
 <!-- GENERALE -->
 <details class="saison" id="generale">
@@ -473,7 +473,7 @@ function addCustomItem(){
   if(!texte) return;
 
   const liste = JSON.parse(
-    localStorage.getItem(STORAGE_KEY) || "[]"
+    localStorage.getItem("custom_moi") || "[]"
   );
 
   liste.push({
@@ -482,17 +482,14 @@ function addCustomItem(){
   });
 
   localStorage.setItem(
-    STORAGE_KEY,
+    "custom_moi",
     JSON.stringify(liste)
   );
 
   input.value = "";
-  
 
   renderCustomItems();
   updateProgress();
-
-});
 }
 function resetSeason(id){
 
