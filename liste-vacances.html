@@ -108,7 +108,9 @@ label{
   font-size:0.95rem;
   outline:none;
 }
-
+#custom-moi{
+  min-height:20px;
+}
 .input-row-custom input:focus{
   border-color:#9C27B0;
 }
@@ -299,9 +301,15 @@ label{
 
 <hr>
 
-<h4>➕ Mes affaires personnelles</h4>
+<h4 style="margin-top:20px">
+  ➕ Mes affaires personnelles
+</h4>
 
-<div id="custom-moi"></div>
+<div id="custom-moi"
+     style="
+       margin-bottom:10px;
+       display:block;">
+</div>
 
 <div class="input-row-custom">
   <input
@@ -329,16 +337,9 @@ label{
 
   
 <script>
-const personne =
-  (localStorage.getItem("lastChild") || "Commun")
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
 
-const STORAGE_KEY = "custom_moi_" + personne;
+localStorage.getItem("custom_moi")
 
-const nomPersonne =
-  localStorage.getItem("lastChild") || "Commun";
 
 document.getElementById("titre-vacances").innerHTML =
   `🧳 Ma liste vacances<br>
