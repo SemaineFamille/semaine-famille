@@ -350,7 +350,7 @@ document.getElementById("titre-vacances").innerHTML =
    </span>`;
 
 allBoxes.forEach((box,index)=>{
-
+const allBoxes = document.querySelectorAll("input[type=checkbox]");
   const key = "vacances_" + index;
 
   box.checked = localStorage.getItem(key)==="1";
@@ -488,8 +488,6 @@ function addCustomItem(){
   input.value = "";
   
 
-  window.addEventListener("load", () => {
-
   renderCustomItems();
   updateProgress();
 
@@ -519,9 +517,7 @@ function resetSeason(id){
   updateProgress();
 }
 
-document.getElementById("nom-personne").textContent =
-  "Liste personnelle : " +
-  (localStorage.getItem("lastChild") || "Commun");
+
 
 renderCustomItems();
 updateProgress();
