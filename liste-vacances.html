@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🧳 Ma liste vacances</title>
 
-
-
 <style>
 
 body{
@@ -409,7 +407,6 @@ label{
 <label><input type="checkbox"> Linge de bain </label>
 <label><input type="checkbox"> Lunettes / casquette </label>
 
-
 <hr>
 
 <h4 style="margin-top:20px">
@@ -441,9 +438,54 @@ label{
 🗑 Effacer ma liste
 </button>
 
-<div class="progress" id="txt-moi"></div>
+<div class="progress" id="txt-paddle"></div>
 </details>
 
+<!-- Ski -->
+<details class="saison" id="ski">
+<summary>🎿 Sortie Ski <span id="prog-ski"></span></summary>
+  
+<label><input type="checkbox"> Ski + Bâtons </label>
+<label><input type="checkbox"> Casque </label>
+<label><input type="checkbox"> Gants </label>
+<label><input type="checkbox"> Magic Pass </label>
+<label><input type="checkbox"> Crème solaire </label>
+<label><input type="checkbox"> Lunettes de soleil </label>
+
+
+<hr>
+
+<h4 style="margin-top:20px">
+  ➕ Mes affaires personnelles
+</h4>
+
+<div id="custom-ski"
+     style="
+       margin-bottom:10px;
+       display:block;">
+</div>
+
+<div class="input-row-custom">
+  <input
+    type="text"
+    id="input-ski"
+    placeholder="Ajouter une affaire..."
+    onkeypress="if(event.key==='Enter')addCustomItem()">
+
+  <button
+    class="btn-add-custom"
+    onclick="addCustomItem()">
+    + Ajouter
+  </button>
+</div>
+
+  
+<button class="btn-reset" onclick="resetSeason('ski')">
+🗑 Effacer ma liste
+</button>
+
+<div class="progress" id="txt-ski"></div>
+</details>
 
   
 <button class="btn-reset-all" onclick="resetAll()">🗑 Tout effacer</button>
@@ -729,6 +771,7 @@ renderCustomItemsGeneric("sport");
 renderCustomItemsGeneric("medicaments");
 renderCustomItemsGeneric("toilette");
 renderCustomItemsGeneric("paddle");
+  renderCustomItemsGeneric("ski");
 
 renderCustomItems();
 updateProgress();
