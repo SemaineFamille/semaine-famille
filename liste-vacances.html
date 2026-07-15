@@ -201,6 +201,26 @@ label{
 <label><input type="checkbox"> Elastiques à cheveux</label>
 <label><input type="checkbox"> Mouchoirs</label>
 
+<hr>
+
+<h4>➕ Mes ajouts</h4>
+
+<div id="custom-toilette"></div>
+
+<div class="input-row-custom">
+  <input
+    type="text"
+    id="input-toilette"
+    placeholder="Ajouter un produit..."
+    onkeypress="if(event.key==='Enter')addCustomItemGeneric('toilette')">
+
+  <button
+    class="btn-add-custom"
+    onclick="addCustomItemGeneric('toilette')">
+    + Ajouter
+  </button>
+</div>
+  
 <button class="btn-reset" onclick="resetSeason('toilette')">
 🗑 Effacer la trousse de toilette
 </button>
@@ -226,6 +246,8 @@ label{
 <label><input type="checkbox"> Table / banc </label> 
 <label><input type="checkbox"> Rallonges / prises / adaptateur </label> 
 
+
+  
 <button class="btn-reset" onclick="resetSeason('caravane')">
 🗑 Effacer Caravane
 </button>
@@ -248,6 +270,25 @@ label{
   <label><input type="checkbox"> Housse natel </label>
   <label><input type="checkbox"> Casquette / bandeau </label>
 
+  <hr>
+
+<h4>➕ Mes ajouts</h4>
+
+<div id="custom-sport"></div>
+
+<div class="input-row-custom">
+  <input
+    type="text"
+    id="input-sport"
+    placeholder="Ajouter un équipement..."
+    onkeypress="if(event.key==='Enter')addCustomItemGeneric('sport')">
+
+  <button
+    class="btn-add-custom"
+    onclick="addCustomItemGeneric('sport')">
+    + Ajouter
+  </button>
+</div>
 
 <button class="btn-reset" onclick="resetSeason('sport')">
 🗑 Effacer Sport
@@ -269,6 +310,26 @@ label{
 <label><input type="checkbox"> Antitique / Antimoustique</label>
 <label><input type="checkbox"> Huiles essentielles </label>
 
+<hr>
+
+<h4>➕ Mes ajouts</h4>
+
+<div id="custom-medicaments"></div>
+
+<div class="input-row-custom">
+  <input
+    type="text"
+    id="input-medicaments"
+    placeholder="Ajouter un médicament..."
+    onkeypress="if(event.key==='Enter')addCustomItemGeneric('medicaments')">
+
+  <button
+    class="btn-add-custom"
+    onclick="addCustomItemGeneric('medicaments')">
+    + Ajouter
+  </button>
+</div>
+  
 <button class="btn-reset" onclick="resetSeason('medicaments')">
 🗑 Effacer les Médicaments
 </button>
@@ -484,6 +545,110 @@ function addCustomItem(){
   renderCustomItems();
   updateProgress();
 }
+  function addCustomItemGeneric(section){
+
+  const input =
+    document.getElementById("input-" + section);
+
+  const texte = input.value.trim();
+
+  if(!texte) return;
+
+  const storageKey = "custom_" + section;
+
+  const liste = JSON.parse(
+    localStorage.getItem(storageKey) || "[]"
+  );
+
+  liste.push({
+    nom: texte,
+    checked:false
+  });
+
+  localStorage.setItem(
+    storageKey,
+    JSON.stringify(liste)
+  );
+
+  input.value = "";
+
+  renderCustomItemsGeneric(section);
+  updateProgress();
+}
+
+function renderCustomItemsGeneric(section){
+
+  const container =
+    document.getElementById("custom-" + section);
+
+  if(!container) return;
+
+  const storageKey = "custom_" + section;
+
+  const liste = JSON.parse(
+    localStorage.getItem(storageKey) || "[]"
+  );
+
+  container.innerHTML = "";
+
+  liste.forEach((item,index)=>{
+
+    container.innerHTML += `
+      <div class="custom-item">
+
+        <label style="flex:1">
+          <input
+            type="checkbox"
+            ${item.checked ? "checked" : ""}
+            onchange="toggleCustomItemGeneric('${section}',${index},this.checked)">
+          ${item.nom}
+        </label>
+
+        <button onclick="deleteCustomItemGeneric('${section}',${index})">
+          ❌
+        </button>
+
+      </div>
+    `;
+  });
+}
+
+function toggleCustomItemGeneric(section,index,value){
+
+  const storageKey = "custom_" + section;
+
+  const liste = JSON.parse(
+    localStorage.getItem(storageKey) || "[]"
+  );
+
+  liste[index].checked = value;
+
+  localStorage.setItem(
+    storageKey,
+    JSON.stringify(liste)
+  );
+
+  updateProgress();
+}
+
+function deleteCustomItemGeneric(section,index){
+
+  const storageKey = "custom_" + section;
+
+  const liste = JSON.parse(
+    localStorage.getItem(storageKey) || "[]"
+  );
+
+  liste.splice(index,1);
+
+  localStorage.setItem(
+    storageKey,
+    JSON.stringify(liste)
+  );
+
+  renderCustomItemsGeneric(section);
+  updateProgress();
+}
 function resetSeason(id){
 
   if(!confirm("Effacer toutes les coches de cette saison ?")) return;
@@ -508,7 +673,9 @@ function resetSeason(id){
   updateProgress();
 }
 
-
+renderCustomItemsGeneric("sport");
+renderCustomItemsGeneric("medicaments");
+renderCustomItemsGeneric("toilette");
 
 renderCustomItems();
 updateProgress();
