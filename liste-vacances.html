@@ -245,6 +245,9 @@ label{
 <label><input type="checkbox"> Solette </label> 
 <label><input type="checkbox"> Table / banc </label> 
 <label><input type="checkbox"> Rallonges / prises / adaptateur </label> 
+<label><input type="checkbox"> Grill </label>
+<label><input type="checkbox"> Wok </label>
+<label><input type="checkbox"> Blender electique </label>
 
 
   
@@ -394,6 +397,54 @@ label{
 <div class="progress" id="txt-moi"></div>
 </details>
 
+<!-- Paddle -->
+<details class="saison" id="paddle">
+<summary>🏄🏻 Sortie paddle <span id="prog-paddle"></span></summary>
+  
+<label><input type="checkbox"> Paddle </label>
+<label><input type="checkbox"> Gilets </label>
+<label><input type="checkbox"> Pagaye </label>
+<label><input type="checkbox"> Crème solaire </label>
+<label><input type="checkbox"> Linge de bain </label>
+<label><input type="checkbox"> Lunettes / casquette </label>
+
+
+<hr>
+
+<h4 style="margin-top:20px">
+  ➕ Mes affaires personnelles
+</h4>
+
+<div id="custom-paddle"
+     style="
+       margin-bottom:10px;
+       display:block;">
+</div>
+
+<div class="input-row-custom">
+  <input
+    type="text"
+    id="input-paddle"
+    placeholder="Ajouter une affaire..."
+    onkeypress="if(event.key==='Enter')addCustomItem()">
+
+  <button
+    class="btn-add-custom"
+    onclick="addCustomItem()">
+    + Ajouter
+  </button>
+</div>
+
+  
+<button class="btn-reset" onclick="resetSeason('paddle')">
+🗑 Effacer ma liste
+</button>
+
+<div class="progress" id="txt-moi"></div>
+</details>
+
+
+  
 <button class="btn-reset-all" onclick="resetAll()">🗑 Tout effacer</button>
 
   
@@ -676,6 +727,7 @@ function resetSeason(id){
 renderCustomItemsGeneric("sport");
 renderCustomItemsGeneric("medicaments");
 renderCustomItemsGeneric("toilette");
+renderCustomItemsGeneric("paddle");
 
 renderCustomItems();
 updateProgress();
