@@ -167,14 +167,15 @@ label{
 <summary>⛱️ Générale <span id="prog-generale"></span></summary>
 
 <label><input type="checkbox" data-id="gourde">Gourde</label>
-<label><input type="checkbox"> Chargeur natel</label>
-<label><input type="checkbox"> Livres</label>
-<label><input type="checkbox"> Carte d'identité</label>
-<label><input type="checkbox"> Argent</label>
-<label><input type="checkbox"> Magic Pass</label>  
-<label><input type="checkbox"> Housse linge sale</label>
-<label><input type="checkbox"> Sac à dos</label>
-<label><input type="checkbox"> Boom Box</label>
+<label><input type="checkbox" data-id="natel">Chargeur natel</label> 
+<label><input type="checkbox" data-id="livres">Livres</label>
+<label><input type="checkbox" data-id="id">Carte d'identité</label>
+<label><input type="checkbox" data-id="argent">Argent</label>
+<label><input type="checkbox" data-id="magic">Magic Pass</label>
+<label><input type="checkbox" data-id="housse">Housse linge sale</label>
+<label><input type="checkbox" data-id="sac_dos">Sac à dos</label>
+<label><input type="checkbox" data-id="boom">Boom Box</label>
+
 
   
 <button class="btn-reset" onclick="resetSeason('generale')">
@@ -189,17 +190,18 @@ label{
 <details class="saison" id="toilette">
 <summary>🪥 Trousse de toilette <span id="prog-toilette"></span></summary>
 
-<label><input type="checkbox"> Brosse à dents</label>
-<label><input type="checkbox"> Dentifrice</label>
-<label><input type="checkbox"> Gel douche</label>
-<label><input type="checkbox"> Shampoing</label>
-<label><input type="checkbox"> Déodorant</label>
-<label><input type="checkbox"> Brosse à cheveux</label>
-<label><input type="checkbox"> Crème solaire</label>
-<label><input type="checkbox"> Coupe-ongle / Lime</label> 
-<label><input type="checkbox"> Gel</label>
-<label><input type="checkbox"> Elastiques à cheveux</label>
-<label><input type="checkbox"> Mouchoirs</label>
+<label><input type="checkbox" data-id="dent">Brosse à dent</label>
+<label><input type="checkbox" data-id="dentifrice">Dentifrice</label>
+<label><input type="checkbox" data-id="douche">Gel douche</label>
+<label><input type="checkbox" data-id="shampoing">Shampoing</label>
+<label><input type="checkbox" data-id="deo">Déodorant</label>
+<label><input type="checkbox" data-id="cheveux">Brosse à cheveux</label>
+<label><input type="checkbox" data-id="solaire">Crème solaire</label>
+<label><input type="checkbox" data-id="lime">Coupe-ongle / Lime</label>
+<label><input type="checkbox" data-id="gel">Gel</label>
+<label><input type="checkbox" data-id="elastic">Elastiques à cheveux</label>
+<label><input type="checkbox" data-id="mouchoirs">Mouchoirs</label>
+
 
 <hr>
 
@@ -232,28 +234,29 @@ label{
 <details class="saison" id="caravane">
 <summary>🏕️ Caravane <span id="prog-caravane"></span></summary>
 
-<label><input type="checkbox"> Linge vaisselle</label>
-<label><input type="checkbox"> Linge à main </label>
-<label><input type="checkbox"> Sac de courses </label>
-<label><input type="checkbox"> Provisions </label>
-<label><input type="checkbox"> Savon vaisselle </label>  
-<label><input type="checkbox"> Savon Marseille </label> 
-<label><input type="checkbox"> Housse linge sale </label> 
-<label><input type="checkbox"> Eponges / pattes </label> 
-<label><input type="checkbox"> Lessive </label> 
-<label><input type="checkbox"> Auvent </label> 
-<label><input type="checkbox"> Solette </label> 
-<label><input type="checkbox"> Table / banc </label> 
-<label><input type="checkbox"> Rallonges / prises / adaptateur </label> 
-<label><input type="checkbox"> Grill </label>
-<label><input type="checkbox"> Wok </label>
-<label><input type="checkbox"> Blender électrique </label>
-<label><input type="checkbox"> Machine à café + capsules </label>
-<label><input type="checkbox"> Draps de lit </label> 
-<label><input type="checkbox"> Duvet </label>
-<label><input type="checkbox"> Coussin </label>
-<label><input type="checkbox"> Bouchon vin à pomper </label>
-<label><input type="checkbox"> Etandage à linge </label>  
+<label><input type="checkbox" data-id="vaisselle">Linge Vaiselle</label>
+<label><input type="checkbox" data-id="main">Linge à main</label>
+<label><input type="checkbox" data-id="courses">Sac de courses</label>
+<label><input type="checkbox" data-id="provisions">Provisions</label>
+<label><input type="checkbox" data-id="savon_vaisselle">Savon Vaisselle</label>
+<label><input type="checkbox" data-id="marseille">Savon Marseille</label>
+<label><input type="checkbox" data-id="housse_linge">Housse linge sale</label>
+<label><input type="checkbox" data-id="eponge">Eponges / pattes</label>
+<label><input type="checkbox" data-id="lessive">Lessive</label>
+<label><input type="checkbox" data-id="auvent">Auvent</label>
+<label><input type="checkbox" data-id="solette">Solette</label>
+<label><input type="checkbox" data-id="tabel">Table / Bancs</label>
+<label><input type="checkbox" data-id="rallonges">Rallonges / Prises / Adaptateur</label>
+<label><input type="checkbox" data-id="grill">Grill</label>
+<label><input type="checkbox" data-id="wok">Wok</label>
+<label><input type="checkbox" data-id="blender">Blender</label>
+<label><input type="checkbox" data-id="cafe">Machine à café</label>
+<label><input type="checkbox" data-id="draps">Draps de lit</label>
+<label><input type="checkbox" data-id="duvet">Duvet</label>
+<label><input type="checkbox" data-id="coussin">Coussin</label>
+<label><input type="checkbox" data-id="bouchon">Bouchon à pomper le vin</label>
+<label><input type="checkbox" data-id="etandage">Etandage à linge</label>
+
 
 
   
@@ -268,15 +271,16 @@ label{
 <details class="saison" id="sport">
 <summary>👟 Sport <span id="prog-sport"></span></summary>
 
-<label><input type="checkbox"> Baskets </label>
-<label><input type="checkbox"> Sac à dos</label>
-<label><input type="checkbox"> Capteur FC</label>
-<label><input type="checkbox"> Chaussettes</label>
-  <label><input type="checkbox"> Short </label>
-  <label><input type="checkbox"> T-shirt</label>
-  <label><input type="checkbox"> Lunettes</label>
-  <label><input type="checkbox"> Housse natel </label>
-  <label><input type="checkbox"> Casquette / bandeau </label>
+<label><input type="checkbox" data-id="baskets">Baskets</label>
+<label><input type="checkbox" data-id="dos">sac à dos</label>
+<label><input type="checkbox" data-id="fc">Capteur FC</label>
+<label><input type="checkbox" data-id="chausettes_sport">Chaussettes de sport</label>
+<label><input type="checkbox" data-id="short_sport">Short</label>
+<label><input type="checkbox" data-id="shirt">T-Shirt</label>
+<label><input type="checkbox" data-id="lunettes">Lunettes</label>
+<label><input type="checkbox" data-id="natel">Housse natel</label>
+<label><input type="checkbox" data-id="bandeau">Casquette / bandeau</label>
+
 
   <hr>
 
@@ -309,9 +313,10 @@ label{
 <details class="saison" id="medicaments">
 <summary>💊 Médicaments <span id="prog-medicaments"></span></summary>
 
-<label><input type="checkbox"> Dafalgan</label>
-<label><input type="checkbox"> Méthylphénidate</label>
-<label><input type="checkbox"> Antihistaminique</label>
+<label><input type="checkbox" data-id="dafalgan">Dafalgan</label>
+<label><input type="checkbox" data-id="concerta">Méthylphénidate</label>
+<label><input type="checkbox" data-id="bilaxten">Antihistaminique</label>
+<label><input type="checkbox" data-id="ventolin">Ventolin</label>
 <label><input type="checkbox"> Ventolin</label>
 <label><input type="checkbox"> Fer</label>
 <label><input type="checkbox"> Sparadraps</label>
