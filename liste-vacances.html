@@ -502,18 +502,32 @@ label{
 localStorage.getItem("custom_moi")
 
 const allBoxes = document.querySelectorAll(
-  'input[type="checkbox"]'
+  '.saison input[type="checkbox"]'
 );
-allBoxes.forEach((box,index)=>{
 
-  const key = "vacances_" + index;
+allBoxes.forEach((box)=>{
 
-  box.checked = localStorage.getItem(key)==="1";
+  const texte =
+    box.parentElement.textContent.trim();
+
+  const key =
+    "vacances_" + texte;
+
+  box.checked =
+    localStorage.getItem(key) === "1";
 
   box.addEventListener("change",()=>{
-    localStorage.setItem(key,box.checked ? "1":"0");
+
+    localStorage.setItem(
+      key,
+      box.checked ? "1" : "0"
+    );
+
     updateProgress();
+
   });
+
+});
 
 });
 
@@ -542,12 +556,19 @@ function resetAll(){
     return;
   }
 
-  document
-    .querySelectorAll("input[type=checkbox]")
-    .forEach((box,index)=>{
-      box.checked = false;
-      localStorage.setItem("vacances_"+index,"0");
-    });
+document
+  .querySelectorAll(".saison input[type=checkbox]")
+  .forEach(box=>{
+
+    const texte =
+      box.parentElement.textContent.trim();
+
+    localStorage.setItem(
+      "vacances_" + texte,
+      box.checked ? "1" : "0"
+    );
+
+  });
 
   updateProgress();
 }
