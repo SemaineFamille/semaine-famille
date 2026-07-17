@@ -507,19 +507,14 @@ label{
 localStorage.getItem("custom_moi")
 
 const allBoxes = document.querySelectorAll(
-  '.saison input[type="checkbox"]'
+  'input[type="checkbox"]'
 );
 
-allBoxes.forEach((box)=>{
+allBoxes.forEach((box,index)=>{
 
-  const texte =
-    box.parentElement.textContent.trim();
+  const key = "vacances_" + index;
 
-  const key =
-    "vacances_" + texte;
-
-  box.checked =
-    localStorage.getItem(key) === "1";
+  box.checked = localStorage.getItem(key)==="1";
 
   box.addEventListener("change",()=>{
 
@@ -527,6 +522,12 @@ allBoxes.forEach((box)=>{
       key,
       box.checked ? "1" : "0"
     );
+
+    updateProgress();
+
+  });
+
+});
 
     updateProgress();
 
