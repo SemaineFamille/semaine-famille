@@ -437,7 +437,7 @@ label{
     type="text"
     id="input-paddle"
     placeholder="Ajouter une affaire..."
-    onkeypress="if(event.key==='Enter')addCustomItem()">
+    onkeypress="if(event.key==='Enter')addCustomItemGeneric('paddle')">
 
   <button
     class="btn-add-custom"
@@ -483,7 +483,7 @@ label{
     type="text"
     id="input-ski"
     placeholder="Ajouter une affaire..."
-    onkeypress="if(event.key==='Enter')addCustomItem()">
+    onkeypress="if(event.key==='Enter')addCustomItemGeneric('ski')">
 
   <button
     class="btn-add-custom"
@@ -531,13 +531,7 @@ allBoxes.forEach((box,index)=>{
 
 });
 
-    updateProgress();
 
-  });
-
-});
-
-});
 
 function updateProgress(){
 
@@ -568,9 +562,11 @@ document
   .querySelectorAll("input[type=checkbox]")
   .forEach((box,index)=>{
 
+    box.checked = false;
+
     localStorage.setItem(
       "vacances_" + index,
-      box.checked ? "1" : "0"
+      "0"
     );
 
   });
