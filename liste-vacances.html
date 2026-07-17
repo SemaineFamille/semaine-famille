@@ -563,14 +563,11 @@ function resetAll(){
   }
 
 document
-  .querySelectorAll(".saison input[type=checkbox]")
-  .forEach(box=>{
-
-    const texte =
-      box.parentElement.textContent.trim();
+  .querySelectorAll("input[type=checkbox]")
+  .forEach((box,index)=>{
 
     localStorage.setItem(
-      "vacances_" + texte,
+      "vacances_" + index,
       box.checked ? "1" : "0"
     );
 
