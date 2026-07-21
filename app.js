@@ -33,6 +33,19 @@ const CHECKLIST_VACANCES = {
   automne: {},
   hiver: {}
 };
+function openImage(src){
+
+  document.getElementById("imageModalImg").src = src;
+
+  document.getElementById("imageModal").style.display = "flex";
+}
+
+function closeImage(){
+
+  document.getElementById("imageModal").style.display = "none";
+}
+
+
 function buildQueryString(params) {
   return new URLSearchParams(params).toString();
 }
