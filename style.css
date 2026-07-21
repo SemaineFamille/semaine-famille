@@ -268,6 +268,8 @@ input[type="text"]:focus,select:focus{outline:none;border-color:var(--violet);}
 }
 
 .horaire-img{
+  width:100%;3  max-width:250px; /* adapte à la taille que tu avais avant */ 
+  height:auto;
   cursor:pointer;
   transition:transform .2s;
 }
