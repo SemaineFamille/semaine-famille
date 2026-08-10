@@ -1,1 +1,13 @@
+<script>
 
+const CODE_SECRET = "2019";
+
+const code = prompt("🔒 Code d'accès");
+
+if(code !== CODE_SECRET){
+  document.body.innerHTML = "";
+  alert("Accès refusé");
+  window.location.href = "index.html";
+}
+
+</script>
