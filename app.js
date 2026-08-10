@@ -3,7 +3,7 @@
    Base + navigation + API + Présences + Menu
    Version optimisée
 ========================================================= */
-console.log("APP VERSION 10-08-2026 16h00");
+console.log("APP VERSION 10-08-2026 16h20");
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxOJEus1Fev5I4YZsSbjpIXXlgGJBY7QmFkkqZtkXYD6eEPwqmgCl8r2hfrO1X9eyqxSA/exec';
 const ADMIN_CODE = '2019';
 
@@ -479,6 +479,7 @@ function login(user) {
         <button class="quick-btn" onclick="location.href='Agenda.html'"><span class="icon">👀</span>Agenda</button>
         <button class="quick-btn" onclick="location.href='liste-vacances.html'"><span class="icon">🧳</span>Ma liste vacances</button>
         <button class="quick-btn" onclick="requestAdmin()" style="background:linear-gradient(135deg,#FF5722,#FF9800)"><span class="icon">⚙️</span>Admin</button>
+        <button class="quick-btn"onclick="location.href='FINANCES_PRIVE.html'"><span class="icon">💰</span>Finances</button>
       `;
     } else {
       qnav.innerHTML = `
