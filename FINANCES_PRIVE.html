@@ -9,12 +9,12 @@
 
 const CODE_SECRET = "2019";
 
-const code = prompt("🔒 Code d'accès");
+const code = prompt("🔒 Entrez le code d'accès");
 
-if(code !== CODE_SECRET){
-  document.body.innerHTML = "";
-  alert("Accès refusé");
-  window.location.href = "index.html";
+if (code !== CODE_SECRET) {
+    alert("⛔ Accès refusé");
+    window.location.replace("index.html");
+    throw new Error("Accès refusé");
 }
 
 </script>
