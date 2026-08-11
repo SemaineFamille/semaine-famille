@@ -144,7 +144,60 @@ async function chargerFinances(){
 }
 
 chargerFinances();
+async function ajouterApport(){
 
+  const montant =
+    prompt("Montant de l'apport");
+
+  if(!montant) return;
+
+  const commentaire =
+    prompt("Commentaire");
+
+  await envoyerMouvement(
+    "Apport",
+    Number(montant),
+    commentaire || ""
+  );
+
+}
+
+async function ajouterDepense(){
+
+  const montant =
+    prompt("Montant de la dépense");
+
+  if(!montant) return;
+
+  const commentaire =
+    prompt("Commentaire");
+
+  await envoyerMouvement(
+    "Dépense",
+    -Math.abs(Number(montant)),
+    commentaire || ""
+  );
+
+}
+
+async function envoyerMouvement(
+  type,
+  montant,
+  commentaire
+){
+
+  await fetch(API_URL,{
+    method:"POST",
+    body:JSON.stringify({
+      type,
+      montant,
+      commentaire
+    })
+  });
+
+  chargerFinances();
+
+}
 </script>
 </body>
 </html>
