@@ -6,7 +6,7 @@
 <title>💰 Finances privées</title>
 
 <script>
-
+let financeType = "";
 const CODE_SECRET = "2019";
 
 const code = prompt("🔒 Entrez le code d'accès");
@@ -170,42 +170,86 @@ async function chargerFinances(){
 }
 
 chargerFinances();
-async function ajouterApport(){
+function ajouterApport(){
+
+  financeType = "Apport";
+
+  document.getElementById(
+    "financeModalTitle"
+  ).textContent = "➕ Ajouter un apport";
+
+  document.getElementById(
+    "financeMontant"
+  ).value = "";
+
+  document.getElementById(
+    "financeCommentaire"
+  ).value = "";
+
+  document.getElementById(
+    "financeModal"
+  ).classList.add("show");
+}
+
+function ajouterDepense(){
+
+  financeType = "Dépense";
+
+  document.getElementById(
+    "financeModalTitle"
+  ).textContent = "➖ Ajouter une dépense";
+
+  document.getElementById(
+    "financeMontant"
+  ).value = "";
+
+  document.getElementById(
+    "financeCommentaire"
+  ).value = "";
+
+  document.getElementById(
+    "financeModal"
+  ).classList.add("show");
+}
+function closeFinanceModal(){
+
+  document.getElementById(
+    "financeModal"
+  ).classList.remove("show");
+
+}
+    async function validerFinance(){
 
   const montant =
-    prompt("Montant de l'apport");
+    Number(
+      document.getElementById(
+        "financeMontant"
+      ).value
+    );
+
+  const commentaire =
+    document.getElementById(
+      "financeCommentaire"
+    ).value;
 
   if(!montant) return;
 
-  const commentaire =
-    prompt("Commentaire");
+  let valeur = montant;
+
+  if(financeType === "Dépense"){
+    valeur = -Math.abs(montant);
+  }
 
   await envoyerMouvement(
-    "Apport",
-    Number(montant),
-    commentaire || ""
+    financeType,
+    valeur,
+    commentaire
   );
 
+  closeFinanceModal();
+
+  chargerFinances();
 }
-
-async function ajouterDepense(){
-
-  const montant =
-    prompt("Montant de la dépense");
-
-  if(!montant) return;
-
-  const commentaire =
-    prompt("Commentaire");
-
-  await envoyerMouvement(
-    "Dépense",
-    -Math.abs(Number(montant)),
-    commentaire || ""
-  );
-
-}
-
 async function envoyerMouvement(
   type,
   montant,
