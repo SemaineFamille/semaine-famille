@@ -180,7 +180,9 @@ h1{
 </div>
 
 <br>
-<div class="card">
+<div class="card"
+     onclick="ouvrirMensualisation()"
+     style="cursor:pointer">
 
   <h2>💳 Compte mensualisation</h2>
 
@@ -189,15 +191,9 @@ h1{
     <span id="soldeMensualisation">...</span>
   </p>
 
-  <button class="btn-finance-plus"
-          onclick="ajouterApportMensualisation()">
-    ➕ Ajouter un apport mensuel
-  </button>
-
-  <button class="btn-finance-moins"
-          onclick="ajouterFactureMensualisation()">
-    🧾 Ajouter une facture payée
-  </button>
+  <p style="color:#666">
+    👉 Cliquer pour voir les mouvements
+  </p>
 
 </div>
  
@@ -260,6 +256,9 @@ async function chargerFinances(){
 
   document.getElementById("totalDepenses").textContent =
     data.totalDepenses.toFixed(2) + " CHF";
+ 
+ document.getElementById("soldeMensualisation").textContent =
+  data.soldeMensualisation.toFixed(2)  + " CHF";
 }
 
 chargerFinances();
