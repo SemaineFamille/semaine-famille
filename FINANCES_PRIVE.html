@@ -186,11 +186,11 @@ h1{
 
 <br>
 <div class="card"
-     onclick="ouvrirMensualisation()"
-     style="margin-top:20px;cursor:pointer;">
- <p style="color:#666">
-    👉 Cliquer pour voir les mouvements
-   </p>
+     style="margin-top:20px;">
+<p style="color:#666;cursor:pointer"
+   onclick="ouvrirMensualisation()">
+👉 Cliquer pour voir les mouvements
+</p>
 
   <h2>💳 Compte mensualisation</h2>
 
@@ -500,12 +500,7 @@ await envoyerMouvement(
   valeur,
   commentaire
 );
- await envoyerMouvement(
-  "EPARGNE_VACANCES",
-  financeType,
-  valeur,
-  commentaire
-);    
+
 
   closeFinanceModal();
 
