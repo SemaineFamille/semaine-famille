@@ -26,7 +26,57 @@ body{
   background:#f3e5f5;
   padding:20px;
 }
+.modal-overlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  z-index:9999;
+  align-items:center;
+  justify-content:center;
+}
 
+.modal-overlay.show{
+  display:flex;
+}
+
+.modal{
+  background:white;
+  border-radius:20px;
+  padding:20px;
+  width:90%;
+  max-width:400px;
+}
+
+.modal input{
+  width:100%;
+  padding:12px;
+  border:2px solid #ddd;
+  border-radius:12px;
+}
+
+.btn-modal-valider{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  background:#4CAF50;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.btn-modal-annuler{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  background:#ddd;
+  color:#333;
+  font-weight:bold;
+  cursor:pointer;
+  margin-top:10px;
+}
 .card{
   background:white;
   padding:20px;
@@ -274,18 +324,6 @@ async function envoyerMouvement(
   chargerFinances();
 }
 
-  await fetch(API_URL,{
-    method:"POST",
-    body:JSON.stringify({
-      type,
-      montant,
-      commentaire
-    })
-  });
-
-  chargerFinances();
-
-}
 </script>
    <div id="financeModal" class="modal-overlay">
 
