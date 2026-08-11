@@ -493,21 +493,24 @@ function closeFinanceModal(){
     valeur = -Math.abs(montant);
   }
 
-  await envoyerMouvement(
-    financeType,
-    valeur,
-    commentaire
-  );
+await envoyerMouvement(
+  "COMPTE_MENSUALISATION",
+  financeType,
+  valeur,
+  commentaire
+);
 
   closeFinanceModal();
 
   chargerFinances();
 }
 async function envoyerMouvement(
+  feuille,
   type,
   montant,
   commentaire
-){
+)
+{
 
   const response = await fetch(API_URL,{
     method:"POST",
