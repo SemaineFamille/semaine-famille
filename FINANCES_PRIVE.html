@@ -569,15 +569,15 @@ async function envoyerMouvement(
     chargerFinances();
 
   }
-  catch(err){
+catch(err){
 
-    console.error(err);
+  console.error("ERREUR FETCH :", err);
 
-    alert(
-      "Erreur lors de l'enregistrement"
-    );
+  alert(
+    "Erreur lors de l'enregistrement"
+  );
 
-  }
+}
 
 }
 
