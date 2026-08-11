@@ -6,6 +6,7 @@
 <title>💰 Finances privées</title>
 
 <script>
+ let feuilleCible = "";
  let financesData = null;   
 let financeType = "";
 const CODE_SECRET = "2019";
@@ -200,12 +201,12 @@ h1{
   </p>
 
    <button class="btn-finance-plus"
-          onclick="ajouterApport()">
+          onclick="ajouterApportMensualisation()">
     ➕ Ajouter un apport
   </button>
 
   <button class="btn-finance-moins"
-          onclick="ajouterDepense()">
+         onclick="ajouterDepenseMensualisation()">
     ➖ Ajouter une dépense
   </button>
 
@@ -238,12 +239,12 @@ h1{
   </p>
 
   <button class="btn-finance-plus"
-          onclick="ajouterApport()">
+          onclick="ajouterApportVacances()">
     ➕ Ajouter un apport
   </button>
 
   <button class="btn-finance-moins"
-          onclick="ajouterDepense()">
+          onclick="ajouterDepenseVacances()">
     ➖ Ajouter une dépense
   </button>
 
@@ -293,6 +294,37 @@ async function chargerFinances(){
 
 
 chargerFinances();
+ function ajouterApportMensualisation(){
+
+  feuilleCible = "COMPTE_MENSUALISATION";
+
+  ajouterApport();
+
+}
+
+function ajouterDepenseMensualisation(){
+
+  feuilleCible = "COMPTE_MENSUALISATION";
+
+  ajouterDepense();
+
+}
+
+function ajouterApportVacances(){
+
+  feuilleCible = "EPARGNE_VACANCES";
+
+  ajouterApport();
+
+}
+
+function ajouterDepenseVacances(){
+
+  feuilleCible = "EPARGNE_VACANCES";
+
+  ajouterDepense();
+
+}
 function ouvrirMensualisation(){
 
   if(!financesData) return;
@@ -516,7 +548,7 @@ console.log(
 );
 
 await envoyerMouvement(
-  "COMPTE_MENSUALISATION",
+  feuilleCible,
   financeType,
   valeur,
   commentaire
