@@ -508,6 +508,13 @@ function closeFinanceModal(){
     valeur = -Math.abs(montant);
   }
 
+console.log(
+  "Envoi",
+  financeType,
+  valeur,
+  commentaire
+);
+
 await envoyerMouvement(
   "COMPTE_MENSUALISATION",
   financeType,
@@ -525,29 +532,53 @@ async function envoyerMouvement(
   type,
   montant,
   commentaire
-)
-{
+){
 
-  const response = await fetch(API_URL,{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json"
-    },
-    body:JSON.stringify({
-      feuille,
-      type,
-      montant,
-      commentaire
-    })
-  });
+  try{
 
-  const result = await response.json();
+    const response = await fetch(API_URL,{
 
-  if(result.success){
-    alert("✅ Mouvement enregistré");
+      method:"POST",
+
+      headers:{
+        "Content-Type":"application/json"
+      },
+
+      body:JSON.stringify({
+
+        feuille,
+        type,
+        montant,
+        commentaire
+
+      })
+
+    });
+
+    const result =
+      await response.json();
+
+    console.log(result);
+
+    if(result.success){
+
+      alert("✅ Mouvement enregistré");
+
+    }
+
+    chargerFinances();
+
+  }
+  catch(err){
+
+    console.error(err);
+
+    alert(
+      "Erreur lors de l'enregistrement"
+    );
+
   }
 
-  chargerFinances();
 }
 
 </script>
