@@ -63,9 +63,77 @@ h1{
 <h1>💰 Finances privées</h1>
 
 <div class="card">
-  <h3>Espace privé</h3>
-  <p>Page en construction.</p>
+
+  <h2>💰 Frais mensualisés</h2>
+
+  <p>
+    <strong>Total annuel :</strong><br>
+    <span id="totalAnnuel">...</span>
+  </p>
+
+  <br>
+
+  <p>
+    <strong>À mettre de côté chaque mois :</strong><br>
+    <span id="totalMensuel">...</span>
+  </p>
+
 </div>
 
+<br>
+
+<div class="card">
+
+  <h2>🌴 Épargne vacances</h2>
+
+  <p>
+    <strong>Solde actuel :</strong><br>
+    <span id="soldeVacances">...</span>
+  </p>
+
+  <br>
+
+  <p>
+    <strong>Total des apports :</strong><br>
+    <span id="totalApports">...</span>
+  </p>
+
+  <br>
+
+  <p>
+    <strong>Total des dépenses :</strong><br>
+    <span id="totalDepenses">...</span>
+  </p>
+
+</div>
+<script>
+
+const API_URL =
+"https://script.google.com/macros/s/AKfycbxqkwUh7KkIZeS_r4i3TZEoM5iELxuJCTsguqbZ-YeuJG0ELPwoLgoJV8okTQk82wc/exec";
+
+async function chargerFinances(){
+
+  const response = await fetch(API_URL);
+  const data = await response.json();
+
+  document.getElementById("totalAnnuel").textContent =
+    data.totalAnnuel.toFixed(2) + " CHF";
+
+  document.getElementById("totalMensuel").textContent =
+    data.totalMensuel.toFixed(2) + " CHF";
+
+  document.getElementById("soldeVacances").textContent =
+    data.soldeVacances.toFixed(2) + " CHF";
+
+  document.getElementById("totalApports").textContent =
+    data.totalApports.toFixed(2) + " CHF";
+
+  document.getElementById("totalDepenses").textContent =
+    data.totalDepenses.toFixed(2) + " CHF";
+}
+
+chargerFinances();
+
+</script>
 </body>
 </html>
