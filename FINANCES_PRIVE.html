@@ -45,6 +45,33 @@ body{
   margin-bottom:20px;
   cursor:pointer;
 }
+  .btn-finance-plus{
+  display:block;
+  width:100%;
+  margin-top:12px;
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  background:#4CAF50;
+  color:white;
+  font-size:1rem;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.btn-finance-moins{
+  display:block;
+  width:100%;
+  margin-top:10px;
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  background:#E53935;
+  color:white;
+  font-size:1rem;
+  font-weight:bold;
+  cursor:pointer;
+}  
 
 h1{
   text-align:center;
@@ -104,18 +131,17 @@ h1{
     <strong>Total des dépenses :</strong><br>
     <span id="totalDepenses">...</span>
   </p>
-<br>
 
-<button class="btn btn-primary"
-        onclick="ajouterApport()">
-  ➕ Ajouter un apport
-</button>
+  <button class="btn-finance-plus"
+          onclick="ajouterApport()">
+    ➕ Ajouter un apport
+  </button>
 
-<button class="btn btn-danger"
-        style="width:100%;margin-top:10px"
-        onclick="ajouterDepense()">
-  ➖ Ajouter une dépense
-</button>
+  <button class="btn-finance-moins"
+          onclick="ajouterDepense()">
+    ➖ Ajouter une dépense
+  </button>
+
 </div>
 <script>
 
