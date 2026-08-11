@@ -499,6 +499,12 @@ await envoyerMouvement(
   valeur,
   commentaire
 );
+ await envoyerMouvement(
+  "EPARGNE_VACANCES",
+  financeType,
+  valeur,
+  commentaire
+);    
 
   closeFinanceModal();
 
@@ -514,7 +520,11 @@ async function envoyerMouvement(
 
   const response = await fetch(API_URL,{
     method:"POST",
+    headers:{
+      "Content-Type":"application/json"
+    },
     body:JSON.stringify({
+      feuille,
       type,
       montant,
       commentaire
