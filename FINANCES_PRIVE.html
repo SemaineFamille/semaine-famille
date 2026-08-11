@@ -364,10 +364,10 @@ function ouvrirMensualisation(){
     const commentaire =
       lignes[i][3] || "";
 
-    const couleur =
-      montant >= 0
-      ? "#4CAF50"
-      : "#E53935";
+   const couleur =
+  type === "Facture"
+  ? "#FF5722"
+  : "#9C27B0";
 
     container.innerHTML += `
 
