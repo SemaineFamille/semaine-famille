@@ -256,6 +256,24 @@ async function envoyerMouvement(
   commentaire
 ){
 
+  const response = await fetch(API_URL,{
+    method:"POST",
+    body:JSON.stringify({
+      type,
+      montant,
+      commentaire
+    })
+  });
+
+  const result = await response.json();
+
+  if(result.success){
+    alert("✅ Mouvement enregistré");
+  }
+
+  chargerFinances();
+}
+
   await fetch(API_URL,{
     method:"POST",
     body:JSON.stringify({
@@ -293,14 +311,14 @@ async function envoyerMouvement(
 
       <br><br>
 
-      <button
-        class="btn btn-primary"
-        onclick="validerFinance()">
+     <button
+  class="btn-modal-valider"
+  onclick="validerFinance()">
         ✅ Valider
       </button>
 
-      <button
-        class="btn"
+    <button
+  class="btn-modal-annuler"
         style="
           width:100%;
           margin-top:8px;
