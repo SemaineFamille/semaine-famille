@@ -254,28 +254,43 @@ const API_URL =
 "https://script.google.com/macros/s/AKfycbxqkwUh7KkIZeS_r4i3TZEoM5iELxuJCTsguqbZ-YeuJG0ELPwoLgoJV8okTQk82wc/exec"
 async function chargerFinances(){
 
-  const response = await fetch(API_URL);
-  const data = await response.json();
+  try{
+
+    const response = await fetch(API_URL);
+
+    const data = await response.json();
+
     financesData = data;
 
-  document.getElementById("totalAnnuel").textContent =
-    data.totalAnnuel.toFixed(2) + " CHF";
+    document.getElementById("totalAnnuel").textContent =
+      data.totalAnnuel.toFixed(2) + " CHF";
 
-  document.getElementById("totalMensuel").textContent =
-    data.totalMensuel.toFixed(2) + " CHF";
+    document.getElementById("totalMensuel").textContent =
+      data.totalMensuel.toFixed(2) + " CHF";
 
-  document.getElementById("soldeVacances").textContent =
-    data.soldeVacances.toFixed(2) + " CHF";
+    document.getElementById("soldeVacances").textContent =
+      data.soldeVacances.toFixed(2) + " CHF";
 
-  document.getElementById("totalApports").textContent =
-    data.totalApports.toFixed(2) + " CHF";
+    document.getElementById("totalApports").textContent =
+      data.totalApports.toFixed(2) + " CHF";
 
-  document.getElementById("totalDepenses").textContent =
-    data.totalDepenses.toFixed(2) + " CHF";
- 
- document.getElementById("soldeMensualisation").textContent =
-  data.soldeMensualisation.toFixed(2)  + " CHF";
+    document.getElementById("totalDepenses").textContent =
+      data.totalDepenses.toFixed(2) + " CHF";
+
+    document.getElementById("soldeMensualisation").textContent =
+      data.soldeMensualisation.toFixed(2) + " CHF";
+
+  }
+  catch(err){
+
+    console.error(err);
+
+    alert("Erreur de connexion Google Sheet");
+
+  }
+
 }
+
 
 chargerFinances();
 function ouvrirMensualisation(){
