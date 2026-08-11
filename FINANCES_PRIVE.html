@@ -6,6 +6,7 @@
 <title>💰 Finances privées</title>
 
 <script>
+ let financesData = null;   
 let financeType = "";
 const CODE_SECRET = "2019";
 
@@ -139,7 +140,12 @@ h1{
 
 <h1>💰 Finances privées</h1>
 
-<div class="card">
+<div class="card"
+     onclick="ouvrirDetailFrais()"
+     style="cursor:pointer">
+<p style="color:#666;margin-top:10px">
+👉 Cliquer pour voir le détail
+</p>
 
   <h2>💰 Frais mensualisés</h2>
 
@@ -202,6 +208,7 @@ async function chargerFinances(){
 
   const response = await fetch(API_URL);
   const data = await response.json();
+    financesData = data;
 
   document.getElementById("totalAnnuel").textContent =
     data.totalAnnuel.toFixed(2) + " CHF";
@@ -220,6 +227,54 @@ async function chargerFinances(){
 }
 
 chargerFinances();
+function ouvrirDetailFrais(){
+
+  if(!financesData) return;
+
+  const container =
+    document.getElementById("fraisDetails");
+
+  container.innerHTML = "";
+
+  const lignes = financesData.frais;
+
+  for(let i=1;i<lignes.length;i++){
+
+    container.innerHTML += `
+      <div style="
+        display:flex;
+        justify-content:space-between;
+        margin-bottom:8px;
+        padding:8px;
+        border-bottom:1px solid #eee;">
+
+        <div>
+          <strong>${lignes[i][0]}</strong>
+        </div>
+
+        <div style="text-align:right">
+          ${Number(lignes[i][1]).toFixed(2)} CHF
+          <br>
+          <small>
+            ${Number(lignes[i][2]).toFixed(2)} CHF/mois
+          </small>
+        </div>
+
+      </div>
+    `;
+  }
+
+  document
+    .getElementById("fraisModal")
+    .classList.add("show");
+}
+
+function closeFraisModal(){
+
+  document
+    .getElementById("fraisModal")
+    .classList.remove("show");
+}    
 function ajouterApport(){
 
   financeType = "Apport";
@@ -371,5 +426,22 @@ async function envoyerMouvement(
   </div>
 
 </div> 
+    <div id="fraisModal" class="modal-overlay">
+
+  <div class="modal">
+
+    <h3>💰 Détail des frais mensualisés</h3>
+
+    <div id="fraisDetails"></div>
+
+    <button
+      class="btn-modal-annuler"
+      onclick="closeFraisModal()">
+      Fermer
+    </button>
+
+  </div>
+
+</div>
 </body>
 </html>
