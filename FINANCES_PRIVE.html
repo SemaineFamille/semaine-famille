@@ -225,5 +225,51 @@ async function envoyerMouvement(
 
 }
 </script>
+   <div id="financeModal" class="modal-overlay">
+
+  <div class="modal">
+
+    <h3 id="financeModalTitle">
+      Ajouter un mouvement
+    </h3>
+
+    <div style="margin-top:15px">
+
+      <input
+        type="number"
+        id="financeMontant"
+        placeholder="Montant CHF">
+
+      <br><br>
+
+      <input
+        type="text"
+        id="financeCommentaire"
+        placeholder="Commentaire">
+
+      <br><br>
+
+      <button
+        class="btn btn-primary"
+        onclick="validerFinance()">
+        ✅ Valider
+      </button>
+
+      <button
+        class="btn"
+        style="
+          width:100%;
+          margin-top:8px;
+          background:#ddd;
+          color:#333;"
+        onclick="closeFinanceModal()">
+        Annuler
+      </button>
+
+    </div>
+
+  </div>
+
+</div> 
 </body>
 </html>
