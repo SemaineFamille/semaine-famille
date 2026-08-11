@@ -53,6 +53,11 @@ body{
 
   -webkit-overflow-scrolling:touch;
 }
+ #mensualisationDetails{
+  max-height:60vh;
+  overflow-y:auto;
+  margin-top:15px;
+}
 #fraisDetails{
   max-height:60vh;
   overflow-y:auto;
@@ -273,9 +278,101 @@ async function chargerFinances(){
 }
 
 chargerFinances();
- function ouvrirMensualisation(){
+function ouvrirMensualisation(){
 
-  alert("Fonction à créer");
+  if(!financesData) return;
+
+  const container =
+    document.getElementById(
+      "mensualisationDetails"
+    );
+
+  container.innerHTML = "";
+
+  const lignes =
+    financesData.mensualisation;
+
+  const limite =
+    new Date();
+
+  limite.setMonth(
+    limite.getMonth() - 12
+  );
+
+  for(let i=lignes.length-1;i>=1;i--){
+
+    const dateMouvement =
+      new Date(lignes[i][0]);
+
+    if(dateMouvement < limite){
+      continue;
+    }
+
+    const type =
+      lignes[i][1];
+
+    const montant =
+      Number(lignes[i][2]);
+
+    const commentaire =
+      lignes[i][3] || "";
+
+    const couleur =
+      montant >= 0
+      ? "#4CAF50"
+      : "#E53935";
+
+    container.innerHTML += `
+
+      <div style="
+        background:#fafafa;
+        padding:12px;
+        border-radius:12px;
+        margin-bottom:10px;
+        border-left:5px solid ${couleur};
+      ">
+
+        <strong>
+          ${dateMouvement.toLocaleDateString('fr-CH')}
+        </strong>
+
+        <br>
+
+        ${type}
+
+        <br>
+
+        <span style="
+          color:${couleur};
+          font-weight:bold;
+        ">
+          ${montant.toFixed(2)} CHF
+        </span>
+
+        <br>
+
+        <small>
+          ${commentaire}
+        </small>
+
+      </div>
+
+    `;
+  }
+
+  document
+    .getElementById(
+      "mensualisationModal"
+    )
+    .classList.add("show");
+}
+ function closeMensualisationModal(){
+
+  document
+    .getElementById(
+      "mensualisationModal"
+    )
+    .classList.remove("show");
 
 }
 function ouvrirDetailFrais(){
@@ -494,5 +591,26 @@ async function envoyerMouvement(
   </div>
 
 </div>
+<div id="mensualisationModal" class="modal-overlay">
+
+  <div class="modal">
+
+    <h3>💳 Historique du compte mensualisation</h3>
+
+    <div id="mensualisationDetails"></div>
+
+    <button
+      class="btn-modal-annuler"
+      onclick="closeMensualisationModal()">
+
+      Fermer
+
+    </button>
+
+  </div>
+
+</div>
+
+ 
 </body>
 </html>
