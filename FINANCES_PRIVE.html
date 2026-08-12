@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 
- <script/cdn.jsdelivr.net/npm/chart.jsscript>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>💰 Finances privées</title>
@@ -358,10 +358,7 @@ let solde = 0;
   limite.setMonth(
     limite.getMonth() - 12
   );
-const labels = [];
-const soldes = [];
 
-let solde = 0;
 
 for(let i=1;i<lignes.length;i++){
 
@@ -381,14 +378,7 @@ for(let i=1;i<lignes.length;i++){
   if(type === "Facture"){
     solde -= montant;
   } else {
-    solde += montant;
-  }
-
-  labels.push(
-    dateMouvement.toLocaleDateString('fr-CH')
-  );
-
-  soldes.push(solde);
+  
 }
   for(let i=lignes.length-1;i>=1;i--){
 
