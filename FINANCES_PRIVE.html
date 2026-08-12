@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+ <script src="httpsvr.net/npm/chart.jsscript>
  <script/cdn.jsdelivr.net/npm/chart.jsscript>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -200,7 +201,10 @@ h1{
     <strong>Solde actuel :</strong><br>
     <span id="soldeMensualisation">...</span>
   </p>
-
+<canvas
+  id="mensualisationChart"
+  height="180">
+</canvas>
    <button class="btn-finance-plus"
           onclick="ajouterApportMensualisation()">
     ➕ Ajouter un apport
@@ -263,6 +267,8 @@ async function chargerFinances(){
     const data = await response.json();
 
     financesData = data;
+
+   dessinerGraphiqueMensualisation();
 
     document.getElementById("totalAnnuel").textContent =
       data.totalAnnuel.toFixed(2) + " CHF";
@@ -501,6 +507,90 @@ window.mensualisationGraph =
       "mensualisationModal"
     )
     .classList.add("show");
+}
+ function dessinerGraphiqueMensualisation(){
+
+  if(!financesData) return;
+
+  const lignes =
+    financesData.mensualisation;
+
+  const limite = new Date();
+
+  limite.setMonth(
+    limite.getMonth() - 12
+  );
+
+  const labels = [];
+  const soldes = [];
+
+  let solde = 0;
+
+  for(let i=1;i<lignes.length;i++){
+
+    const dateMouvement =
+      new Date(lignes[i][0]);
+
+    if(dateMouvement < limite){
+      continue;
+    }
+
+    const type =
+      lignes[i][1];
+
+    const montant =
+      Number(lignes[i][2]);
+
+    if(type === "Facture"){
+      solde -= montant;
+    } else {
+      solde += montant;
+    }
+
+    labels.push(
+      dateMouvement.toLocaleDateString("fr-CH")
+    );
+
+    soldes.push(solde);
+  }
+
+  const ctx =
+    document.getElementById(
+      "mensualisationChart"
+    );
+
+  if(window.mensualisationGraph){
+    window.mensualisationGraph.destroy();
+  }
+
+  window.mensualisationGraph =
+    new Chart(ctx,{
+
+      type:"line",
+
+      data:{
+        labels,
+        datasets:[{
+
+          label:"Solde",
+
+          data:soldes,
+
+          borderColor:"#9C27B0",
+
+          backgroundColor:
+            "rgba(156,39,176,0.1)",
+
+          fill:true,
+
+          tension:0.3,
+
+          pointRadius:4
+
+        }]
+      }
+
+    });
 }
  function closeMensualisationModal(){
 
