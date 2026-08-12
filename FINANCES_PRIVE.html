@@ -423,8 +423,8 @@ function ouvrirMensualisation(){
     )
     .classList.add("show");
 }
- function dessinerGraphiqueMensualisation(){
-console.log("Graphique démarré");
+function dessinerGraphiqueMensualisation(){
+
   if(!financesData) return;
 
   const lignes =
@@ -458,7 +458,7 @@ console.log("Graphique démarré");
 
     if(type === "Facture"){
       solde -= montant;
-    } else {
+    }else{
       solde += montant;
     }
 
@@ -474,62 +474,28 @@ console.log("Graphique démarré");
       "mensualisationChart"
     );
 
+  if(!ctx){
+    console.error("Canvas introuvable");
+    return;
+  }
+
   if(window.mensualisationGraph){
     window.mensualisationGraph.destroy();
   }
 
-console.log("Chart =", Chart);
-console.log("ctx =", ctx);
-console.log("labels =", labels);
-console.log("soldes =", soldes);
-
-window.mensualisationGraph =
- if(!ctx){
-  console.error("Canvas introuvable");
-  return;
-}
-  new Chart(ctx,{
-
-    type:"line",
-
-    data:{
-      labels,
-      datasets:[{
-
-        label:"Solde",
-
-        data:soldes,
-
-        borderColor:"#9C27B0",
-
-        backgroundColor:
-          "rgba(156,39,176,0.1)",
-
-        fill:true,
-
-        tension:0.3,
-
-        pointRadius:4
-
-      }]
-    },
-
-    options:{
-      responsive:true,
-      maintainAspectRatio:false
-    }
-
-  });
+  window.mensualisationGraph =
+    new Chart(ctx,{
 
       type:"line",
 
       data:{
-        labels,
+        labels: labels,
+
         datasets:[{
 
           label:"Solde",
 
-          data:soldes,
+          data: soldes,
 
           borderColor:"#9C27B0",
 
@@ -543,9 +509,15 @@ window.mensualisationGraph =
           pointRadius:4
 
         }]
+      },
+
+      options:{
+        responsive:true,
+        maintainAspectRatio:false
       }
 
     });
+
 }
  function closeMensualisationModal(){
 
