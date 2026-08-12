@@ -421,7 +421,7 @@ function ouvrirMensualisation(){
     .classList.add("show");
 }
  function dessinerGraphiqueMensualisation(){
-
+console.log("Graphique démarré");
   if(!financesData) return;
 
   const lignes =
@@ -476,6 +476,10 @@ function ouvrirMensualisation(){
   }
 
   window.mensualisationGraph =
+   console.log("Chart =", Chart);
+console.log("ctx =", ctx);
+console.log("labels =", labels);
+console.log("soldes =", soldes);
     new Chart(ctx,{
 
       type:"line",
