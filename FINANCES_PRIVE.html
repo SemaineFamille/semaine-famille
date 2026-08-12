@@ -267,7 +267,7 @@ async function chargerFinances(){
 
     financesData = data;
 
-   // dessinerGraphiqueMensualisation();
+   dessinerGraphiqueMensualisation();
 
     document.getElementById("totalAnnuel").textContent =
       data.totalAnnuel.toFixed(2) + " CHF";
@@ -474,12 +474,48 @@ console.log("Graphique démarré");
     window.mensualisationGraph.destroy();
   }
 
-  window.mensualisationGraph =
-   console.log("Chart =", Chart);
+console.log("Chart =", Chart);
 console.log("ctx =", ctx);
 console.log("labels =", labels);
 console.log("soldes =", soldes);
-    new Chart(ctx,{
+
+window.mensualisationGraph =
+ if(!ctx){
+  console.error("Canvas introuvable");
+  return;
+}
+  new Chart(ctx,{
+
+    type:"line",
+
+    data:{
+      labels,
+      datasets:[{
+
+        label:"Solde",
+
+        data:soldes,
+
+        borderColor:"#9C27B0",
+
+        backgroundColor:
+          "rgba(156,39,176,0.1)",
+
+        fill:true,
+
+        tension:0.3,
+
+        pointRadius:4
+
+      }]
+    },
+
+    options:{
+      responsive:true,
+      maintainAspectRatio:false
+    }
+
+  });
 
       type:"line",
 
