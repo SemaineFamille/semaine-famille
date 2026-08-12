@@ -352,7 +352,38 @@ let solde = 0;
   limite.setMonth(
     limite.getMonth() - 12
   );
+const labels = [];
+const soldes = [];
 
+let solde = 0;
+
+for(let i=1;i<lignes.length;i++){
+
+  const dateMouvement =
+    new Date(lignes[i][0]);
+
+  if(dateMouvement < limite){
+    continue;
+  }
+
+  const montant =
+    Number(lignes[i][2]);
+
+  const type =
+    lignes[i][1];
+
+  if(type === "Facture"){
+    solde -= montant;
+  } else {
+    solde += montant;
+  }
+
+  labels.push(
+    dateMouvement.toLocaleDateString('fr-CH')
+  );
+
+  soldes.push(solde);
+}
   for(let i=lignes.length-1;i>=1;i--){
 
     const dateMouvement =
