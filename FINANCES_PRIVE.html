@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+ <script/cdn.jsdelivr.net/npm/chart.jsscript>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>💰 Finances privées</title>
@@ -339,6 +340,12 @@ function ouvrirMensualisation(){
   const lignes =
     financesData.mensualisation;
 
+const labels = [];
+const soldes = [];
+
+let solde = 0;
+ 
+
   const limite =
     new Date();
 
@@ -363,6 +370,14 @@ function ouvrirMensualisation(){
 
     const commentaire =
       lignes[i][3] || "";
+
+   solde += montant;
+
+labels.push(
+  dateMouvement.toLocaleDateString('fr-CH')
+);
+
+soldes.push(solde);
 
  const couleur =
 montant >= 0
@@ -406,7 +421,50 @@ montant >= 0
 
     `;
   }
+const ctx =
+  document.getElementById(
+    "mensualisationChart"
+  );
 
+if(window.mensualisationGraph){
+  window.mensualisationGraph.destroy();
+}
+
+window.mensualisationGraph =
+  new Chart(ctx,{
+
+    type:"line",
+
+    data:{
+
+      labels: labels,
+
+      datasets:[{
+
+        label:"Solde du compte",
+
+        data: soldes,
+
+        borderColor:"#9C27B0",
+
+        backgroundColor:
+          "rgba(156,39,176,0.15)",
+
+        fill:true,
+
+        tension:0.3,
+
+        pointRadius:4
+
+      }]
+    },
+
+    options:{
+      responsive:true,
+      maintainAspectRatio:false
+    }
+
+});
   document
     .getElementById(
       "mensualisationModal"
@@ -673,7 +731,10 @@ catch(err){
   <div class="modal">
 
     <h3>💳 Historique du compte mensualisation</h3>
-
+<canvas
+  id="mensualisationChart"
+  height="180">
+</canvas>
     <div id="mensualisationDetails"></div>
 
     <button
