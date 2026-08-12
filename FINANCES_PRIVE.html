@@ -346,8 +346,6 @@ function ouvrirMensualisation(){
   const lignes =
     financesData.mensualisation;
 
-
-
   const limite =
     new Date();
 
@@ -355,28 +353,7 @@ function ouvrirMensualisation(){
     limite.getMonth() - 12
   );
 
-
-for(let i=1;i<lignes.length;i++){
-
-  const dateMouvement =
-    new Date(lignes[i][0]);
-
-  if(dateMouvement < limite){
-    continue;
-  }
-
-  const montant =
-    Number(lignes[i][2]);
-
-  const type =
-    lignes[i][1];
-
-if(type === "Facture"){
-  solde -= montant;
-} else {
-  solde += montant;
-}
-  for(let i=lignes.length-1;i>=1;i--){
+  for(let i=lignes.length - 1; i >= 1; i--){
 
     const dateMouvement =
       new Date(lignes[i][0]);
@@ -394,18 +371,10 @@ if(type === "Facture"){
     const commentaire =
       lignes[i][3] || "";
 
-   solde += montant;
-
-labels.push(
-  dateMouvement.toLocaleDateString('fr-CH')
-);
-
-soldes.push(solde);
-
- const couleur =
-montant >= 0
-  ? "#ff225c"
-  : "#9C27B0";
+    const couleur =
+      (type === "Facture" || type === "Dépense")
+      ? "#ff225c"
+      : "#9C27B0";
 
     container.innerHTML += `
 
@@ -444,50 +413,7 @@ montant >= 0
 
     `;
   }
-const ctx =
-  document.getElementById(
-    "mensualisationChart"
-  );
 
-if(window.mensualisationGraph){
-  window.mensualisationGraph.destroy();
-}
-
-window.mensualisationGraph =
-  new Chart(ctx,{
-
-    type:"line",
-
-    data:{
-
-      labels: labels,
-
-      datasets:[{
-
-        label:"Solde du compte",
-
-        data: soldes,
-
-        borderColor:"#9C27B0",
-
-        backgroundColor:
-          "rgba(156,39,176,0.15)",
-
-        fill:true,
-
-        tension:0.3,
-
-        pointRadius:4
-
-      }]
-    },
-
-    options:{
-      responsive:true,
-      maintainAspectRatio:false
-    }
-
-});
   document
     .getElementById(
       "mensualisationModal"
