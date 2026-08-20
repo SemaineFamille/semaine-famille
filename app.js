@@ -252,12 +252,12 @@ const MOIS_NOMS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juill
 
 
 const TACHES_RECURRENTES = [
-  { personne: 'Alessia', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-06-05', frequence: 4 },
-  { personne: 'Diego', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-06-05', frequence: 4 },
-  { personne: 'Clément', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-05-29', frequence: 3 },
-  { personne: 'Antonin', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-05-29', frequence: 3 },
-  { personne: 'Jérémie', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-05-29', frequence: 3 },
-  { personne: 'Mél & Yann', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-05-15', frequence: 2 },
+  { personne: 'Alessia', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-08-15', frequence: 4 },
+  { personne: 'Diego', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-08-15', frequence: 4 },
+  { personne: 'Clément', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-85-15', frequence: 3 },
+  { personne: 'Antonin', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-08-21', frequence: 3 },
+  { personne: 'Jérémie', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-08-15', frequence: 3 },
+  { personne: 'Mél & Yann', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-08-15', frequence: 2 },
   { personne: 'Alessia', tache: 'Monter ta lessive', icon: '👕', dateDebut: '2026-06-11', frequence: 1 },
    { personne: 'Clément', tache: 'Monter ta lessive', icon: '👕', dateDebut: '2026-06-11', frequence: 1 },
    { personne: 'Antonin', tache: 'Mettre ta lessive à la buanderie', icon: '👕', dateDebut: '2026-06-11', frequence: 1 },
