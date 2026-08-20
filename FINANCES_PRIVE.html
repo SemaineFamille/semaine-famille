@@ -562,8 +562,11 @@ console.log(
   libelle,
   mois
 );
-    const listeMois =
-      mois.split(",").map(Number);
+   const listeMois =
+  mois
+    .replace(/\./g,",")
+    .split(",")
+    .map(Number);
 
     let prochainMois =
       listeMois.find(
