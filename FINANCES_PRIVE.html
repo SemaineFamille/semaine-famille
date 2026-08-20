@@ -583,12 +583,20 @@ function ouvrirDetailFrais(){
     });
 
   }
+const moisActuel =
+  new Date().getMonth() + 1;
+ 
+facturesTriees.sort((a,b)=>{
 
-  facturesTriees.sort(
-    (a,b) =>
-      a.prochainMois -
-      b.prochainMois
-  );
+  const ordreA =
+    (a.prochainMois - moisActuel + 12) % 12;
+
+  const ordreB =
+    (b.prochainMois - moisActuel + 12) % 12;
+
+  return ordreA - ordreB;
+
+});
 
   let moisAffiche = null;
   let totalMois = 0;
