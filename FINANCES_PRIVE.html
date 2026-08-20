@@ -287,7 +287,7 @@ async function chargerFinances(){
     financesData = data;
 
 calculProchaineEcheance();
-   function calculProchaineEcheance(){
+  function calculProchaineEcheance(){
 
   if(!financesData) return;
 
@@ -297,19 +297,18 @@ calculProchaineEcheance();
   const moisActuel =
     new Date().getMonth() + 1;
 
-  let prochaineFacture = null;
+  let moisProchain = null;
+
+  const factures = [];
 
   for(let i=1;i<lignes.length;i++){
-
-    const libelle =
-      lignes[i][0];
 
     const annuel =
       Number(lignes[i][1]);
 
     const mois =
       String(lignes[i][3])
-        .replace(/\./g, ",");
+      .replace(/\./g,",");
 
     const nbFactures =
       Number(lignes[i][4]);
@@ -317,49 +316,65 @@ calculProchaineEcheance();
     const listeMois =
       mois.split(",").map(Number);
 
-    let prochainMois =
-      listeMois.find(
-        m => m > moisActuel
-      );
+    for(const m of listeMois){
 
-    if(!prochainMois){
-      prochainMois = listeMois[0];
-    }
+      let ordre =
+        (m - moisActuel + 12) % 12;
 
-    const montantFacture =
-      annuel / nbFactures;
+      if(ordre === 0){
+        ordre = 12;
+      }
 
-    if(
-      !prochaineFacture ||
-      prochainMois < prochaineFacture.mois
-    ){
-      prochaineFacture = {
-        libelle,
-        mois: prochainMois,
-        montant: montantFacture
-      };
+      factures.push({
+
+        mois: m,
+
+        ordre,
+
+        montant:
+          annuel / nbFactures
+
+      });
+
     }
 
   }
 
-  if(!prochaineFacture) return;
+  factures.sort(
+    (a,b) =>
+      a.ordre - b.ordre
+  );
+
+  moisProchain =
+    factures[0].mois;
+
+  const totalMois =
+    factures
+      .filter(
+        f => f.mois === moisProchain
+      )
+      .reduce(
+        (s,f) =>
+          s + f.montant,
+        0
+      );
 
   document.getElementById(
     "prochaineEcheance"
   ).textContent =
-    nomMois(prochaineFacture.mois);
+    nomMois(moisProchain);
 
   document.getElementById(
     "montantProchaineEcheance"
   ).textContent =
-    prochaineFacture.montant.toFixed(2)
+    totalMois.toFixed(2)
     + " CHF";
 
   const solde =
     financesData.soldeMensualisation;
 
   const reste =
-    solde - prochaineFacture.montant;
+    solde - totalMois;
 
   document.getElementById(
     "etatProchaineEcheance"
@@ -369,7 +384,6 @@ calculProchaineEcheance();
     : `⚠️ Manque ${Math.abs(reste).toFixed(2)} CHF`;
 
 }
-   
    dessinerGraphiqueMensualisation();
 
     document.getElementById("totalAnnuel").textContent =
