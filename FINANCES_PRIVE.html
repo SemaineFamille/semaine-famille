@@ -547,7 +547,8 @@ function ouvrirDetailFrais(){
 
   for(let i=1;i<lignes.length;i++){
 
-    const libelle = lignes[i][0];
+    const libelle =
+      lignes[i][0];
 
     const annuel =
       Number(lignes[i][1]);
@@ -589,7 +590,48 @@ function ouvrirDetailFrais(){
       b.prochainMois
   );
 
+  let moisAffiche = null;
+  let totalMois = 0;
+
   for(const facture of facturesTriees){
+
+    if(moisAffiche !== facture.prochainMois){
+
+      if(moisAffiche !== null){
+
+        container.innerHTML += `
+          <div style="
+            text-align:right;
+            font-weight:bold;
+            color:#9C27B0;
+            margin-bottom:20px;">
+
+            Total :
+            ${totalMois.toFixed(2)} CHF
+
+          </div>
+        `;
+
+      }
+
+      moisAffiche =
+        facture.prochainMois;
+
+      totalMois = 0;
+
+      container.innerHTML += `
+        <h3 style="
+          color:#9C27B0;
+          margin-top:20px;">
+
+          ${nomMois(moisAffiche)}
+
+        </h3>
+      `;
+    }
+
+    totalMois +=
+      facture.montantFacture;
 
     container.innerHTML += `
 
@@ -606,12 +648,6 @@ function ouvrirDetailFrais(){
             ${facture.libelle}
           </strong>
 
-          <br>
-
-          <small>
-            Mois ${facture.prochainMois}
-          </small>
-
         </div>
 
         <div>
@@ -627,9 +663,44 @@ function ouvrirDetailFrais(){
 
   }
 
+  if(moisAffiche !== null){
+
+    container.innerHTML += `
+      <div style="
+        text-align:right;
+        font-weight:bold;
+        color:#9C27B0;
+        margin-bottom:20px;">
+
+        Total :
+        ${totalMois.toFixed(2)} CHF
+
+      </div>
+    `;
+  }
+
   document
     .getElementById("fraisModal")
     .classList.add("show");
+
+}
+function nomMois(m){
+
+  return [
+    "",
+    "Janvier",
+    "Février",
+    "Mars",
+    "Avril",
+    "Mai",
+    "Juin",
+    "Juillet",
+    "Août",
+    "Septembre",
+    "Octobre",
+    "Novembre",
+    "Décembre"
+  ][m];
 
 }
 
