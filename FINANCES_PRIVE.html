@@ -530,48 +530,6 @@ function dessinerGraphiqueMensualisation(){
 }
 function ouvrirDetailFrais(){
 
-const moisActuel =
-  new Date().getMonth() + 1;
-
-const facturesTriees = [];
-
-for(let i=1;i<lignes.length;i++){
-
-  const libelle = lignes[i][0];
-  const annuel = Number(lignes[i][1]);
-  const mois = String(lignes[i][3]);
-  const nbFactures = Number(lignes[i][4]);
-
-  const listeMois =
-    mois.split(",").map(Number);
-
-  let prochainMois =
-    listeMois.find(
-      m => m >= moisActuel
-    );
-
-  if(!prochainMois){
-    prochainMois = listeMois[0];
-  }
-
-  facturesTriees.push({
-
-    libelle,
-    annuel,
-    prochainMois,
-
-    montantFacture:
-      annuel / nbFactures
-
-  });
-
-}
- 
- facturesTriees.sort(
-  (a,b)=>
-    a.prochainMois -
-    b.prochainMois
-);
   if(!financesData) return;
 
   const container =
@@ -579,73 +537,102 @@ for(let i=1;i<lignes.length;i++){
 
   container.innerHTML = "";
 
-  const lignes = financesData.frais;
+  const lignes =
+    financesData.frais;
+
+  const moisActuel =
+    new Date().getMonth() + 1;
+
+  const facturesTriees = [];
 
   for(let i=1;i<lignes.length;i++){
-for(const facture of facturesTriees){
 
-  container.innerHTML += `
+    const libelle = lignes[i][0];
 
-    <div style="
-      display:flex;
-      justify-content:space-between;
-      margin-bottom:10px;
-      padding:10px;
-      border-bottom:1px solid #eee;">
+    const annuel =
+      Number(lignes[i][1]);
 
-      <div>
+    const mois =
+      String(lignes[i][3]);
 
-        <strong>
-          ${facture.libelle}
-        </strong>
+    const nbFactures =
+      Number(lignes[i][4]);
 
-        <br>
+    const listeMois =
+      mois.split(",").map(Number);
 
-        <small>
-          Mois ${facture.prochainMois}
-        </small>
+    let prochainMois =
+      listeMois.find(
+        m => m >= moisActuel
+      );
 
-      </div>
+    if(!prochainMois){
+      prochainMois = listeMois[0];
+    }
 
-      <div>
+    facturesTriees.push({
 
-        ${facture.montantFacture.toFixed(2)}
-        CHF
+      libelle,
 
-      </div>
+      prochainMois,
 
-    </div>
+      montantFacture:
+        annuel / nbFactures
 
-  `;
-}
+    });
+
+  }
+
+  facturesTriees.sort(
+    (a,b) =>
+      a.prochainMois -
+      b.prochainMois
+  );
+
+  for(const facture of facturesTriees){
+
     container.innerHTML += `
+
       <div style="
         display:flex;
         justify-content:space-between;
+        padding:10px;
         margin-bottom:8px;
-        padding:8px;
         border-bottom:1px solid #eee;">
 
         <div>
-          <strong>${lignes[i][0]}</strong>
+
+          <strong>
+            ${facture.libelle}
+          </strong>
+
+          <br>
+
+          <small>
+            Mois ${facture.prochainMois}
+          </small>
+
         </div>
 
-        <div style="text-align:right">
-          ${Number(lignes[i][1]).toFixed(2)} CHF
-          <br>
-          <small>
-            ${Number(lignes[i][2]).toFixed(2)} CHF/mois
-          </small>
+        <div>
+
+          ${facture.montantFacture.toFixed(2)}
+          CHF
+
         </div>
 
       </div>
+
     `;
+
   }
 
   document
     .getElementById("fraisModal")
     .classList.add("show");
+
 }
+
 
 function closeFraisModal(){
 
