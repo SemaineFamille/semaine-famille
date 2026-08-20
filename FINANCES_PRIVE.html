@@ -558,7 +558,10 @@ function ouvrirDetailFrais(){
 
     const nbFactures =
       Number(lignes[i][4]);
-
+console.log(
+  libelle,
+  mois
+);
     const listeMois =
       mois.split(",").map(Number);
 
@@ -583,8 +586,6 @@ function ouvrirDetailFrais(){
     });
 
   }
-const moisActuel =
-  new Date().getMonth() + 1;
  
 facturesTriees.sort((a,b)=>{
 
