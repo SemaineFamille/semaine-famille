@@ -690,16 +690,20 @@ console.log(
       prochainMois = listeMois[0];
     }
 
-    facturesTriees.push({
+   for(const m of listeMois){
 
-      libelle,
+  facturesTriees.push({
 
-      prochainMois,
+    libelle,
 
-      montantFacture:
-        annuel / nbFactures
+    prochainMois: m,
 
-    });
+    montantFacture:
+      annuel / nbFactures
+
+  });
+
+}
 
   }
  
