@@ -81,7 +81,7 @@ async function apiCall(params) {
   if (APP_CACHE.inflight.has(url)) {
     return APP_CACHE.inflight.get(url);
   }
-console.log("CALL >", url);
+
   const p = fetch(url, {
   method: 'GET',
  })
@@ -709,7 +709,7 @@ async function loadPresences(force = false) {
   APP_CACHE.pagesLoaded.present
 );
 ``
-   console.time("loadPresences");
+   
   const loadingEl = document.getElementById('present-loading');
   const contentEl = document.getElementById('present-content');
 
@@ -740,8 +740,7 @@ async function loadPresences(force = false) {
 
   if (loadingEl) loadingEl.style.display = 'none';
   if (contentEl) contentEl.style.display = 'block';
-   console.timeEnd("loadPresences");
-
+  
 }
 
 async function savePresences() {
@@ -1285,7 +1284,7 @@ function isTacheParentActiveForDate(tache, dateStr) {
 
 
 function getToutesLesTachesEnfant(enfant, jour, dateYMD) {
-   console.count("getToutesLesTachesEnfant");
+   
   const dateStr = dateYMD || formatDateYYYYMMDD(new Date());
   const dateObj = new Date(dateStr + 'T00:00:00');
   const dow = dateObj.getDay();
