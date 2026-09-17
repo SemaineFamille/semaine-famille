@@ -1342,15 +1342,15 @@ function getTachesEnRetard(enfant) {
 
   const toutesHier = getToutesLesTachesEnfant(enfant, jourHier, yesterdayStr);
 
-  return toutesHier.filter(t => {
-    const etat = tachesData.find(td =>
-      td.tache === t.tache &&
-      td.enfant === enfant &&
-      td.jour === t.jourReel
-    );
+ return toutesHier.filter(t => {
 
-    return !etat || (etat.etat || '').trim() !== 'Fait';
-  }).map(t => ({
+  return !isTacheFaite(
+    enfant,
+    t.tache,
+    t.jourReel
+  );
+
+}).map(t => ({
     ...t,
     enRetard: true,
     dueDate: yesterdayStr
