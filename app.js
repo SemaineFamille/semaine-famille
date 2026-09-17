@@ -295,6 +295,8 @@ let tachesData = [];
 let tachesConfig = [];
 let tachesPonctuelles = [];
 let jobData = {};
+let tachesFaitesIndex = {};
+
 
 let currentListe = 'generale';
 let currentAdminEnfant = 'Alessia';
@@ -1150,6 +1152,36 @@ async function loadBadges() {
 /* =========================================================
    HELPERS TÂCHES
 ========================================================= */
+function buildTachesIndex() {
+
+  tachesFaitesIndex = {};
+
+  tachesData.forEach(t => {
+
+    if ((t.etat || '').trim() === 'Fait') {
+
+      const key =
+        t.enfant + "|" +
+        t.tache + "|" +
+        t.jour;
+
+      tachesFaitesIndex[key] = true;
+    }
+
+  });
+
+}
+
+function isTacheFaite(enfant, tache, jour) {
+
+  const key =
+    enfant + "|" +
+    tache + "|" +
+    jour;
+
+  return tachesFaitesIndex[key] === true;
+}
+
 function getTacheIcon(label) {
 
   const recur = TACHES_RECURRENTES.find(
@@ -1406,7 +1438,8 @@ async function loadTaches(force = false) {
       });
     }
   });
-
+buildTachesIndex();
+   
   tachesPonctuelles = [];
   parseLines(pText).forEach(line => {
     const c = line.split('|');
