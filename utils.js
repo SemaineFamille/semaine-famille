@@ -26,3 +26,29 @@ function parseIsoDate(raw) {
 
   return s;
 }
+
+function dateMinusDays(ymd, days) {
+  const d = new Date(ymd + 'T00:00:00');
+  d.setDate(d.getDate() - days);
+  return formatDateYYYYMMDD(d);
+}
+
+function getJourFromYMD(ymd) {
+  const d = new Date(ymd + 'T00:00:00');
+  const idx = (d.getDay() === 0) ? 6 : d.getDay() - 1;
+  return { jour: JOURS[idx], jourIdx: idx };
+}
+
+
+function escapeHtml(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+function escapeJsString(value) {
+  return String(value ?? '')
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'");
+}
