@@ -82,7 +82,10 @@ async function apiCall(params) {
     return APP_CACHE.inflight.get(url);
   }
 
-  const p = fetch(url, { method: 'GET' })
+  const p = fetch(url, {
+  method: 'GET',
+  cache: 'no-store'
+})
     .then(r => r.text())
     .then(text => {
       if (readRequest) {
