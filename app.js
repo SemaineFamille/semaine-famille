@@ -159,7 +159,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     navigator.serviceWorker.register('/semaine-famille/sw.js').catch(console.error);
   }
 
-  await loadBadges();
+  setTimeout(() => {
+  loadBadges();
+}, 5000);
 });
 
 /* =========================================================
