@@ -2282,7 +2282,7 @@ function showAdminEnfant(enfant, btn) {
     renderPreview(enfant);
   }
 }
-
+const TACHES_FIXES = [];
 function renderAdminForm() {
   let html = '';
 
