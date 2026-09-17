@@ -1,4 +1,5 @@
-console.log("APP VERSION 17-09-2026 14h40");
+console.log("APP VERSION 17-09-2026 14h50");
+console.log("api.js chargé");
 
 /* =========================================================
    Cache front / anti-requêtes doublées
