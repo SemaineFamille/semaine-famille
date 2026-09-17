@@ -264,7 +264,7 @@ const MOIS_NOMS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juill
 const TACHES_RECURRENTES = [
   { personne: 'Alessia', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-08-15', frequence: 4 },
   { personne: 'Diego', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-08-15', frequence: 4 },
-  { personne: 'Clément', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-85-15', frequence: 3 },
+  { personne: 'Clément', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-08-15', frequence: 3 },
   { personne: 'Antonin', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-08-21', frequence: 3 },
   { personne: 'Jérémie', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-08-15', frequence: 3 },
   { personne: 'Mél & Yann', tache: 'Défaire ton lit', icon: '🛏️', dateDebut: '2026-08-15', frequence: 2 },
