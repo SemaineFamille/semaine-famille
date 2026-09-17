@@ -3,7 +3,7 @@
    Base + navigation + API + Présences + Menu
    Version optimisée
 ========================================================= */
-console.log("APP VERSION 17-09-2026 10h15");
+console.log("APP VERSION 17-09-2026 10h25");
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxOJEus1Fev5I4YZsSbjpIXXlgGJBY7QmFkkqZtkXYD6eEPwqmgCl8r2hfrO1X9eyqxSA/exec';
 const ADMIN_CODE = '2019';
 
@@ -1094,6 +1094,8 @@ async function loadBadges() {
       }
     });
 
+buildTachesIndex();
+     
     const today = formatDateYYYYMMDD(new Date());
     const { jour } = getJourFromYMD(today);
 
@@ -1125,16 +1127,15 @@ async function loadBadges() {
     ...ponctuellesRetard
   ];
 
-  const nonFaites = toutes.filter(t => {
-    const fait = tachesData.find(td =>
-      td.tache === t.tache &&
-      td.enfant === nom &&
-      td.jour === t.jourReel &&
-      (td.etat || '').trim() === 'Fait'
-    );
+ const nonFaites = toutes.filter(t => {
 
-    return !fait;
-  });
+  return !isTacheFaite(
+    nom,
+    t.tache,
+    t.jourReel
+  );
+
+});
 
   counts[nom] = nonFaites.length;
 });
