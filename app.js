@@ -703,6 +703,11 @@ function loadVacances() {
   console.log("Vacances ouvertes");
 }
 async function loadPresences(force = false) {
+   console.log(
+  "CACHE PRESENCES",
+  APP_CACHE.pagesLoaded.present
+);
+``
    console.time("loadPresences");
   const loadingEl = document.getElementById('present-loading');
   const contentEl = document.getElementById('present-content');
@@ -792,6 +797,10 @@ async function clearPresences() {
    Menu
 ========================================================= */
 async function loadMenu(force = false) {
+   console.log(
+  "CACHE MENU",
+  APP_CACHE.pagesLoaded.menu
+);
    console.time("loadMenu");
   const loadingEl = document.getElementById('menu-loading');
   const contentEl = document.getElementById('menu-content');
@@ -1411,6 +1420,10 @@ function getPonctuellesEnRetard(enfant) {
    CHARGEMENT TÂCHES
 ========================================================= */
 async function loadTaches(force = false) {
+   console.log(
+  "CACHE TACHES",
+  APP_CACHE.pagesLoaded.taches
+);
   const container = document.getElementById('taches-content');
   if (container) {
     container.innerHTML = '<div class="loading"><div class="spinner"></div>Chargement...</div>';
