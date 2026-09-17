@@ -1044,6 +1044,7 @@ async function clearListe() {
    BADGES
 ========================================================= */
 async function loadBadges() {
+   console.time("loadBadges");
   if (APP_CACHE.badgesPromise) {
     return APP_CACHE.badgesPromise;
   }
@@ -1153,7 +1154,7 @@ buildTachesIndex();
     await APP_CACHE.badgesPromise;
   } finally {
     APP_CACHE.badgesPromise = null;
-  }
+  }console.timeEnd("loadBadges");
 }
 
 /* =========================================================
@@ -1263,6 +1264,7 @@ function isTacheParentActiveForDate(tache, dateStr) {
 
 
 function getToutesLesTachesEnfant(enfant, jour, dateYMD) {
+   console.count("getToutesLesTachesEnfant");
   const dateStr = dateYMD || formatDateYYYYMMDD(new Date());
   const dateObj = new Date(dateStr + 'T00:00:00');
   const dow = dateObj.getDay();
