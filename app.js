@@ -84,8 +84,7 @@ async function apiCall(params) {
 console.log("CALL >", url);
   const p = fetch(url, {
   method: 'GET',
-  cache: 'no-store'
-})
+ })
     .then(r => r.text())
     .then(text => {
       if (readRequest) {
