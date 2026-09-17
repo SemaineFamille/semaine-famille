@@ -81,7 +81,7 @@ async function apiCall(params) {
   if (APP_CACHE.inflight.has(url)) {
     return APP_CACHE.inflight.get(url);
   }
-
+console.log("CALL >", url);
   const p = fetch(url, {
   method: 'GET',
   cache: 'no-store'
