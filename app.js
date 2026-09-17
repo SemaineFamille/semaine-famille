@@ -700,6 +700,7 @@ function loadVacances() {
   console.log("Vacances ouvertes");
 }
 async function loadPresences(force = false) {
+   console.time("loadPresences");
   const loadingEl = document.getElementById('present-loading');
   const contentEl = document.getElementById('present-content');
 
@@ -730,6 +731,8 @@ async function loadPresences(force = false) {
 
   if (loadingEl) loadingEl.style.display = 'none';
   if (contentEl) contentEl.style.display = 'block';
+   console.timeEnd("loadPresences");
+
 }
 
 async function savePresences() {
@@ -786,6 +789,7 @@ async function clearPresences() {
    Menu
 ========================================================= */
 async function loadMenu(force = false) {
+   console.time("loadMenu");
   const loadingEl = document.getElementById('menu-loading');
   const contentEl = document.getElementById('menu-content');
 
@@ -821,6 +825,7 @@ async function loadMenu(force = false) {
 
   if (loadingEl) loadingEl.style.display = 'none';
   if (contentEl) contentEl.style.display = 'block';
+   console.timeEnd("loadMenu");
 }
 
 function renderMenuUI() {
@@ -955,6 +960,8 @@ function showListe(liste, btn) {
 }
 
 async function loadCourses(liste) {
+   console.time("loadCourses");
+
   const container = document.getElementById('courses-list');
   if (container) {
     container.innerHTML = '<div class="loading">Chargement...</div>';
@@ -971,6 +978,7 @@ async function loadCourses(liste) {
 
   APP_CACHE.pagesLoaded.courses = true;
   renderCourses(liste);
+   console.timeEnd("loadCourses");
 }
 
 function renderCourses(liste) {
