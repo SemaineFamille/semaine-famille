@@ -112,10 +112,6 @@ function getJourFromYMD(ymd) {
   return { jour: JOURS[idx], jourIdx: idx };
 }
 
-function parseLines(text) {
-  if (!text || text.trim() === '' || text.trim() === 'ok') return [];
-  return text.split('~~~~').map(l => l.trim()).filter(Boolean);
-}
 
 function escapeHtml(value) {
   return String(value || '')
