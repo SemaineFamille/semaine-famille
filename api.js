@@ -114,3 +114,7 @@ console.log(
   APP_CACHE.inflight.set(url, p);
   return p;
 }
+function parseLines(text) {
+  if (!text || text.trim() === '' || text.trim() === 'ok') return [];
+  return text.split('~~~~').map(l => l.trim()).filter(Boolean);
+}
