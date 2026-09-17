@@ -69,6 +69,7 @@ function clearReadCacheBySheet(sheetName) {
 }
 
 async function apiCall(params) {
+   const startTime = performance.now();
   const qs = buildQueryString(params);
   const url = SCRIPT_URL + '?' + qs;
   const readRequest = isReadRequest(params);
@@ -118,6 +119,11 @@ async function apiCall(params) {
           APP_CACHE.pagesLoaded.job = false;
         }
       }
+console.log(
+  "API",
+  params.sheet,
+  Math.round(performance.now() - startTime) + " ms"
+);
 
       return text;
     })
