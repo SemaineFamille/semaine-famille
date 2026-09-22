@@ -120,6 +120,12 @@ console.log(
   params.sheet,
   Math.round(performance.now() - startTime) + " ms"
 );
+      console.log(
+  "TEXT LENGTH",
+  params.sheet,
+  text.length
+);
+
 
       return text;
     })
