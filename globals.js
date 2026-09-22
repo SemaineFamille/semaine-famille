@@ -16,7 +16,9 @@ const TACHES_RECURRENTES = [
   { personne: 'Alessia', tache: 'Monter ta lessive', icon: '👕', dateDebut: '2026-06-11', frequence: 1 },
    { personne: 'Clément', tache: 'Monter ta lessive', icon: '👕', dateDebut: '2026-06-11', frequence: 1 },
    { personne: 'Antonin', tache: 'Mettre ta lessive à la buanderie', icon: '👕', dateDebut: '2026-06-11', frequence: 1 },
-   { personne: 'Jérémie', tache: 'Monter ta lessive', icon: '👕', dateDebut: '2026-06-11', frequence: 1 }
+   { personne: 'Jérémie', tache: 'Monter ta lessive', icon: '👕', dateDebut: '2026-06-11', frequence: 1 },
+  { personne: 'Alessia', tache: 'Faire signer ton agenda', icon: '✒️', dateDebut: '2026-09-26', frequence: 1 },
+   { personne: 'Clément', tache: 'Faire signer ton agenda', icon: '✒️', dateDebut: '2026-09-26', frequence: 1 }
 ];
 
 
