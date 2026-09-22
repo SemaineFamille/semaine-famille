@@ -62,9 +62,7 @@ const startNetwork = performance.now();
 const p = fetch(url, {
   method: 'GET'
 })
-const p = fetch(url, {
-  method: 'GET'
-})
+
 .then(async r => {
 console.log(
 "HEADERS ARRIVES",
