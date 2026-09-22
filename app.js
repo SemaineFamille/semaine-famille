@@ -1,4 +1,4 @@
-console.log("APP VERSION 22-09-2026 15h50");
+console.log("APP VERSION 22-09-2026 13h50");
 
 /* =========================================================
    Cache front / anti-requêtes doublées
