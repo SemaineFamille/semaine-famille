@@ -36,9 +36,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     showScreen('home');
   }
 
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/semaine-famille/sw.js').catch(console.error);
-  }
+  /*if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/semaine-famille/sw.js')
+       .catch(console.error);
+  }*/
 
   setTimeout(() => {
   loadBadges();
