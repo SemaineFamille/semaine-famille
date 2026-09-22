@@ -745,11 +745,24 @@ async function loadBadges() {
   }
 
   APP_CACHE.badgesPromise = (async () => {
-    const [cText, tText, pText] = await Promise.all([
-      apiCall({ action: 'lire', sheet: 'TACHES_CONFIG' }),
-      apiCall({ action: 'lire', sheet: 'TACHES' }),
-      apiCall({ action: 'lire', sheet: 'TACHES_PONCTUELLES' })
-    ]);
+   const cText =
+ await apiCall({
+   action:'lire',
+   sheet:'TACHES_CONFIG'
+ });
+
+const tText =
+ await apiCall({
+   action:'lire',
+   sheet:'TACHES'
+ });
+
+const pText =
+ await apiCall({
+   action:'lire',
+   sheet:'TACHES_PONCTUELLES'
+ });
+
 
     tachesConfig = [];
     parseLines(cText).forEach(line => {
