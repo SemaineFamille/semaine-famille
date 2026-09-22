@@ -600,10 +600,28 @@ async function loadMenu(force = false) {
     return;
   }
 
-  const [pText, mText] = await Promise.all([
-    apiCall({ action: 'lire', sheet: 'PRESENCES', start, days: 7 }),
-    apiCall({ action: 'lire', sheet: 'MENU' })
-  ]);
+let pText = '';
+let mText = '';
+
+try {
+  pText = await apiCall({
+    action: 'lire',
+    sheet: 'PRESENCES',
+    start,
+    days: 7
+  });
+} catch (e) {
+  console.error('PRESENCES KO', e);
+}
+
+try {
+  mText = await apiCall({
+    action: 'lire',
+    sheet: 'MENU'
+  });
+} catch (e) {
+  console.error('MENU KO', e);
+}
 
   presencesData = parsePresencesText(pText);
   menuData = parseMenuText(mText);
