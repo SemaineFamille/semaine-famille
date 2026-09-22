@@ -48,15 +48,14 @@ async function apiCall(params) {
   const url = SCRIPT_URL + '?' + qs;
   const readRequest = isReadRequest(params);
 
-  if (readRequest && APP_CACHE.responses.has(url)) {
+  /*if (readRequest && APP_CACHE.responses.has(url)) {
     return APP_CACHE.responses.get(url);
-  }
+  }*/
 
   if (APP_CACHE.inflight.has(url)) {
     return APP_CACHE.inflight.get(url);
   }
 
- console.log("FETCH URL", url);
 const startNetwork = performance.now();
 
 const p = fetch(url, {
@@ -64,17 +63,7 @@ const p = fetch(url, {
 })
 
 .then(async r => {
-console.log(
-"HEADERS ARRIVES",
-params.sheet,
-Math.round(performance.now() - startNetwork) + " ms"
-);
-  console.log(
-    "RESPONSE",
-    params.sheet,
-    r.status,
-    r.url
-  );
+
 
   if (!r.ok) {
     throw new Error(
@@ -88,7 +77,7 @@ Math.round(performance.now() - startNetwork) + " ms"
 
     .then(text => {
       if (readRequest) {
-        APP_CACHE.responses.set(url, text);
+        */*APP_CACHE.responses.set(url, text);*/*
       } else {
         const sheet = params?.sheet || '';
         clearReadCacheBySheet(sheet);
@@ -121,23 +110,8 @@ Math.round(performance.now() - startNetwork) + " ms"
           APP_CACHE.pagesLoaded.job = false;
         }
       }
-console.log(
-  "API",
-  params.sheet,
-  Math.round(performance.now() - startTime) + " ms"
-);
-      console.log(
-  "TEXT LENGTH",
-  params.sheet,
-  text.length
-);
 
-console.log(
-  "BODY LU",
-  params.sheet,
-  Math.round(performance.now() - startNetwork) + " ms"
-);
-      return text;
+       return text;
     })
   .catch(err => {
 
