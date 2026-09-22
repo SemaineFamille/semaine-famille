@@ -1,4 +1,4 @@
-console.log("APP VERSION 22-09-2026 12h38");
+console.log("APP VERSION 22-09-2026 13h37");
 
 /* =========================================================
    Cache front / anti-requêtes doublées
@@ -486,8 +486,7 @@ async function loadPresences(force = false) {
   "CACHE PRESENCES",
   APP_CACHE.pagesLoaded.present
 );
-``
-   
+
   const loadingEl = document.getElementById('present-loading');
   const contentEl = document.getElementById('present-content');
 
@@ -754,33 +753,34 @@ function updateBadges(counts) {
 }
 
 /* =========================================================
-   BADGES
+   SOURCE PARTAGÉE TÂCHES (TACHES_CONFIG + TACHES + TACHES_PONCTUELLES)
+   -> un seul point de chargement, utilisé par loadBadges(),
+      loadTaches() et loadLoginReminders(), avec cache TTL,
+      pour éviter de refaire 3 appels Apps Script à chaque fois.
 ========================================================= */
-async function loadBadges() {
-   console.time("loadBadges");
-  if (APP_CACHE.badgesPromise) {
-    return APP_CACHE.badgesPromise;
+async function loadTachesSourceData(force = false) {
+  const now = Date.now();
+  const ttl = APP_CACHE.tachesSourceTtlMs || 60000; // 1 min par défaut
+
+  if (
+    !force &&
+    APP_CACHE.tachesSourceLoadedAt &&
+    (now - APP_CACHE.tachesSourceLoadedAt < ttl)
+  ) {
+    return; // tachesConfig / tachesData / tachesPonctuelles déjà à jour, on ne réappelle pas l'API
   }
 
-  APP_CACHE.badgesPromise = (async () => {
-   const cText =
- await apiCall({
-   action:'lire',
-   sheet:'TACHES_CONFIG'
- });
+  // si un chargement est déjà en cours, on attend le même plutôt que d'en lancer un 2e en parallèle
+  if (APP_CACHE.tachesSourcePromise) {
+    return APP_CACHE.tachesSourcePromise;
+  }
 
-const tText =
- await apiCall({
-   action:'lire',
-   sheet:'TACHES'
- });
-
-const pText =
- await apiCall({
-   action:'lire',
-   sheet:'TACHES_PONCTUELLES'
- });
-
+  APP_CACHE.tachesSourcePromise = (async () => {
+    const [cText, tText, pText] = await Promise.all([
+      apiCall({ action: 'lire', sheet: 'TACHES_CONFIG' }),
+      apiCall({ action: 'lire', sheet: 'TACHES' }),
+      apiCall({ action: 'lire', sheet: 'TACHES_PONCTUELLES' })
+    ]);
 
     tachesConfig = [];
     parseLines(cText).forEach(line => {
@@ -813,6 +813,7 @@ const pText =
         });
       }
     });
+    buildTachesIndex();
 
     tachesPonctuelles = [];
     parseLines(pText).forEach(line => {
@@ -827,8 +828,34 @@ const pText =
       }
     });
 
-buildTachesIndex();
-     
+    APP_CACHE.tachesSourceLoadedAt = Date.now();
+  })();
+
+  try {
+    await APP_CACHE.tachesSourcePromise;
+  } finally {
+    APP_CACHE.tachesSourcePromise = null;
+  }
+}
+
+/* Invalide le cache partagé (à appeler après tout enregistrement/suppression
+   de tâche, ponctuelle ou config, pour forcer un rechargement au prochain accès) */
+function invalidateTachesSource() {
+  APP_CACHE.tachesSourceLoadedAt = 0;
+}
+
+/* =========================================================
+   BADGES
+========================================================= */
+async function loadBadges() {
+   console.time("loadBadges");
+  if (APP_CACHE.badgesPromise) {
+    return APP_CACHE.badgesPromise;
+  }
+
+  APP_CACHE.badgesPromise = (async () => {
+    await loadTachesSourceData();
+
     const today = formatDateYYYYMMDD(new Date());
     const { jour } = getJourFromYMD(today);
 
@@ -1140,57 +1167,7 @@ async function loadTaches(force = false) {
     return;
   }
 
-  const [cText, tText, pText] = await Promise.all([
-    apiCall({ action: 'lire', sheet: 'TACHES_CONFIG' }),
-    apiCall({ action: 'lire', sheet: 'TACHES' }),
-    apiCall({ action: 'lire', sheet: 'TACHES_PONCTUELLES' })
-  ]);
-
-  tachesConfig = [];
-  parseLines(cText).forEach(line => {
-    const c = line.split('|');
-    if (c.length >= 10) {
-      tachesConfig.push({
-        tache: c[0],
-        enfant: c[1],
-        lundi: c[2],
-        mardi: c[3],
-        mercredi: c[4],
-        jeudi: c[5],
-        vendredi: c[6],
-        samedi: c[7],
-        dimanche: c[8],
-        active: (c[9] || '').trim()
-      });
-    }
-  });
-
-  tachesData = [];
-  parseLines(tText).forEach(line => {
-    const c = line.split('|');
-    if (c.length >= 4) {
-      tachesData.push({
-        tache: c[0],
-        enfant: c[1],
-        jour: parseIsoDate(c[2]),
-        etat: (c[3] || '').trim()
-      });
-    }
-  });
-buildTachesIndex();
-   
-  tachesPonctuelles = [];
-  parseLines(pText).forEach(line => {
-    const c = line.split('|');
-    if (c.length >= 3) {
-      tachesPonctuelles.push({
-        tache: c[0],
-        enfant: c[1],
-        date: parseIsoDate(c[2]),
-        icon: '📌'
-      });
-    }
-  });
+  await loadTachesSourceData(force);
 
   APP_CACHE.pagesLoaded.taches = true;
   renderTaches();
@@ -1452,6 +1429,7 @@ async function toggleTache(tache, jour, estFait, enfant) {
 
   APP_CACHE.pagesLoaded.taches = false;
   APP_CACHE.badgesPromise = null;
+  invalidateTachesSource();
 
   showToast('✅ Bien joué !');
   setTimeout(async () => {
@@ -1469,56 +1447,7 @@ async function loadLoginReminders() {
 
   board.innerHTML = '<div class="loading">Chargement des rappels...</div>';
 
-  const [cText, tText, pText] = await Promise.all([
-    apiCall({ action: 'lire', sheet: 'TACHES_CONFIG' }),
-    apiCall({ action: 'lire', sheet: 'TACHES' }),
-    apiCall({ action: 'lire', sheet: 'TACHES_PONCTUELLES' })
-  ]);
-
-  tachesConfig = [];
-  parseLines(cText).forEach(line => {
-    const c = line.split('|');
-    if (c.length >= 10) {
-      tachesConfig.push({
-        tache: c[0],
-        enfant: c[1],
-        lundi: c[2],
-        mardi: c[3],
-        mercredi: c[4],
-        jeudi: c[5],
-        vendredi: c[6],
-        samedi: c[7],
-        dimanche: c[8],
-        active: (c[9] || '').trim()
-      });
-    }
-  });
-
-  tachesData = [];
-  parseLines(tText).forEach(line => {
-    const c = line.split('|');
-    if (c.length >= 4) {
-      tachesData.push({
-        tache: c[0],
-        enfant: c[1],
-        jour: parseIsoDate(c[2]),
-        etat: (c[3] || '').trim()
-      });
-    }
-  });
-
-  tachesPonctuelles = [];
-  parseLines(pText).forEach(line => {
-    const c = line.split('|');
-    if (c.length >= 3) {
-      tachesPonctuelles.push({
-        tache: c[0],
-        enfant: c[1],
-        date: parseIsoDate(c[2]),
-        icon: '📌'
-      });
-    }
-  });
+  await loadTachesSourceData();
 
   const todayStr = formatDateYYYYMMDD(new Date());
   const { jour } = getJourFromYMD(todayStr);
@@ -2072,6 +2001,7 @@ async function saveAdminConfig() {
 
   APP_CACHE.pagesLoaded.taches = false;
   APP_CACHE.badgesPromise = null;
+  invalidateTachesSource();
 
   showToast('✅ Configuration enregistrée !');
   await loadAdminConfig();
@@ -2106,6 +2036,7 @@ async function saveTachePonctuelle() {
 
   APP_CACHE.pagesLoaded.taches = false;
   APP_CACHE.badgesPromise = null;
+  invalidateTachesSource();
 
   showToast('📌 Tâche ponctuelle ajoutée !');
   await loadPonctuelles();
@@ -2152,7 +2083,7 @@ async function loadPonctuelles() {
         </div>
       </div>
       <button class="btn-delete"
-        onclick="deleteCourse(${i})">
+        onclick="deletePonctuelle('${escapeJsString(i.tache)}','${escapeJsString(i.enfant)}','${escapeJsString(i.date)}')">
   ✕
 </button>
     </div>
@@ -2170,6 +2101,7 @@ async function deletePonctuelle(tache, enfant, date) {
 
   APP_CACHE.pagesLoaded.taches = false;
   APP_CACHE.badgesPromise = null;
+  invalidateTachesSource();
 
   showToast('🗑️ Tâche supprimée');
   await loadPonctuelles();
