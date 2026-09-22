@@ -61,13 +61,22 @@ async function apiCall(params) {
 const p = fetch(url, {
   method: 'GET'
 })
-    .then(r => {
+.then(async r => {
+
   console.log(
     "RESPONSE",
     params.sheet,
     r.status,
     r.url
   );
+
+  if (!r.ok) {
+    throw new Error(
+      "HTTP " + r.status +
+      " sur " + params.sheet
+    );
+  }
+
   return r.text();
 })
 
@@ -114,10 +123,16 @@ console.log(
 
       return text;
     })
-    .catch(err => {
-      console.error(err);
-      return '';
-    })
+  .catch(err => {
+
+  console.error(
+    "ECHEC API",
+    params.sheet,
+    err
+  );
+
+  throw err;
+})
     .finally(() => {
       APP_CACHE.inflight.delete(url);
     });
