@@ -77,7 +77,7 @@ const p = fetch(url, {
 
     .then(text => {
       if (readRequest) {
-        */*APP_CACHE.responses.set(url, text);*/*
+      // APP_CACHE.responses.set(url, text);
       } else {
         const sheet = params?.sheet || '';
         clearReadCacheBySheet(sheet);
