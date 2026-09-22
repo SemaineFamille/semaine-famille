@@ -57,12 +57,20 @@ async function apiCall(params) {
   }
 
  console.log("FETCH URL", url);
+const startNetwork = performance.now();
 
 const p = fetch(url, {
   method: 'GET'
 })
+const p = fetch(url, {
+  method: 'GET'
+})
 .then(async r => {
-
+console.log(
+"HEADERS ARRIVES",
+params.sheet,
+Math.round(performance.now() - startNetwork) + " ms"
+);
   console.log(
     "RESPONSE",
     params.sheet,
@@ -126,7 +134,11 @@ console.log(
   text.length
 );
 
-
+console.log(
+  "BODY LU",
+  params.sheet,
+  Math.round(performance.now() - startNetwork) + " ms"
+);
       return text;
     })
   .catch(err => {
