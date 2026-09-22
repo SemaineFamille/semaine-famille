@@ -56,10 +56,21 @@ async function apiCall(params) {
     return APP_CACHE.inflight.get(url);
   }
 
-  const p = fetch(url, {
-  method: 'GET',
- })
-    .then(r => r.text())
+ console.log("FETCH URL", url);
+
+const p = fetch(url, {
+  method: 'GET'
+})
+    .then(r => {
+  console.log(
+    "RESPONSE",
+    params.sheet,
+    r.status,
+    r.url
+  );
+  return r.text();
+})
+
     .then(text => {
       if (readRequest) {
         APP_CACHE.responses.set(url, text);
