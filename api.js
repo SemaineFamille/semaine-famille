@@ -1,4 +1,4 @@
-console.log("APP VERSION 23-09-2026 07h53");
+console.log("APP VERSION 22-09-2026 12h38");
 
 /* =========================================================
    Cache front / anti-requêtes doublées
@@ -603,21 +603,13 @@ async function loadMenu(force = false) {
 let pText = '';
 let mText = '';
 
-const [pResult, mResult] = await Promise.allSettled([
-  apiCall({ action: 'lire', sheet: 'PRESENCES', start, days: 7 }),
-  apiCall({ action: 'lire', sheet: 'MENU', start, days: 7 })
-]);
-
-if (pResult.status === 'fulfilled') {
-  pText = pResult.value;
-} else {
-  console.error('PRESENCES KO', pResult.reason);
-}
-
-if (mResult.status === 'fulfilled') {
-  mText = mResult.value;
-} else {
-  console.error('MENU KO', mResult.reason);
+try {
+  const combined = await apiCall({ action: 'lire', sheet: 'MENU_SEMAINE', start, days: 7 });
+  const parsed = JSON.parse(combined);
+  pText = parsed.presences || '';
+  mText = parsed.menu || '';
+} catch (e) {
+  console.error('MENU_SEMAINE KO', e);
 }
 
   presencesData = parsePresencesText(pText);
