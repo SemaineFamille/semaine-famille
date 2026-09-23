@@ -1,4 +1,4 @@
-console.log("APP VERSION 22-09-2026 13h50");
+console.log("APP VERSION 23-09-2026 08h03");
 
 /* =========================================================
    Cache front / anti-requêtes doublées
@@ -578,7 +578,6 @@ async function loadMenu(force = false) {
   "CACHE MENU",
   APP_CACHE.pagesLoaded.menu
 );
-   console.time("loadMenu");
   const loadingEl = document.getElementById('menu-loading');
   const contentEl = document.getElementById('menu-content');
 
@@ -599,24 +598,18 @@ async function loadMenu(force = false) {
     return;
   }
 
+  console.time("loadMenu");
+
 let pText = '';
 let mText = '';
 
-const [pResult, mResult] = await Promise.allSettled([
-  apiCall({ action: 'lire', sheet: 'PRESENCES', start, days: 7 }),
-  apiCall({ action: 'lire', sheet: 'MENU', start, days: 7 })
-]);
-
-if (pResult.status === 'fulfilled') {
-  pText = pResult.value;
-} else {
-  console.error('PRESENCES KO', pResult.reason);
-}
-
-if (mResult.status === 'fulfilled') {
-  mText = mResult.value;
-} else {
-  console.error('MENU KO', mResult.reason);
+try {
+  const combined = await apiCall({ action: 'lire', sheet: 'MENU_SEMAINE', start, days: 7 });
+  const parsed = JSON.parse(combined);
+  pText = parsed.presences || '';
+  mText = parsed.menu || '';
+} catch (e) {
+  console.error('MENU_SEMAINE KO', e);
 }
 
   presencesData = parsePresencesText(pText);
@@ -773,59 +766,78 @@ async function loadTachesSourceData(force = false) {
   }
 
   APP_CACHE.tachesSourcePromise = (async () => {
-    const [cText, tText, pText] = await Promise.all([
+    const [cResult, tResult, pResult] = await Promise.allSettled([
       apiCall({ action: 'lire', sheet: 'TACHES_CONFIG' }),
       apiCall({ action: 'lire', sheet: 'TACHES' }),
       apiCall({ action: 'lire', sheet: 'TACHES_PONCTUELLES' })
     ]);
 
-    tachesConfig = [];
-    parseLines(cText).forEach(line => {
-      const c = line.split('|');
-      if (c.length >= 10) {
-        tachesConfig.push({
-          tache: c[0],
-          enfant: c[1],
-          lundi: c[2],
-          mardi: c[3],
-          mercredi: c[4],
-          jeudi: c[5],
-          vendredi: c[6],
-          samedi: c[7],
-          dimanche: c[8],
-          active: (c[9] || '').trim()
-        });
-      }
-    });
+    let allOk = true;
 
-    tachesData = [];
-    parseLines(tText).forEach(line => {
-      const c = line.split('|');
-      if (c.length >= 4) {
-        tachesData.push({
-          tache: c[0],
-          enfant: c[1],
-          jour: parseIsoDate(c[2]),
-          etat: (c[3] || '').trim()
-        });
-      }
-    });
-    buildTachesIndex();
+    if (cResult.status === 'fulfilled') {
+      tachesConfig = [];
+      parseLines(cResult.value).forEach(line => {
+        const c = line.split('|');
+        if (c.length >= 10) {
+          tachesConfig.push({
+            tache: c[0],
+            enfant: c[1],
+            lundi: c[2],
+            mardi: c[3],
+            mercredi: c[4],
+            jeudi: c[5],
+            vendredi: c[6],
+            samedi: c[7],
+            dimanche: c[8],
+            active: (c[9] || '').trim()
+          });
+        }
+      });
+    } else {
+      allOk = false;
+      console.error('TACHES_CONFIG KO', cResult.reason);
+    }
 
-    tachesPonctuelles = [];
-    parseLines(pText).forEach(line => {
-      const c = line.split('|');
-      if (c.length >= 3) {
-        tachesPonctuelles.push({
-          tache: c[0],
-          enfant: c[1],
-          date: parseIsoDate(c[2]),
-          icon: '📌'
-        });
-      }
-    });
+    if (tResult.status === 'fulfilled') {
+      tachesData = [];
+      parseLines(tResult.value).forEach(line => {
+        const c = line.split('|');
+        if (c.length >= 4) {
+          tachesData.push({
+            tache: c[0],
+            enfant: c[1],
+            jour: parseIsoDate(c[2]),
+            etat: (c[3] || '').trim()
+          });
+        }
+      });
+      buildTachesIndex();
+    } else {
+      allOk = false;
+      console.error('TACHES KO', tResult.reason);
+    }
 
-    APP_CACHE.tachesSourceLoadedAt = Date.now();
+    if (pResult.status === 'fulfilled') {
+      tachesPonctuelles = [];
+      parseLines(pResult.value).forEach(line => {
+        const c = line.split('|');
+        if (c.length >= 3) {
+          tachesPonctuelles.push({
+            tache: c[0],
+            enfant: c[1],
+            date: parseIsoDate(c[2]),
+            icon: '📌'
+          });
+        }
+      });
+    } else {
+      allOk = false;
+      console.error('TACHES_PONCTUELLES KO', pResult.reason);
+    }
+
+    // On ne marque "à jour" que si les 3 lectures ont réussi ; sinon on réessaiera
+    // au prochain accès au lieu de rester bloqué avec des données partielles pendant tout le TTL.
+    APP_CACHE.tachesSourceLoadedAt = allOk ? Date.now() : 0;
   })();
 
   try {
