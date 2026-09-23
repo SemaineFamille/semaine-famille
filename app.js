@@ -1,4 +1,4 @@
-console.log("APP VERSION 23-09-2026 08h03");
+console.log("APP VERSION 23-09-2026 08h12");
 
 /* =========================================================
    Cache front / anti-requêtes doublées
@@ -766,17 +766,23 @@ async function loadTachesSourceData(force = false) {
   }
 
   APP_CACHE.tachesSourcePromise = (async () => {
-    const [cResult, tResult, pResult] = await Promise.allSettled([
-      apiCall({ action: 'lire', sheet: 'TACHES_CONFIG' }),
-      apiCall({ action: 'lire', sheet: 'TACHES' }),
-      apiCall({ action: 'lire', sheet: 'TACHES_PONCTUELLES' })
-    ]);
-
     let allOk = true;
+    let cText = '', tText = '', pText = '';
 
-    if (cResult.status === 'fulfilled') {
+    try {
+      const combined = await apiCall({ action: 'lire', sheet: 'TACHES_SOURCE' });
+      const parsed = JSON.parse(combined);
+      cText = parsed.config || '';
+      tText = parsed.taches || '';
+      pText = parsed.ponctuelles || '';
+    } catch (e) {
+      allOk = false;
+      console.error('TACHES_SOURCE KO', e);
+    }
+
+    if (allOk) {
       tachesConfig = [];
-      parseLines(cResult.value).forEach(line => {
+      parseLines(cText).forEach(line => {
         const c = line.split('|');
         if (c.length >= 10) {
           tachesConfig.push({
@@ -793,14 +799,9 @@ async function loadTachesSourceData(force = false) {
           });
         }
       });
-    } else {
-      allOk = false;
-      console.error('TACHES_CONFIG KO', cResult.reason);
-    }
 
-    if (tResult.status === 'fulfilled') {
       tachesData = [];
-      parseLines(tResult.value).forEach(line => {
+      parseLines(tText).forEach(line => {
         const c = line.split('|');
         if (c.length >= 4) {
           tachesData.push({
@@ -812,14 +813,9 @@ async function loadTachesSourceData(force = false) {
         }
       });
       buildTachesIndex();
-    } else {
-      allOk = false;
-      console.error('TACHES KO', tResult.reason);
-    }
 
-    if (pResult.status === 'fulfilled') {
       tachesPonctuelles = [];
-      parseLines(pResult.value).forEach(line => {
+      parseLines(pText).forEach(line => {
         const c = line.split('|');
         if (c.length >= 3) {
           tachesPonctuelles.push({
@@ -830,12 +826,9 @@ async function loadTachesSourceData(force = false) {
           });
         }
       });
-    } else {
-      allOk = false;
-      console.error('TACHES_PONCTUELLES KO', pResult.reason);
     }
 
-    // On ne marque "à jour" que si les 3 lectures ont réussi ; sinon on réessaiera
+    // On ne marque "à jour" que si la lecture a réussi ; sinon on réessaiera
     // au prochain accès au lieu de rester bloqué avec des données partielles pendant tout le TTL.
     APP_CACHE.tachesSourceLoadedAt = allOk ? Date.now() : 0;
   })();
