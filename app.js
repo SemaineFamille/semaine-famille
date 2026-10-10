@@ -1919,11 +1919,31 @@ function showAdminEnfant(enfant, btn) {
     renderPreview(enfant);
   }
 }
-const TACHES_FIXES = [];
-function renderAdminForm() {
-  let html = '';
 
-  TACHES_FIXES.forEach(tache => {
+function renderAdminForm() {
+ let html = '';
+
+const tachesUniques = [...new Set(
+  tachesConfig.map(t => t.tache)
+)];
+
+tachesUniques.forEach(nomTache => {
+
+  const ex = tachesConfig.find(
+    t =>
+      t.tache === nomTache &&
+      t.enfant === currentAdminEnfant
+  );
+
+  const tache = {
+    id: nomTache
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-zA-Z0-9]/g, '_')
+      .toLowerCase(),
+    label: nomTache,
+    icon: '✅'
+  };
     const ex = tachesConfig.find(t => t.tache === tache.label && t.enfant === currentAdminEnfant);
 
     html += `
