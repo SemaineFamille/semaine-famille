@@ -1929,11 +1929,6 @@ const tachesUniques = [...new Set(
 
 tachesUniques.forEach(nomTache => {
 
-  const ex = tachesConfig.find(
-    t =>
-      t.tache === nomTache &&
-      t.enfant === currentAdminEnfant
-  );
 
   const tache = {
     id: nomTache
